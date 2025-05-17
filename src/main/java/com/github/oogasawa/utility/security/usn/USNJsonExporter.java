@@ -11,10 +11,23 @@ import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
+/**
+ * A utility class that parses Ubuntu Security Notice (USN) text messages and exports filtered and
+ * enriched security entries as either JSON or TSV.
+ * <p>
+ * This class targets entries relevant to Ubuntu 24.04 (LTS) and focuses on generic kernel reports
+ * (excluding cloud-specific or OEM variants). It enhances each entry with severity levels and
+ * livepatch support details.
+ */
 public class USNJsonExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(USNJsonExporter.class);
 
+    /**
+     * Enumeration representing severity levels for CVEs, in increasing order of seriousness.
+     */
     public enum PriorityLevel {
         LOW(1), MEDIUM(2), HIGH(3), CRITICAL(4);
 
@@ -50,7 +63,22 @@ public class USNJsonExporter {
         }
     }
 
-
+    /**
+     * Main entry point to generate a report from a raw USN message file.
+     *
+     * <p>
+     * The input file should consist of multiple Ubuntu Security Notices as published in the
+     * <i>ubuntu-security-announce</i> mailing list digest. These digests are typically received via email
+     * and can be concatenated manually or automatically before being passed to this method.
+     * <p>
+     * You can subscribe to or unsubscribe from the <i>ubuntu-security-announce</i> mailing list via:
+     * <a href="https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce">
+     * https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce</a>
+     *
+     * 
+     * @param inputPath the file path to the input plain-text USN data
+     * @param format    the desired output format ("json" or "tsv")
+     */
     public void report(Path inputPath, String format) {
         try (BufferedReader reader = Files.newBufferedReader(inputPath)) {
             List<USNEntryJson> entries = parseUSNMessages(reader);
@@ -83,14 +111,23 @@ public class USNJsonExporter {
     
 
 
-
+    /**
+     * Checks whether a USN entry applies to Ubuntu 24.04 (with or without LTS label).
+     *
+     * @param entry the USN entry to check
+     * @return true if the entry targets Ubuntu 24.04, false otherwise
+     */
     private boolean appliesToUbuntu2404(USNEntryJson entry) {
         return entry.releases.stream()
                 .anyMatch(rel -> rel.equals("24.04") || rel.equals("24.04 LTS"));
     }
 
 
-
+    /**
+     * Assigns the highest severity level among the entry's CVEs to the entry itself.
+     *
+     * @param entry the USN entry to modify
+     */
     private void assignMaxSeverity(USNEntryJson entry) {
         logger.info(String.format("%s, %s, %s", entry.id, entry.title, entry.cves));
         
@@ -105,7 +142,12 @@ public class USNJsonExporter {
         entry.severity = max.map(PriorityLevel::nameCapitalized).orElse("Unknown");
     }
 
-
+    /**
+     * Determines whether Canonical Livepatch is available for a given USN entry.
+     *
+     * @param entry the USN entry to evaluate
+     * @param doc   the HTML document fetched for the USN
+     */
     private void determineLivepatchAvailability(USNEntryJson entry, Document doc) {
         String bodyText = doc.body().text().toLowerCase();
         if (bodyText.contains("canonical livepatch is available")) {
@@ -116,7 +158,15 @@ public class USNJsonExporter {
             entry.livepatch = "NA";
         }
     }
-    
+
+
+    /**
+     * Determines whether the given USN entry is a generic kernel report,
+     * excluding cloud, OEM, and other specific variants.
+     *
+     * @param entry the USN entry to evaluate
+     * @return true if the entry is generic, false otherwise
+     */
     private boolean isGenericKernelReport(USNEntryJson entry) {
         String title = entry.title != null ? entry.title : "";
         return !(title.contains("(GKE)") || title.contains("(AWS)") || title.contains("(Azure)")
@@ -124,7 +174,18 @@ public class USNJsonExporter {
                 || title.contains("(OEM)") || title.contains("(Raspberry Pi)"));
     }
 
-    
+
+    /**
+     * Attempts to retrieve the Ubuntu-assigned priority level for the given CVE ID.
+     * <p>
+     * This method queries the Ubuntu CVE Tracker to determine the severity of the specified CVE.
+     * If the request fails (due to network issues, malformed responses, or unavailable data),
+     * the method logs a warning and returns {@code null} instead of throwing an exception.
+     *
+     * @param cveId the CVE identifier (e.g., "CVE-2024-12345")
+     * @return a {@link PriorityLevel} representing the severity assigned by Ubuntu,
+     *         or {@code null} if the priority could not be determined
+     */
     private PriorityLevel fetchPrioritySafely(String cveId) {
         try {
             String rawPriority = UbuntuPriorityFetcher.fetchUbuntuPriority(cveId);
@@ -136,101 +197,16 @@ public class USNJsonExporter {
         }
     }
 
-    private void printAsJson(List<USNEntryJson> entries) throws IOException {
-        ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.writeValue(System.out, entries);
-    }
-
-
-    private void printAsTsv(List<USNEntryJson> entries) {
-        // Print header row
-        System.out.println("id\ttitle\tpublished_date\tsummary\tseverity\tlivepatch");
-
-        for (USNEntryJson entry : entries) {
-            String id = nullToEmpty(entry.id);
-            String title = nullToEmpty(entry.title);
-            String date = nullToEmpty(entry.published_date);
-            String summary = entry.summary != null
-                    ? entry.summary.replace("\t", " ").replace("\n", " ").trim()
-                    : "";
-            String severity = nullToEmpty(entry.severity);
-            String livepatch = nullToEmpty(entry.livepatch);
-
-            System.out.printf("%s\t%s\t%s\t%s\t%s\t%s%n", id, title, date, summary, severity, livepatch);
-        }
-    }
-
-    private String nullToEmpty(String s) {
-        return s != null ? s : "NA";
-    }
 
     
-
-    public static List<USNEntryJson> parseUSNMessages(BufferedReader reader) throws IOException {
-        List<USNEntryJson> entries = new ArrayList<>();
-        USNEntryJson current = null;
-
-        StringBuilder detailsBuf = new StringBuilder();
-        StringBuilder updateBuf = new StringBuilder();
-        boolean inSummary = false;
-        boolean inDetails = false;
-        boolean inUpdate = false;
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.startsWith("Subject: [")) {
-                if (current != null) {
-                    finalizeCurrentEntry(current, detailsBuf, updateBuf, entries);
-                }
-                current = startNewEntry(line);
-                inSummary = inDetails = inUpdate = false;
-                detailsBuf.setLength(0);
-                updateBuf.setLength(0);
-            } else if (current != null) {
-                if (line.startsWith("Summary:")) {
-                    inSummary = true;
-                    inDetails = inUpdate = false;
-                    current.summary = "";
-                    continue;
-                } else if (line.startsWith("Software Description:")) {
-                    inSummary = inDetails = inUpdate = false;
-                    continue;
-                } else if (line.startsWith("Details:")) {
-                    inDetails = true;
-                    inSummary = inUpdate = false;
-                    continue;
-                } else if (line.startsWith("Update instructions:")) {
-                    inUpdate = true;
-                    inDetails = inSummary = false;
-                    continue;
-                } else if (line.startsWith("References:")
-                        || line.startsWith("Package Information:")) {
-                    inSummary = inDetails = inUpdate = false;
-                    continue;
-                }
-
-                handleContentLine(current, line, inSummary, inDetails, inUpdate, detailsBuf,
-                        updateBuf);
-            }
-        }
-
-        if (current != null) {
-            finalizeCurrentEntry(current, detailsBuf, updateBuf, entries);
-        }
-
-        return entries;
-    }
-
-    private static USNEntryJson startNewEntry(String line) {
-        USNEntryJson entry = new USNEntryJson();
-        Matcher m = Pattern.compile("^Subject: \\[(USN-[\\d-]+)] (.+)$").matcher(line);
-        if (m.find()) {
-            entry.id = m.group(1);
-            entry.title = m.group(2);
-        }
-        return entry;
-    }
-
+    /**
+     * Finalizes a current USN entry by assigning accumulated details and updates.
+     *
+     * @param entry   the entry to finalize
+     * @param details the accumulated details buffer
+     * @param updates the accumulated update instructions buffer
+     * @param entries the list to which the entry is added
+     */
     private static void finalizeCurrentEntry(USNEntryJson entry, StringBuilder details,
             StringBuilder updates, List<USNEntryJson> entries) {
         if (details.length() > 0)
@@ -314,8 +290,91 @@ public class USNJsonExporter {
         }
     }
 
+    
+
+    /**
+     * Safely converts null strings to "NA".
+     *
+     * @param s the input string
+     * @return "NA" if input is null, otherwise the original string
+     */
+    private String nullToEmpty(String s) {
+        return s != null ? s : "NA";
+    }
 
 
+    
+    /**
+     * Parses USN text entries from a buffered reader into structured objects.
+     *
+     * @param reader the BufferedReader of raw USN text
+     * @return a list of structured USNEntryJson objects
+     * @throws IOException if reading fails
+     */
+    public static List<USNEntryJson> parseUSNMessages(BufferedReader reader) throws IOException {
+        List<USNEntryJson> entries = new ArrayList<>();
+        USNEntryJson current = null;
+
+        StringBuilder detailsBuf = new StringBuilder();
+        StringBuilder updateBuf = new StringBuilder();
+        boolean inSummary = false;
+        boolean inDetails = false;
+        boolean inUpdate = false;
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith("Subject: [")) {
+                if (current != null) {
+                    finalizeCurrentEntry(current, detailsBuf, updateBuf, entries);
+                }
+                current = startNewEntry(line);
+                inSummary = inDetails = inUpdate = false;
+                detailsBuf.setLength(0);
+                updateBuf.setLength(0);
+            } else if (current != null) {
+                if (line.startsWith("Summary:")) {
+                    inSummary = true;
+                    inDetails = inUpdate = false;
+                    current.summary = "";
+                    continue;
+                } else if (line.startsWith("Software Description:")) {
+                    inSummary = inDetails = inUpdate = false;
+                    continue;
+                } else if (line.startsWith("Details:")) {
+                    inDetails = true;
+                    inSummary = inUpdate = false;
+                    continue;
+                } else if (line.startsWith("Update instructions:")) {
+                    inUpdate = true;
+                    inDetails = inSummary = false;
+                    continue;
+                } else if (line.startsWith("References:")
+                        || line.startsWith("Package Information:")) {
+                    inSummary = inDetails = inUpdate = false;
+                    continue;
+                }
+
+                handleContentLine(current, line, inSummary, inDetails, inUpdate, detailsBuf,
+                        updateBuf);
+            }
+        }
+
+        if (current != null) {
+            finalizeCurrentEntry(current, detailsBuf, updateBuf, entries);
+        }
+
+        return entries;
+    }
+
+
+
+
+    /**
+     * Parses a date string like "May 1, 2024" into ISO format ("2024-05-01").
+     *
+     * @param raw the raw date string
+     * @return ISO 8601 date string or null if parsing fails
+     */
     private static String parseDate(String raw) {
         try {
             return java.time.LocalDate.parse(raw,
@@ -327,27 +386,74 @@ public class USNJsonExporter {
     }
 
 
-    private static String getSeverityLabel(double score) {
-        if (score >= 9.0)
-            return "Critical";
-        else if (score >= 7.0)
-            return "High";
-        else if (score >= 4.0)
-            return "Medium";
-        else if (score > 0.0)
-            return "Low";
-        else
-            return "None";
+    
+    
+    /**
+     * Outputs the list of USN entries in JSON format to stdout.
+     *
+     * @param entries the entries to serialize
+     * @throws IOException if serialization fails
+     */
+    private void printAsJson(List<USNEntryJson> entries) throws IOException {
+        ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+        mapper.writeValue(System.out, entries);
+    }
+
+
+    /**
+     * Outputs the list of filtered USN entries in tab-separated values (TSV) format to standard output.
+     * <p>
+     * The output includes a header row followed by one line per entry. Each line contains the following fields:
+     * <ul>
+     *   <li>{@code id} – the USN identifier (e.g., USN-1234-1)</li>
+     *   <li>{@code title} – the USN entry title</li>
+     *   <li>{@code published_date} – the publication date in ISO 8601 format (e.g., 2024-05-18)</li>
+     *   <li>{@code summary} – a summary of the vulnerability or update</li>
+     *   <li>{@code severity} – the maximum severity level among associated CVEs</li>
+     *   <li>{@code livepatch} – whether Canonical Livepatch is available ("yes", "no", or "NA")</li>
+     * </ul>
+     * <p>
+     * Null or missing fields are replaced with {@code "NA"} to ensure consistency in the output.
+     *
+     * @param entries the list of USN entries to format and print
+     */
+    private void printAsTsv(List<USNEntryJson> entries) {
+        // Print header row
+        System.out.println("id\ttitle\tpublished_date\tsummary\tseverity\tlivepatch");
+
+        for (USNEntryJson entry : entries) {
+            String id = nullToEmpty(entry.id);
+            String title = nullToEmpty(entry.title);
+            String date = nullToEmpty(entry.published_date);
+            String summary = entry.summary != null
+                    ? entry.summary.replace("\t", " ").replace("\n", " ").trim()
+                    : "";
+            String severity = nullToEmpty(entry.severity);
+            String livepatch = nullToEmpty(entry.livepatch);
+
+            System.out.printf("%s\t%s\t%s\t%s\t%s\t%s%n", id, title, date, summary, severity, livepatch);
+        }
+    }
+
+
+   /**
+     * Initializes a new USN entry based on the Subject line.
+     *
+     * @param line the Subject line from input
+     * @return the initialized USNEntryJson object
+     */
+    private static USNEntryJson startNewEntry(String line) {
+        USNEntryJson entry = new USNEntryJson();
+        Matcher m = Pattern.compile("^Subject: \\[(USN-[\\d-]+)] (.+)$").matcher(line);
+        if (m.find()) {
+            entry.id = m.group(1);
+            entry.title = m.group(2);
+        }
+        return entry;
     }
 
 
 
-    private static boolean isMoreSevere(double score, String currentSeverity) {
-        Map<String, Integer> severityRank =
-                Map.of("None", 0, "Low", 1, "Medium", 2, "High", 3, "Critical", 4);
-        return severityRank.getOrDefault(getSeverityLabel(score), 0) > severityRank
-                .getOrDefault(currentSeverity, 0);
-    }
 
 
 
