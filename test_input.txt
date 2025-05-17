@@ -1,0 +1,3429 @@
+
+スレッドを開きました。既読メッセージは 1 件です。
+
+コンテンツへ
+国立遺伝学研究所 メール でのスクリーン リーダーの使用
+55 / 13,250
+ubuntu-security-announce Digest, Vol 248, Issue 19
+受信トレイ
+ubuntu-security-announce-request@lists.ubuntu.com メーリングリストの登録解除
+	
+5月15日(木) 21:03 (17 時間前)
+	
+To ubuntu-security-announce
+Send ubuntu-security-announce mailing list submissions to
+        ubuntu-security-announce@lists.ubuntu.com
+
+To subscribe or unsubscribe via the World Wide Web, visit
+        https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+or, via email, send a message with subject or body 'help' to
+        ubuntu-security-announce-request@lists.ubuntu.com
+
+You can reach the person managing the list at
+        ubuntu-security-announce-owner@lists.ubuntu.com
+
+When replying, please edit your Subject line so it is more specific
+than "Re: Contents of ubuntu-security-announce digest..."
+
+
+Today's Topics:
+
+   1. [USN-7507-1] Rack vulnerabilities (noreply+usn-bot@canonical.com)
+
+
+----------------------------------------------------------------------
+
+Message: 1
+From: noreply+usn-bot@canonical.com
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7507-1] Rack vulnerabilities
+Message-ID:
+        <mailman.16.1747310403.12052.ubuntu-security-announce@lists.ubuntu.com>
+
+Content-Type: text/plain; charset="utf-8"
+
+==========================================================================
+Ubuntu Security Notice USN-7507-1
+May 12, 2025
+
+ruby-rack vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 25.04
+- Ubuntu 24.10
+- Ubuntu 24.04 LTS
+- Ubuntu 22.04 LTS
+- Ubuntu 20.04 LTS
+- Ubuntu 18.04 LTS
+- Ubuntu 16.04 LTS
+- Ubuntu 14.04 LTS
+
+Summary:
+
+Rack could be made to crash or allow unintended access to network services.
+
+Software Description:
+- ruby-rack: modular Ruby webserver interface
+
+Details:
+
+It was discovered that Rack incorrectly handled deleted rack sessions. An
+attacker could possibly use this issue to expose sensitive information or
+to gain unauthorized access to user accounts. (CVE-2025-32441)
+
+It was discovered that Rack incorrectly limited the number of parameters
+in a web request. An attacker could possibly use this issue to cause a
+denial of service. This issue only affected Ubuntu 20.04 LTS, Ubuntu 22.04
+LTS, Ubuntu 24.04 LTS, Ubuntu 24.10, and Ubuntu 25.04. (CVE-2025-46727)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 25.04
+  ruby-rack                       2.2.7-1.1ubuntu0.25.04.1
+
+Ubuntu 24.10
+  ruby-rack                       2.2.7-1.1ubuntu0.2
+
+Ubuntu 24.04 LTS
+  ruby-rack                       2.2.7-1ubuntu0.3
+
+Ubuntu 22.04 LTS
+  ruby-rack                       2.1.4-5ubuntu1.1+esm2
+                                  Available with Ubuntu Pro
+
+Ubuntu 20.04 LTS
+  ruby-rack                       2.0.7-2ubuntu0.1+esm7
+                                  Available with Ubuntu Pro
+
+Ubuntu 18.04 LTS
+  ruby-rack                       1.6.4-4ubuntu0.2+esm8
+                                  Available with Ubuntu Pro
+
+Ubuntu 16.04 LTS
+  ruby-rack                       1.6.4-3ubuntu0.2+esm8
+                                  Available with Ubuntu Pro
+
+Ubuntu 14.04 LTS
+  ruby-rack                       1.5.2-3+deb8u3ubuntu1~esm10
+                                  Available with Ubuntu Pro
+
+In general, a standard system update will make all the necessary changes.
+
+References:
+  https://ubuntu.com/security/notices/USN-7507-1
+  CVE-2025-32441, CVE-2025-46727
+
+Package Information:
+  https://launchpad.net/ubuntu/+source/ruby-rack/2.2.7-1.1ubuntu0.25.04.1
+  https://launchpad.net/ubuntu/+source/ruby-rack/2.2.7-1.1ubuntu0.2
+  https://launchpad.net/ubuntu/+source/ruby-rack/2.2.7-1ubuntu0.3
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 833 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250515/9104722f/attachment.sig>
+
+------------------------------
+
+Subject: Digest Footer
+
+-- 
+ubuntu-security-announce mailing list
+ubuntu-security-announce@lists.ubuntu.com
+Modify settings or unsubscribe at: https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+
+
+------------------------------
+
+End of ubuntu-security-announce Digest, Vol 248, Issue 19
+*********************************************************
+	
+
+スレッドを開きました。未読メッセージは 1 件です。
+
+コンテンツへ
+国立遺伝学研究所 メール でのスクリーン リーダーの使用
+19 / 多数
+ubuntu-security-announce Digest, Vol 248, Issue 17
+受信トレイ
+ubuntu-security-announce-request@lists.ubuntu.com メーリングリストの登録解除
+	
+5月13日(火) 16:51 (3 日前)
+	
+To ubuntu-security-announce
+Send ubuntu-security-announce mailing list submissions to
+        ubuntu-security-announce@lists.ubuntu.com
+
+To subscribe or unsubscribe via the World Wide Web, visit
+        https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+or, via email, send a message with subject or body 'help' to
+        ubuntu-security-announce-request@lists.ubuntu.com
+
+You can reach the person managing the list at
+        ubuntu-security-announce-owner@lists.ubuntu.com
+
+When replying, please edit your Subject line so it is more specific
+than "Re: Contents of ubuntu-security-announce digest..."
+
+
+Today's Topics:
+
+   1. [USN-7506-1] Linux kernel vulnerabilities (Giampaolo Fresi Roglia)
+   2. [USN-7506-2] Linux kernel (AWS) vulnerabilities
+      (Giampaolo Fresi Roglia)
+   3. [USN-7506-3] Linux kernel (FIPS) vulnerabilities
+      (Giampaolo Fresi Roglia)
+   4. [USN-7506-4] Linux kernel (Xenial HWE) vulnerabilities
+      (Giampaolo Fresi Roglia)
+
+
+----------------------------------------------------------------------
+
+Message: 1
+Date: Mon, 12 May 2025 14:42:18 +0200
+From: Giampaolo Fresi Roglia <giampaolo.fresi.roglia@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7506-1] Linux kernel vulnerabilities
+Message-ID: <87sela9f11.fsf@canonical.com>
+Content-Type: text/plain; charset="utf-8"
+
+==========================================================================
+Ubuntu Security Notice USN-7506-1
+May 12, 2025
+
+linux, linux-aws, linux-kvm vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 16.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux: Linux kernel
+- linux-aws: Linux kernel for Amazon Web Services (AWS) systems
+- linux-kvm: Linux kernel for cloud environments
+
+Details:
+
+Demi Marie Obenour and Simon Gaiser discovered that several Xen para-
+virtualization device frontends did not properly restrict the access rights
+of device backends. An attacker could possibly use a malicious Xen backend
+to gain access to memory pages of a guest VM or cause a denial of service
+in the guest. (CVE-2022-23041)
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+  - Hardware crypto device drivers;
+  - GPU drivers;
+  - IIO subsystem;
+  - Media drivers;
+  - Network drivers;
+  - SCSI subsystem;
+  - SPI subsystem;
+  - USB Gadget drivers;
+  - Ceph distributed file system;
+  - File systems infrastructure;
+  - JFS file system;
+  - Network file system (NFS) client;
+  - Network file system (NFS) server daemon;
+  - NILFS2 file system;
+  - SMB network file system;
+  - CAN network layer;
+  - IPv6 networking;
+  - MAC80211 subsystem;
+  - Netfilter;
+  - Netlink;
+  - Network traffic control;
+  - SCTP protocol;
+  - TIPC protocol;
+(CVE-2024-46780, CVE-2021-47163, CVE-2024-46771, CVE-2021-47506,
+CVE-2024-36934, CVE-2024-35864, CVE-2024-26915, CVE-2021-47150,
+CVE-2024-50256, CVE-2024-53173, CVE-2024-53066, CVE-2024-53063,
+CVE-2021-47245, CVE-2024-26996, CVE-2024-56642, CVE-2021-47219,
+CVE-2024-56631, CVE-2021-47587, CVE-2021-47191, CVE-2023-52741,
+CVE-2021-46959, CVE-2024-26689, CVE-2024-26974, CVE-2024-56770,
+CVE-2024-56598, CVE-2024-49944, CVE-2024-50237, CVE-2024-53140,
+CVE-2024-56650, CVE-2021-47500, CVE-2025-21971)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 16.04 LTS
+  linux-image-4.4.0-1144-kvm      4.4.0-1144.155
+                                  Available with Ubuntu Pro
+  linux-image-4.4.0-1181-aws      4.4.0-1181.196
+                                  Available with Ubuntu Pro
+  linux-image-4.4.0-268-generic   4.4.0-268.302
+                                  Available with Ubuntu Pro
+  linux-image-4.4.0-268-lowlatency  4.4.0-268.302
+                                  Available with Ubuntu Pro
+  linux-image-aws                 4.4.0.1181.185
+                                  Available with Ubuntu Pro
+  linux-image-generic             4.4.0.268.274
+                                  Available with Ubuntu Pro
+  linux-image-generic-lts-xenial  4.4.0.268.274
+                                  Available with Ubuntu Pro
+  linux-image-kvm                 4.4.0.1144.141
+                                  Available with Ubuntu Pro
+  linux-image-lowlatency          4.4.0.268.274
+                                  Available with Ubuntu Pro
+  linux-image-lowlatency-lts-xenial  4.4.0.268.274
+                                  Available with Ubuntu Pro
+  linux-image-virtual             4.4.0.268.274
+                                  Available with Ubuntu Pro
+  linux-image-virtual-lts-xenial  4.4.0.268.274
+                                  Available with Ubuntu Pro
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+  https://ubuntu.com/security/notices/USN-7506-1
+  CVE-2021-46959, CVE-2021-47150, CVE-2021-47163, CVE-2021-47191,
+  CVE-2021-47219, CVE-2021-47245, CVE-2021-47500, CVE-2021-47506,
+  CVE-2021-47587, CVE-2022-23041, CVE-2023-52741, CVE-2024-26689,
+  CVE-2024-26915, CVE-2024-26974, CVE-2024-26996, CVE-2024-35864,
+  CVE-2024-36934, CVE-2024-46771, CVE-2024-46780, CVE-2024-49944,
+  CVE-2024-50237, CVE-2024-50256, CVE-2024-53063, CVE-2024-53066,
+  CVE-2024-53140, CVE-2024-53173, CVE-2024-56598, CVE-2024-56631,
+  CVE-2024-56642, CVE-2024-56650, CVE-2024-56770, CVE-2025-21971
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 710 bytes
+Desc: not available
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250512/31c310be/attachment-0001.sig>
+
+------------------------------
+
+Message: 2
+Date: Mon, 12 May 2025 15:11:20 +0200
+From: Giampaolo Fresi Roglia <giampaolo.fresi.roglia@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7506-2] Linux kernel (AWS) vulnerabilities
+Message-ID: <87plge9don.fsf@canonical.com>
+Content-Type: text/plain; charset="utf-8"
+
+==========================================================================
+Ubuntu Security Notice USN-7506-2
+May 12, 2025
+
+linux-aws vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 14.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-aws: Linux kernel for Amazon Web Services (AWS) systems
+
+Details:
+
+Demi Marie Obenour and Simon Gaiser discovered that several Xen para-
+virtualization device frontends did not properly restrict the access rights
+of device backends. An attacker could possibly use a malicious Xen backend
+to gain access to memory pages of a guest VM or cause a denial of service
+in the guest. (CVE-2022-23041)
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+  - Hardware crypto device drivers;
+  - GPU drivers;
+  - IIO subsystem;
+  - Media drivers;
+  - Network drivers;
+  - SCSI subsystem;
+  - SPI subsystem;
+  - USB Gadget drivers;
+  - Ceph distributed file system;
+  - File systems infrastructure;
+  - JFS file system;
+  - Network file system (NFS) client;
+  - Network file system (NFS) server daemon;
+  - NILFS2 file system;
+  - SMB network file system;
+  - CAN network layer;
+  - IPv6 networking;
+  - MAC80211 subsystem;
+  - Netfilter;
+  - Netlink;
+  - Network traffic control;
+  - SCTP protocol;
+  - TIPC protocol;
+(CVE-2024-56650, CVE-2024-26915, CVE-2024-50237, CVE-2024-53140,
+CVE-2024-26996, CVE-2021-47506, CVE-2024-26974, CVE-2025-21971,
+CVE-2024-56770, CVE-2024-53063, CVE-2021-47245, CVE-2024-36934,
+CVE-2021-47500, CVE-2024-53173, CVE-2021-47219, CVE-2024-46771,
+CVE-2024-56631, CVE-2024-46780, CVE-2024-35864, CVE-2021-46959,
+CVE-2021-47191, CVE-2021-47587, CVE-2024-53066, CVE-2024-56642,
+CVE-2021-47163, CVE-2024-50256, CVE-2021-47150, CVE-2024-56598,
+CVE-2024-26689, CVE-2023-52741, CVE-2024-49944)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 14.04 LTS
+  linux-image-4.4.0-1143-aws      4.4.0-1143.149
+                                  Available with Ubuntu Pro
+  linux-image-aws                 4.4.0.1143.140
+                                  Available with Ubuntu Pro
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+  https://ubuntu.com/security/notices/USN-7506-2
+  https://ubuntu.com/security/notices/USN-7506-1
+  CVE-2021-46959, CVE-2021-47150, CVE-2021-47163, CVE-2021-47191,
+  CVE-2021-47219, CVE-2021-47245, CVE-2021-47500, CVE-2021-47506,
+  CVE-2021-47587, CVE-2022-23041, CVE-2023-52741, CVE-2024-26689,
+  CVE-2024-26915, CVE-2024-26974, CVE-2024-26996, CVE-2024-35864,
+  CVE-2024-36934, CVE-2024-46771, CVE-2024-46780, CVE-2024-49944,
+  CVE-2024-50237, CVE-2024-50256, CVE-2024-53063, CVE-2024-53066,
+  CVE-2024-53140, CVE-2024-53173, CVE-2024-56598, CVE-2024-56631,
+  CVE-2024-56642, CVE-2024-56650, CVE-2024-56770, CVE-2025-21971
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 710 bytes
+Desc: not available
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250512/d377337f/attachment-0001.sig>
+
+------------------------------
+
+Message: 3
+Date: Mon, 12 May 2025 15:25:15 +0200
+From: Giampaolo Fresi Roglia <giampaolo.fresi.roglia@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7506-3] Linux kernel (FIPS) vulnerabilities
+Message-ID: <87msbi9d1g.fsf@canonical.com>
+Content-Type: text/plain; charset="utf-8"
+
+==========================================================================
+Ubuntu Security Notice USN-7506-3
+May 12, 2025
+
+linux-fips vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 16.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-fips: Linux kernel with FIPS
+
+Details:
+
+Demi Marie Obenour and Simon Gaiser discovered that several Xen para-
+virtualization device frontends did not properly restrict the access rights
+of device backends. An attacker could possibly use a malicious Xen backend
+to gain access to memory pages of a guest VM or cause a denial of service
+in the guest. (CVE-2022-23041)
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+  - Hardware crypto device drivers;
+  - GPU drivers;
+  - IIO subsystem;
+  - Media drivers;
+  - Network drivers;
+  - SCSI subsystem;
+  - SPI subsystem;
+  - USB Gadget drivers;
+  - Ceph distributed file system;
+  - File systems infrastructure;
+  - JFS file system;
+  - Network file system (NFS) client;
+  - Network file system (NFS) server daemon;
+  - NILFS2 file system;
+  - SMB network file system;
+  - CAN network layer;
+  - IPv6 networking;
+  - MAC80211 subsystem;
+  - Netfilter;
+  - Netlink;
+  - Network traffic control;
+  - SCTP protocol;
+  - TIPC protocol;
+(CVE-2024-56598, CVE-2024-56650, CVE-2024-46771, CVE-2024-53173,
+CVE-2024-53063, CVE-2024-26974, CVE-2021-46959, CVE-2024-53066,
+CVE-2021-47163, CVE-2024-50237, CVE-2021-47587, CVE-2024-56631,
+CVE-2024-50256, CVE-2021-47150, CVE-2021-47506, CVE-2021-47219,
+CVE-2023-52741, CVE-2024-49944, CVE-2025-21971, CVE-2024-26689,
+CVE-2024-46780, CVE-2024-53140, CVE-2021-47245, CVE-2024-56642,
+CVE-2021-47500, CVE-2024-36934, CVE-2024-26996, CVE-2024-35864,
+CVE-2021-47191, CVE-2024-26915, CVE-2024-56770)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 16.04 LTS
+  linux-image-4.4.0-1113-fips     4.4.0-1113.120
+                                  Available with Ubuntu Pro
+  linux-image-fips                4.4.0.1113.114
+                                  Available with Ubuntu Pro
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+  https://ubuntu.com/security/notices/USN-7506-3
+  https://ubuntu.com/security/notices/USN-7506-2
+  https://ubuntu.com/security/notices/USN-7506-1
+  CVE-2021-46959, CVE-2021-47150, CVE-2021-47163, CVE-2021-47191,
+  CVE-2021-47219, CVE-2021-47245, CVE-2021-47500, CVE-2021-47506,
+  CVE-2021-47587, CVE-2022-23041, CVE-2023-52741, CVE-2024-26689,
+  CVE-2024-26915, CVE-2024-26974, CVE-2024-26996, CVE-2024-35864,
+  CVE-2024-36934, CVE-2024-46771, CVE-2024-46780, CVE-2024-49944,
+  CVE-2024-50237, CVE-2024-50256, CVE-2024-53063, CVE-2024-53066,
+  CVE-2024-53140, CVE-2024-53173, CVE-2024-56598, CVE-2024-56631,
+  CVE-2024-56642, CVE-2024-56650, CVE-2024-56770, CVE-2025-21971
+
+Package Information:
+  https://launchpad.net/ubuntu/+source/linux-fips/4.4.0-1113.120
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 710 bytes
+Desc: not available
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250512/16f5af77/attachment-0001.sig>
+
+------------------------------
+
+Message: 4
+Date: Tue, 13 May 2025 09:47:58 +0200
+From: Giampaolo Fresi Roglia <giampaolo.fresi.roglia@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7506-4] Linux kernel (Xenial HWE) vulnerabilities
+Message-ID: <87jz6l9ck1.fsf@canonical.com>
+Content-Type: text/plain; charset="utf-8"
+
+==========================================================================
+Ubuntu Security Notice USN-7506-4
+May 13, 2025
+
+linux-lts-xenial vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 14.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-lts-xenial: Linux hardware enablement kernel from Xenial for Trusty
+
+Details:
+
+Demi Marie Obenour and Simon Gaiser discovered that several Xen para-
+virtualization device frontends did not properly restrict the access rights
+of device backends. An attacker could possibly use a malicious Xen backend
+to gain access to memory pages of a guest VM or cause a denial of service
+in the guest. (CVE-2022-23041)
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+  - Hardware crypto device drivers;
+  - GPU drivers;
+  - IIO subsystem;
+  - Media drivers;
+  - Network drivers;
+  - SCSI subsystem;
+  - SPI subsystem;
+  - USB Gadget drivers;
+  - Ceph distributed file system;
+  - File systems infrastructure;
+  - JFS file system;
+  - Network file system (NFS) client;
+  - Network file system (NFS) server daemon;
+  - NILFS2 file system;
+  - SMB network file system;
+  - CAN network layer;
+  - IPv6 networking;
+  - MAC80211 subsystem;
+  - Netfilter;
+  - Netlink;
+  - Network traffic control;
+  - SCTP protocol;
+  - TIPC protocol;
+(CVE-2024-46771, CVE-2021-47500, CVE-2024-56631, CVE-2021-47219,
+CVE-2021-47163, CVE-2024-50256, CVE-2024-56650, CVE-2024-46780,
+CVE-2021-47506, CVE-2024-26996, CVE-2025-21971, CVE-2021-47587,
+CVE-2021-47245, CVE-2024-56598, CVE-2021-46959, CVE-2024-26974,
+CVE-2024-56642, CVE-2023-52741, CVE-2021-47150, CVE-2024-53173,
+CVE-2024-26915, CVE-2024-36934, CVE-2024-56770, CVE-2024-53063,
+CVE-2021-47191, CVE-2024-26689, CVE-2024-53066, CVE-2024-35864,
+CVE-2024-50237, CVE-2024-53140, CVE-2024-49944)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 14.04 LTS
+  linux-image-4.4.0-268-generic   4.4.0-268.302~14.04.1
+                                  Available with Ubuntu Pro
+  linux-image-4.4.0-268-lowlatency  4.4.0-268.302~14.04.1
+                                  Available with Ubuntu Pro
+  linux-image-generic-lts-xenial  4.4.0.268.302~14.04.1
+                                  Available with Ubuntu Pro
+  linux-image-lowlatency-lts-xenial  4.4.0.268.302~14.04.1
+                                  Available with Ubuntu Pro
+  linux-image-virtual-lts-xenial  4.4.0.268.302~14.04.1
+                                  Available with Ubuntu Pro
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+  https://ubuntu.com/security/notices/USN-7506-4
+  https://ubuntu.com/security/notices/USN-7506-3
+  https://ubuntu.com/security/notices/USN-7506-2
+  https://ubuntu.com/security/notices/USN-7506-1
+  CVE-2021-46959, CVE-2021-47150, CVE-2021-47163, CVE-2021-47191,
+  CVE-2021-47219, CVE-2021-47245, CVE-2021-47500, CVE-2021-47506,
+  CVE-2021-47587, CVE-2022-23041, CVE-2023-52741, CVE-2024-26689,
+  CVE-2024-26915, CVE-2024-26974, CVE-2024-26996, CVE-2024-35864,
+  CVE-2024-36934, CVE-2024-46771, CVE-2024-46780, CVE-2024-49944,
+  CVE-2024-50237, CVE-2024-50256, CVE-2024-53063, CVE-2024-53066,
+  CVE-2024-53140, CVE-2024-53173, CVE-2024-56598, CVE-2024-56631,
+  CVE-2024-56642, CVE-2024-56650, CVE-2024-56770, CVE-2025-21971
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 710 bytes
+Desc: not available
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250513/5e7eebbb/attachment.sig>
+
+------------------------------
+
+Subject: Digest Footer
+
+-- 
+ubuntu-security-announce mailing list
+ubuntu-security-announce@lists.ubuntu.com
+Modify settings or unsubscribe at: https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+
+
+------------------------------
+
+End of ubuntu-security-announce Digest, Vol 248, Issue 17
+*********************************************************
+	
+
+スレッドを開きました。未読メッセージは 1 件です。
+
+コンテンツへ
+国立遺伝学研究所 メール でのスクリーン リーダーの使用
+5 / 13,288
+ubuntu-security-announce Digest, Vol 248, Issue 25
+受信トレイ
+ubuntu-security-announce-request@lists.ubuntu.com メーリングリストの登録解除
+	
+4:42 (15 時間前)
+	
+To ubuntu-security-announce
+Send ubuntu-security-announce mailing list submissions to
+        ubuntu-security-announce@lists.ubuntu.com
+
+To subscribe or unsubscribe via the World Wide Web, visit
+        https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+or, via email, send a message with subject or body 'help' to
+        ubuntu-security-announce-request@lists.ubuntu.com
+
+You can reach the person managing the list at
+        ubuntu-security-announce-owner@lists.ubuntu.com
+
+When replying, please edit your Subject line so it is more specific
+than "Re: Contents of ubuntu-security-announce digest..."
+
+
+Today's Topics:
+
+   1. [USN-7511-2] Linux kernel (GCP FIPS) vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+   2. [USN-7515-1] Linux kernel (GKE) vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+
+
+----------------------------------------------------------------------
+
+Message: 1
+Date: Fri, 16 May 2025 19:36:27 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7511-2] Linux kernel (GCP FIPS) vulnerabilities
+Message-ID: <dc9ec5ee-2363-42b6-8956-40912cfca182@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7511-2
+May 16, 2025
+
+linux-gcp-fips vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 22.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-gcp-fips: Linux kernel for Google Cloud Platform (GCP) systems with
+FIPS
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - ARM64 architecture;
+   - PowerPC architecture;
+   - x86 architecture;
+   - Block layer subsystem;
+   - Network block device driver;
+   - Bus devices;
+   - Character device driver;
+   - TPM device driver;
+   - Clock framework and drivers;
+   - GPIO subsystem;
+   - GPU drivers;
+   - HID subsystem;
+   - I2C subsystem;
+   - InfiniBand drivers;
+   - Media drivers;
+   - NVIDIA Tegra memory controller driver;
+   - Network drivers;
+   - PCI subsystem;
+   - PPS (Pulse Per Second) driver;
+   - PTP clock framework;
+   - RapidIO drivers;
+   - Real Time Clock drivers;
+   - SLIMbus drivers;
+   - QCOM SoC drivers;
+   - Trusted Execution Environment drivers;
+   - TTY drivers;
+   - USB DSL drivers;
+   - USB Device Class drivers;
+   - USB core drivers;
+   - USB Gadget drivers;
+   - USB Host Controller drivers;
+   - Renesas USBHS Controller drivers;
+   - ACRN Hypervisor Service Module driver;
+   - File systems infrastructure;
+   - BTRFS file system;
+   - F2FS file system;
+   - Network file system (NFS) server daemon;
+   - NILFS2 file system;
+   - Overlay file system;
+   - SMB network file system;
+   - UBI file system;
+   - KVM subsystem;
+   - L3 Master device support module;
+   - Process Accounting mechanism;
+   - Padata parallel execution mechanism;
+   - printk logging mechanism;
+   - Scheduler infrastructure;
+   - Timer subsystem;
+   - Tracing infrastructure;
+   - Memory management;
+   - 802.1Q VLAN protocol;
+   - B.A.T.M.A.N. meshing protocol;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - Logical Link layer;
+   - Multipath TCP;
+   - Netfilter;
+   - NFC subsystem;
+   - Open vSwitch;
+   - Rose network layer;
+   - Network traffic control;
+   - Wireless networking;
+   - Landlock security;
+   - Linux Security Modules (LSM) Framework;
+   - Tomoyo security module;
+(CVE-2024-58063, CVE-2025-21802, CVE-2025-21910, CVE-2025-21718,
+CVE-2025-21707, CVE-2025-21781, CVE-2025-21726, CVE-2024-56599,
+CVE-2025-21735, CVE-2025-21859, CVE-2025-21924, CVE-2024-57980,
+CVE-2024-58002, CVE-2024-58090, CVE-2025-21728, CVE-2024-58055,
+CVE-2024-57978, CVE-2025-21704, CVE-2025-21820, CVE-2025-21776,
+CVE-2025-21919, CVE-2025-21765, CVE-2025-21935, CVE-2025-21647,
+CVE-2025-21804, CVE-2024-58072, CVE-2025-21865, CVE-2025-21887,
+CVE-2024-58079, CVE-2024-58020, CVE-2024-35889, CVE-2024-58017,
+CVE-2024-58005, CVE-2025-21862, CVE-2025-21875, CVE-2025-21925,
+CVE-2025-21951, CVE-2025-21866, CVE-2025-21871, CVE-2025-21914,
+CVE-2025-21948, CVE-2025-21715, CVE-2025-21848, CVE-2025-21905,
+CVE-2025-21830, CVE-2024-58051, CVE-2025-21909, CVE-2025-21711,
+CVE-2025-21684, CVE-2025-21844, CVE-2025-21904, CVE-2025-21898,
+CVE-2025-21767, CVE-2024-58069, CVE-2024-57834, CVE-2025-21934,
+CVE-2025-21926, CVE-2025-21708, CVE-2025-21736, CVE-2024-58085,
+CVE-2024-26982, CVE-2024-58083, CVE-2025-21920, CVE-2025-21764,
+CVE-2025-21753, CVE-2025-21799, CVE-2025-21846, CVE-2024-57979,
+CVE-2025-21785, CVE-2024-58010, CVE-2024-57986, CVE-2025-21762,
+CVE-2025-21912, CVE-2025-21744, CVE-2025-21787, CVE-2025-21761,
+CVE-2025-21971, CVE-2025-21943, CVE-2024-47726, CVE-2025-21721,
+CVE-2025-21748, CVE-2025-21791, CVE-2025-21796, CVE-2025-21806,
+CVE-2025-21779, CVE-2024-58001, CVE-2025-21745, CVE-2025-21814,
+CVE-2025-21719, CVE-2025-21950, CVE-2025-21858, CVE-2025-21823,
+CVE-2025-21758, CVE-2024-57981, CVE-2024-58058, CVE-2024-56721,
+CVE-2025-21811, CVE-2024-58086, CVE-2025-21722, CVE-2025-21727,
+CVE-2025-21760, CVE-2024-58076, CVE-2025-21916, CVE-2025-21826,
+CVE-2024-57973, CVE-2025-21795, CVE-2025-21763, CVE-2024-58014,
+CVE-2025-21917, CVE-2024-57977, CVE-2024-44964, CVE-2024-58016,
+CVE-2024-58007, CVE-2025-21928, CVE-2024-58052, CVE-2025-21749,
+CVE-2025-21772, CVE-2025-21877, CVE-2025-21782, CVE-2025-21922,
+CVE-2025-21766, CVE-2024-58034, CVE-2025-21835, CVE-2025-21878,
+CVE-2025-21731, CVE-2024-58071)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 22.04 LTS
+   linux-image-5.15.0-1083-gcp-fips  5.15.0-1083.92+fips1
+                                   Available with Ubuntu Pro
+   linux-image-gcp-fips            5.15.0.1083.73
+                                   Available with Ubuntu Pro
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7511-2
+   https://ubuntu.com/security/notices/USN-7511-1
+   CVE-2024-26982, CVE-2024-35889, CVE-2024-44964, CVE-2024-47726,
+   CVE-2024-56599, CVE-2024-56721, CVE-2024-57834, CVE-2024-57973,
+   CVE-2024-57977, CVE-2024-57978, CVE-2024-57979, CVE-2024-57980,
+   CVE-2024-57981, CVE-2024-57986, CVE-2024-58001, CVE-2024-58002,
+   CVE-2024-58005, CVE-2024-58007, CVE-2024-58010, CVE-2024-58014,
+   CVE-2024-58016, CVE-2024-58017, CVE-2024-58020, CVE-2024-58034,
+   CVE-2024-58051, CVE-2024-58052, CVE-2024-58055, CVE-2024-58058,
+   CVE-2024-58063, CVE-2024-58069, CVE-2024-58071, CVE-2024-58072,
+   CVE-2024-58076, CVE-2024-58079, CVE-2024-58083, CVE-2024-58085,
+   CVE-2024-58086, CVE-2024-58090, CVE-2025-21647, CVE-2025-21684,
+   CVE-2025-21704, CVE-2025-21707, CVE-2025-21708, CVE-2025-21711,
+   CVE-2025-21715, CVE-2025-21718, CVE-2025-21719, CVE-2025-21721,
+   CVE-2025-21722, CVE-2025-21726, CVE-2025-21727, CVE-2025-21728,
+   CVE-2025-21731, CVE-2025-21735, CVE-2025-21736, CVE-2025-21744,
+   CVE-2025-21745, CVE-2025-21748, CVE-2025-21749, CVE-2025-21753,
+   CVE-2025-21758, CVE-2025-21760, CVE-2025-21761, CVE-2025-21762,
+   CVE-2025-21763, CVE-2025-21764, CVE-2025-21765, CVE-2025-21766,
+   CVE-2025-21767, CVE-2025-21772, CVE-2025-21776, CVE-2025-21779,
+   CVE-2025-21781, CVE-2025-21782, CVE-2025-21785, CVE-2025-21787,
+   CVE-2025-21791, CVE-2025-21795, CVE-2025-21796, CVE-2025-21799,
+   CVE-2025-21802, CVE-2025-21804, CVE-2025-21806, CVE-2025-21811,
+   CVE-2025-21814, CVE-2025-21820, CVE-2025-21823, CVE-2025-21826,
+   CVE-2025-21830, CVE-2025-21835, CVE-2025-21844, CVE-2025-21846,
+   CVE-2025-21848, CVE-2025-21858, CVE-2025-21859, CVE-2025-21862,
+   CVE-2025-21865, CVE-2025-21866, CVE-2025-21871, CVE-2025-21875,
+   CVE-2025-21877, CVE-2025-21878, CVE-2025-21887, CVE-2025-21898,
+   CVE-2025-21904, CVE-2025-21905, CVE-2025-21909, CVE-2025-21910,
+   CVE-2025-21912, CVE-2025-21914, CVE-2025-21916, CVE-2025-21917,
+   CVE-2025-21919, CVE-2025-21920, CVE-2025-21922, CVE-2025-21924,
+   CVE-2025-21925, CVE-2025-21926, CVE-2025-21928, CVE-2025-21934,
+   CVE-2025-21935, CVE-2025-21943, CVE-2025-21948, CVE-2025-21950,
+   CVE-2025-21951, CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux-gcp-fips/5.15.0-1083.92+fips1
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/8d2aa02f/attachment.sig>
+
+------------------------------
+
+Message: 2
+Date: Fri, 16 May 2025 19:38:29 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7515-1] Linux kernel (GKE) vulnerabilities
+Message-ID: <f5fce5cb-72c4-4fad-9a54-ad569cba1aee@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7515-1
+May 16, 2025
+
+linux-gke vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 24.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-gke: Linux kernel for Google Container Engine (GKE) systems
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - RISC-V architecture;
+   - x86 architecture;
+   - Block layer subsystem;
+   - Compute Acceleration Framework;
+   - ACPI drivers;
+   - Drivers core;
+   - Ublk userspace block driver;
+   - Virtio block driver;
+   - DMA engine subsystem;
+   - GPU drivers;
+   - Microsoft Hyper-V drivers;
+   - Hardware monitoring drivers;
+   - IIO ADC drivers;
+   - IIO subsystem;
+   - InfiniBand drivers;
+   - Multiple devices driver;
+   - Media drivers;
+   - Microchip PCI driver;
+   - Network drivers;
+   - Mellanox network drivers;
+   - STMicroelectronics network drivers;
+   - PCI subsystem;
+   - Pin controllers subsystem;
+   - x86 platform drivers;
+   - Power supply drivers;
+   - SCSI subsystem;
+   - USB Gadget drivers;
+   - TDX Guest driver;
+   - AFS file system;
+   - BTRFS file system;
+   - Ceph distributed file system;
+   - EROFS file system;
+   - File systems infrastructure;
+   - Network file systems library;
+   - NILFS2 file system;
+   - Overlay file system;
+   - SMB network file system;
+   - VLANs driver;
+   - Memory management;
+   - LAPB network protocol;
+   - io_uring subsystem;
+   - BPF subsystem;
+   - Control group (cgroup);
+   - Tracing infrastructure;
+   - Workqueue subsystem;
+   - Bluetooth subsystem;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - MAC80211 subsystem;
+   - Multipath TCP;
+   - Netfilter;
+   - NET/ROM layer;
+   - Packet sockets;
+   - RDS protocol;
+   - Network traffic control;
+   - SCTP protocol;
+   - SMC sockets;
+   - Wireless networking;
+   - SELinux security module;
+   - ALSA framework;
+   - SOF drivers;
+(CVE-2025-21660, CVE-2025-21659, CVE-2024-56718, CVE-2024-56675,
+CVE-2025-21631, CVE-2025-21664, CVE-2025-21655, CVE-2025-21662,
+CVE-2024-57804, CVE-2025-21656, CVE-2024-57910, CVE-2025-21647,
+CVE-2025-21634, CVE-2024-56716, CVE-2024-56709, CVE-2024-56770,
+CVE-2024-57888, CVE-2024-57793, CVE-2024-56670, CVE-2024-57931,
+CVE-2025-21640, CVE-2025-21648, CVE-2024-57913, CVE-2024-56710,
+CVE-2024-44964, CVE-2024-57911, CVE-2025-21654, CVE-2024-57890,
+CVE-2024-56654, CVE-2024-56767, CVE-2025-21650, CVE-2024-54460,
+CVE-2025-21635, CVE-2024-57791, CVE-2024-49568, CVE-2024-57879,
+CVE-2024-57929, CVE-2024-56715, CVE-2024-57899, CVE-2024-53687,
+CVE-2024-57900, CVE-2024-57903, CVE-2024-54455, CVE-2024-56763,
+CVE-2024-58087, CVE-2025-21638, CVE-2024-57892, CVE-2024-57884,
+CVE-2024-57792, CVE-2024-57904, CVE-2024-56759, CVE-2024-56659,
+CVE-2024-57885, CVE-2024-57889, CVE-2024-56657, CVE-2024-56667,
+CVE-2024-47408, CVE-2024-57805, CVE-2025-21637, CVE-2024-57893,
+CVE-2024-57946, CVE-2024-57806, CVE-2024-36476, CVE-2025-21646,
+CVE-2024-56369, CVE-2024-57917, CVE-2025-21649, CVE-2024-54193,
+CVE-2024-56717, CVE-2024-41013, CVE-2024-55916, CVE-2024-57933,
+CVE-2024-57907, CVE-2024-54683, CVE-2024-57887, CVE-2024-56760,
+CVE-2024-56652, CVE-2024-57940, CVE-2024-57906, CVE-2024-57939,
+CVE-2024-56372, CVE-2024-56665, CVE-2024-57925, CVE-2025-21938,
+CVE-2024-57895, CVE-2024-58237, CVE-2024-56664, CVE-2024-56660,
+CVE-2024-55639, CVE-2025-21632, CVE-2024-57841, CVE-2024-39282,
+CVE-2025-21651, CVE-2024-53125, CVE-2024-57807, CVE-2025-21643,
+CVE-2024-57883, CVE-2024-57898, CVE-2024-57897, CVE-2024-53179,
+CVE-2024-57932, CVE-2024-57916, CVE-2024-53685, CVE-2024-57908,
+CVE-2025-21652, CVE-2025-21658, CVE-2024-57926, CVE-2024-57801,
+CVE-2024-55881, CVE-2024-57901, CVE-2025-21653, CVE-2025-21642,
+CVE-2024-57882, CVE-2024-57912, CVE-2024-56662, CVE-2025-21639,
+CVE-2025-21971, CVE-2024-47736, CVE-2024-56761, CVE-2024-57945,
+CVE-2025-21663, CVE-2024-49571, CVE-2024-56758, CVE-2024-53690,
+CVE-2024-38608, CVE-2024-56656, CVE-2025-21645, CVE-2024-56764,
+CVE-2024-57896, CVE-2024-57938, CVE-2024-57902, CVE-2025-21636,
+CVE-2024-56769, CVE-2024-57802)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 24.04 LTS
+   linux-image-6.8.0-1025-gke      6.8.0-1025.29
+   linux-image-gke                 6.8.0-1025.29
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7515-1
+   CVE-2024-36476, CVE-2024-38608, CVE-2024-39282, CVE-2024-41013,
+   CVE-2024-44964, CVE-2024-47408, CVE-2024-47736, CVE-2024-49568,
+   CVE-2024-49571, CVE-2024-53125, CVE-2024-53179, CVE-2024-53685,
+   CVE-2024-53687, CVE-2024-53690, CVE-2024-54193, CVE-2024-54455,
+   CVE-2024-54460, CVE-2024-54683, CVE-2024-55639, CVE-2024-55881,
+   CVE-2024-55916, CVE-2024-56369, CVE-2024-56372, CVE-2024-56652,
+   CVE-2024-56654, CVE-2024-56656, CVE-2024-56657, CVE-2024-56659,
+   CVE-2024-56660, CVE-2024-56662, CVE-2024-56664, CVE-2024-56665,
+   CVE-2024-56667, CVE-2024-56670, CVE-2024-56675, CVE-2024-56709,
+   CVE-2024-56710, CVE-2024-56715, CVE-2024-56716, CVE-2024-56717,
+   CVE-2024-56718, CVE-2024-56758, CVE-2024-56759, CVE-2024-56760,
+   CVE-2024-56761, CVE-2024-56763, CVE-2024-56764, CVE-2024-56767,
+   CVE-2024-56769, CVE-2024-56770, CVE-2024-57791, CVE-2024-57792,
+   CVE-2024-57793, CVE-2024-57801, CVE-2024-57802, CVE-2024-57804,
+   CVE-2024-57805, CVE-2024-57806, CVE-2024-57807, CVE-2024-57841,
+   CVE-2024-57879, CVE-2024-57882, CVE-2024-57883, CVE-2024-57884,
+   CVE-2024-57885, CVE-2024-57887, CVE-2024-57888, CVE-2024-57889,
+   CVE-2024-57890, CVE-2024-57892, CVE-2024-57893, CVE-2024-57895,
+   CVE-2024-57896, CVE-2024-57897, CVE-2024-57898, CVE-2024-57899,
+   CVE-2024-57900, CVE-2024-57901, CVE-2024-57902, CVE-2024-57903,
+   CVE-2024-57904, CVE-2024-57906, CVE-2024-57907, CVE-2024-57908,
+   CVE-2024-57910, CVE-2024-57911, CVE-2024-57912, CVE-2024-57913,
+   CVE-2024-57916, CVE-2024-57917, CVE-2024-57925, CVE-2024-57926,
+   CVE-2024-57929, CVE-2024-57931, CVE-2024-57932, CVE-2024-57933,
+   CVE-2024-57938, CVE-2024-57939, CVE-2024-57940, CVE-2024-57945,
+   CVE-2024-57946, CVE-2024-58087, CVE-2024-58237, CVE-2025-21631,
+   CVE-2025-21632, CVE-2025-21634, CVE-2025-21635, CVE-2025-21636,
+   CVE-2025-21637, CVE-2025-21638, CVE-2025-21639, CVE-2025-21640,
+   CVE-2025-21642, CVE-2025-21643, CVE-2025-21645, CVE-2025-21646,
+   CVE-2025-21647, CVE-2025-21648, CVE-2025-21649, CVE-2025-21650,
+   CVE-2025-21651, CVE-2025-21652, CVE-2025-21653, CVE-2025-21654,
+   CVE-2025-21655, CVE-2025-21656, CVE-2025-21658, CVE-2025-21659,
+   CVE-2025-21660, CVE-2025-21662, CVE-2025-21663, CVE-2025-21664,
+   CVE-2025-21938, CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux-gke/6.8.0-1025.29
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/e3a4ce61/attachment.sig>
+
+------------------------------
+
+Subject: Digest Footer
+
+-- 
+ubuntu-security-announce mailing list
+ubuntu-security-announce@lists.ubuntu.com
+Modify settings or unsubscribe at: https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+
+
+------------------------------
+
+End of ubuntu-security-announce Digest, Vol 248, Issue 25
+*********************************************************
+	
+
+スレッドを開きました。未読メッセージは 1 件です。
+
+コンテンツへ
+国立遺伝学研究所 メール でのスクリーン リーダーの使用
+5 / 13,287
+ubuntu-security-announce Digest, Vol 248, Issue 24
+受信トレイ
+ubuntu-security-announce-request@lists.ubuntu.com メーリングリストの登録解除
+	
+3:45 (16 時間前)
+	
+To ubuntu-security-announce
+Send ubuntu-security-announce mailing list submissions to
+        ubuntu-security-announce@lists.ubuntu.com
+
+To subscribe or unsubscribe via the World Wide Web, visit
+        https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+or, via email, send a message with subject or body 'help' to
+        ubuntu-security-announce-request@lists.ubuntu.com
+
+You can reach the person managing the list at
+        ubuntu-security-announce-owner@lists.ubuntu.com
+
+When replying, please edit your Subject line so it is more specific
+than "Re: Contents of ubuntu-security-announce digest..."
+
+
+Today's Topics:
+
+   1. [USN-7516-2] Linux kernel (GCP FIPS) vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+   2. [USN-7517-1] Linux kernel (Xilinx ZynqMP) vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+
+
+----------------------------------------------------------------------
+
+Message: 1
+Date: Fri, 16 May 2025 19:39:16 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7516-2] Linux kernel (GCP FIPS) vulnerabilities
+Message-ID: <420c9234-dfd4-4167-af89-f47a888241ce@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7516-2
+May 16, 2025
+
+linux-gcp-fips vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 20.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-gcp-fips: Linux kernel for Google Cloud Platform (GCP) systems with
+FIPS
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - ARM64 architecture;
+   - PowerPC architecture;
+   - Block layer subsystem;
+   - Drivers core;
+   - Network block device driver;
+   - Character device driver;
+   - GPU drivers;
+   - HID subsystem;
+   - InfiniBand drivers;
+   - Media drivers;
+   - Network drivers;
+   - PPS (Pulse Per Second) driver;
+   - PTP clock framework;
+   - RapidIO drivers;
+   - Real Time Clock drivers;
+   - SCSI subsystem;
+   - SLIMbus drivers;
+   - QCOM SoC drivers;
+   - Trusted Execution Environment drivers;
+   - USB DSL drivers;
+   - USB Device Class drivers;
+   - USB core drivers;
+   - USB Gadget drivers;
+   - USB Host Controller drivers;
+   - Renesas USBHS Controller drivers;
+   - File systems infrastructure;
+   - BTRFS file system;
+   - NILFS2 file system;
+   - UBI file system;
+   - KVM subsystem;
+   - L3 Master device support module;
+   - Process Accounting mechanism;
+   - printk logging mechanism;
+   - Scheduler infrastructure;
+   - Tracing infrastructure;
+   - Memory management;
+   - 802.1Q VLAN protocol;
+   - B.A.T.M.A.N. meshing protocol;
+   - Bluetooth subsystem;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - Logical Link layer;
+   - NFC subsystem;
+   - Open vSwitch;
+   - Rose network layer;
+   - Network traffic control;
+   - Wireless networking;
+   - Tomoyo security module;
+(CVE-2025-21866, CVE-2025-21846, CVE-2025-21971, CVE-2025-21909,
+CVE-2024-58083, CVE-2025-21811, CVE-2025-21776, CVE-2024-58051,
+CVE-2025-21917, CVE-2025-21935, CVE-2025-21785, CVE-2021-47191,
+CVE-2025-21765, CVE-2025-21704, CVE-2025-21647, CVE-2024-58069,
+CVE-2025-21877, CVE-2025-21948, CVE-2024-58007, CVE-2024-58001,
+CVE-2025-21871, CVE-2024-58055, CVE-2025-21848, CVE-2025-21925,
+CVE-2024-58058, CVE-2025-21814, CVE-2025-21905, CVE-2025-21898,
+CVE-2025-21926, CVE-2025-21760, CVE-2024-57973, CVE-2025-21806,
+CVE-2024-58071, CVE-2025-21761, CVE-2025-21762, CVE-2024-57986,
+CVE-2025-21708, CVE-2025-21744, CVE-2024-26996, CVE-2024-50055,
+CVE-2024-58020, CVE-2025-21858, CVE-2025-21715, CVE-2025-21904,
+CVE-2025-21920, CVE-2024-56599, CVE-2025-21781, CVE-2025-21764,
+CVE-2025-21865, CVE-2025-21772, CVE-2024-58072, CVE-2025-21928,
+CVE-2025-21859, CVE-2025-21721, CVE-2025-21719, CVE-2025-21914,
+CVE-2025-21753, CVE-2024-58009, CVE-2024-57981, CVE-2024-58063,
+CVE-2024-58052, CVE-2025-21722, CVE-2024-57977, CVE-2025-21736,
+CVE-2025-21922, CVE-2024-26982, CVE-2025-21718, CVE-2025-21916,
+CVE-2025-21749, CVE-2025-21787, CVE-2024-58085, CVE-2024-58010,
+CVE-2024-57979, CVE-2024-57980, CVE-2025-21782, CVE-2025-21791,
+CVE-2025-21728, CVE-2023-52741, CVE-2025-21934, CVE-2024-58002,
+CVE-2025-21735, CVE-2025-21910, CVE-2025-21823, CVE-2024-58090,
+CVE-2025-21862, CVE-2025-21731, CVE-2025-21835, CVE-2024-58017,
+CVE-2024-58014, CVE-2025-21763)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 20.04 LTS
+   linux-image-5.4.0-1149-gcp-fips  5.4.0-1149.158+fips1
+                                   Available with Ubuntu Pro
+   linux-image-gcp-fips            5.4.0.1149.91
+                                   Available with Ubuntu Pro
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7516-2
+   https://ubuntu.com/security/notices/USN-7516-1
+   CVE-2021-47191, CVE-2023-52741, CVE-2024-26982, CVE-2024-26996,
+   CVE-2024-50055, CVE-2024-56599, CVE-2024-57973, CVE-2024-57977,
+   CVE-2024-57979, CVE-2024-57980, CVE-2024-57981, CVE-2024-57986,
+   CVE-2024-58001, CVE-2024-58002, CVE-2024-58007, CVE-2024-58009,
+   CVE-2024-58010, CVE-2024-58014, CVE-2024-58017, CVE-2024-58020,
+   CVE-2024-58051, CVE-2024-58052, CVE-2024-58055, CVE-2024-58058,
+   CVE-2024-58063, CVE-2024-58069, CVE-2024-58071, CVE-2024-58072,
+   CVE-2024-58083, CVE-2024-58085, CVE-2024-58090, CVE-2025-21647,
+   CVE-2025-21704, CVE-2025-21708, CVE-2025-21715, CVE-2025-21718,
+   CVE-2025-21719, CVE-2025-21721, CVE-2025-21722, CVE-2025-21728,
+   CVE-2025-21731, CVE-2025-21735, CVE-2025-21736, CVE-2025-21744,
+   CVE-2025-21749, CVE-2025-21753, CVE-2025-21760, CVE-2025-21761,
+   CVE-2025-21762, CVE-2025-21763, CVE-2025-21764, CVE-2025-21765,
+   CVE-2025-21772, CVE-2025-21776, CVE-2025-21781, CVE-2025-21782,
+   CVE-2025-21785, CVE-2025-21787, CVE-2025-21791, CVE-2025-21806,
+   CVE-2025-21811, CVE-2025-21814, CVE-2025-21823, CVE-2025-21835,
+   CVE-2025-21846, CVE-2025-21848, CVE-2025-21858, CVE-2025-21859,
+   CVE-2025-21862, CVE-2025-21865, CVE-2025-21866, CVE-2025-21871,
+   CVE-2025-21877, CVE-2025-21898, CVE-2025-21904, CVE-2025-21905,
+   CVE-2025-21909, CVE-2025-21910, CVE-2025-21914, CVE-2025-21916,
+   CVE-2025-21917, CVE-2025-21920, CVE-2025-21922, CVE-2025-21925,
+   CVE-2025-21926, CVE-2025-21928, CVE-2025-21934, CVE-2025-21935,
+   CVE-2025-21948, CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux-gcp-fips/5.4.0-1149.158+fips1
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/63aff3b2/attachment.sig>
+
+------------------------------
+
+Message: 2
+Date: Fri, 16 May 2025 19:39:39 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7517-1] Linux kernel (Xilinx ZynqMP) vulnerabilities
+Message-ID: <b2838de3-c9f4-4e9b-9dba-dd08a5e46199@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7517-1
+May 16, 2025
+
+linux-xilinx-zynqmp vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 20.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-xilinx-zynqmp: Linux kernel for Xilinx ZynqMP processors
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - ARM64 architecture;
+   - PowerPC architecture;
+   - Block layer subsystem;
+   - Drivers core;
+   - Network block device driver;
+   - Character device driver;
+   - GPU drivers;
+   - HID subsystem;
+   - InfiniBand drivers;
+   - Media drivers;
+   - Network drivers;
+   - PPS (Pulse Per Second) driver;
+   - PTP clock framework;
+   - RapidIO drivers;
+   - Real Time Clock drivers;
+   - SCSI subsystem;
+   - SLIMbus drivers;
+   - QCOM SoC drivers;
+   - Trusted Execution Environment drivers;
+   - USB DSL drivers;
+   - USB Device Class drivers;
+   - USB core drivers;
+   - USB Gadget drivers;
+   - USB Host Controller drivers;
+   - Renesas USBHS Controller drivers;
+   - File systems infrastructure;
+   - BTRFS file system;
+   - Ceph distributed file system;
+   - NILFS2 file system;
+   - UBI file system;
+   - KVM subsystem;
+   - L3 Master device support module;
+   - Netfilter;
+   - Process Accounting mechanism;
+   - printk logging mechanism;
+   - Scheduler infrastructure;
+   - Tracing infrastructure;
+   - Memory management;
+   - 802.1Q VLAN protocol;
+   - B.A.T.M.A.N. meshing protocol;
+   - Bluetooth subsystem;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - Logical Link layer;
+   - NFC subsystem;
+   - Open vSwitch;
+   - Rose network layer;
+   - Network traffic control;
+   - Wireless networking;
+   - Tomoyo security module;
+(CVE-2024-58051, CVE-2025-21731, CVE-2025-21782, CVE-2025-21785,
+CVE-2025-21917, CVE-2025-21914, CVE-2025-21744, CVE-2025-21948,
+CVE-2025-21708, CVE-2024-58072, CVE-2024-57977, CVE-2024-26996,
+CVE-2025-21787, CVE-2025-21859, CVE-2024-58007, CVE-2023-52664,
+CVE-2025-21722, CVE-2025-21971, CVE-2025-21928, CVE-2025-21791,
+CVE-2024-58090, CVE-2024-57981, CVE-2025-21865, CVE-2024-58001,
+CVE-2025-21926, CVE-2024-58071, CVE-2025-21721, CVE-2025-21772,
+CVE-2025-21764, CVE-2024-58017, CVE-2024-57973, CVE-2025-21761,
+CVE-2025-21866, CVE-2025-21920, CVE-2025-21704, CVE-2024-58055,
+CVE-2024-56599, CVE-2025-21935, CVE-2023-52927, CVE-2025-21811,
+CVE-2024-50055, CVE-2025-21781, CVE-2025-21760, CVE-2025-21922,
+CVE-2024-58009, CVE-2024-58069, CVE-2025-21877, CVE-2024-58058,
+CVE-2024-57980, CVE-2025-21905, CVE-2024-26982, CVE-2025-21916,
+CVE-2024-58020, CVE-2025-21835, CVE-2025-21719, CVE-2025-21858,
+CVE-2024-58085, CVE-2025-21814, CVE-2025-21762, CVE-2025-21862,
+CVE-2024-58014, CVE-2025-21898, CVE-2025-21904, CVE-2025-21736,
+CVE-2025-21765, CVE-2025-21647, CVE-2024-58010, CVE-2025-21763,
+CVE-2025-21718, CVE-2021-47191, CVE-2024-58052, CVE-2025-21846,
+CVE-2024-58063, CVE-2024-26689, CVE-2025-21806, CVE-2025-21753,
+CVE-2025-21910, CVE-2025-21848, CVE-2025-21749, CVE-2025-21871,
+CVE-2024-57979, CVE-2025-21728, CVE-2025-21925, CVE-2024-58002,
+CVE-2025-21909, CVE-2025-21715, CVE-2024-58083, CVE-2025-21735,
+CVE-2025-21776, CVE-2025-21823, CVE-2025-21934, CVE-2023-52741,
+CVE-2024-57986)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 20.04 LTS
+   linux-image-5.4.0-1064-xilinx-zynqmp  5.4.0-1064.68
+   linux-image-xilinx-zynqmp       5.4.0.1064.64
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7517-1
+   CVE-2021-47191, CVE-2023-52664, CVE-2023-52741, CVE-2023-52927,
+   CVE-2024-26689, CVE-2024-26982, CVE-2024-26996, CVE-2024-50055,
+   CVE-2024-56599, CVE-2024-57973, CVE-2024-57977, CVE-2024-57979,
+   CVE-2024-57980, CVE-2024-57981, CVE-2024-57986, CVE-2024-58001,
+   CVE-2024-58002, CVE-2024-58007, CVE-2024-58009, CVE-2024-58010,
+   CVE-2024-58014, CVE-2024-58017, CVE-2024-58020, CVE-2024-58051,
+   CVE-2024-58052, CVE-2024-58055, CVE-2024-58058, CVE-2024-58063,
+   CVE-2024-58069, CVE-2024-58071, CVE-2024-58072, CVE-2024-58083,
+   CVE-2024-58085, CVE-2024-58090, CVE-2025-21647, CVE-2025-21704,
+   CVE-2025-21708, CVE-2025-21715, CVE-2025-21718, CVE-2025-21719,
+   CVE-2025-21721, CVE-2025-21722, CVE-2025-21728, CVE-2025-21731,
+   CVE-2025-21735, CVE-2025-21736, CVE-2025-21744, CVE-2025-21749,
+   CVE-2025-21753, CVE-2025-21760, CVE-2025-21761, CVE-2025-21762,
+   CVE-2025-21763, CVE-2025-21764, CVE-2025-21765, CVE-2025-21772,
+   CVE-2025-21776, CVE-2025-21781, CVE-2025-21782, CVE-2025-21785,
+   CVE-2025-21787, CVE-2025-21791, CVE-2025-21806, CVE-2025-21811,
+   CVE-2025-21814, CVE-2025-21823, CVE-2025-21835, CVE-2025-21846,
+   CVE-2025-21848, CVE-2025-21858, CVE-2025-21859, CVE-2025-21862,
+   CVE-2025-21865, CVE-2025-21866, CVE-2025-21871, CVE-2025-21877,
+   CVE-2025-21898, CVE-2025-21904, CVE-2025-21905, CVE-2025-21909,
+   CVE-2025-21910, CVE-2025-21914, CVE-2025-21916, CVE-2025-21917,
+   CVE-2025-21920, CVE-2025-21922, CVE-2025-21925, CVE-2025-21926,
+   CVE-2025-21928, CVE-2025-21934, CVE-2025-21935, CVE-2025-21948,
+   CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux-xilinx-zynqmp/5.4.0-1064.68
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/c7710af1/attachment.sig>
+
+------------------------------
+
+Subject: Digest Footer
+
+-- 
+ubuntu-security-announce mailing list
+ubuntu-security-announce@lists.ubuntu.com
+Modify settings or unsubscribe at: https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+
+
+------------------------------
+
+End of ubuntu-security-announce Digest, Vol 248, Issue 24
+*********************************************************
+	
+
+スレッドを開きました。未読メッセージは 1 件です。
+
+コンテンツへ
+国立遺伝学研究所 メール でのスクリーン リーダーの使用
+5 / 13,286
+ubuntu-security-announce Digest, Vol 248, Issue 20
+受信トレイ
+ubuntu-security-announce-request@lists.ubuntu.com メーリングリストの登録解除
+	
+2:46 (17 時間前)
+	
+To ubuntu-security-announce
+Send ubuntu-security-announce mailing list submissions to
+        ubuntu-security-announce@lists.ubuntu.com
+
+To subscribe or unsubscribe via the World Wide Web, visit
+        https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+or, via email, send a message with subject or body 'help' to
+        ubuntu-security-announce-request@lists.ubuntu.com
+
+You can reach the person managing the list at
+        ubuntu-security-announce-owner@lists.ubuntu.com
+
+When replying, please edit your Subject line so it is more specific
+than "Re: Contents of ubuntu-security-announce digest..."
+
+
+Today's Topics:
+
+   1. [USN-7510-2] Linux kernel (FIPS) vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+   2. [USN-7512-1] Linux kernel (GCP) vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+
+
+----------------------------------------------------------------------
+
+Message: 1
+Date: Fri, 16 May 2025 19:33:41 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7510-2] Linux kernel (FIPS) vulnerabilities
+Message-ID: <ce2485c4-ab2d-4710-9ddc-8e65666f20a8@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7510-2
+May 16, 2025
+
+linux-fips vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 22.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-fips: Linux kernel with FIPS
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - ARM64 architecture;
+   - PowerPC architecture;
+   - x86 architecture;
+   - Block layer subsystem;
+   - Network block device driver;
+   - Bus devices;
+   - Character device driver;
+   - TPM device driver;
+   - Clock framework and drivers;
+   - GPIO subsystem;
+   - GPU drivers;
+   - HID subsystem;
+   - I2C subsystem;
+   - InfiniBand drivers;
+   - Media drivers;
+   - NVIDIA Tegra memory controller driver;
+   - Network drivers;
+   - PCI subsystem;
+   - PPS (Pulse Per Second) driver;
+   - PTP clock framework;
+   - RapidIO drivers;
+   - Real Time Clock drivers;
+   - SLIMbus drivers;
+   - QCOM SoC drivers;
+   - Trusted Execution Environment drivers;
+   - TTY drivers;
+   - USB DSL drivers;
+   - USB Device Class drivers;
+   - USB core drivers;
+   - USB Gadget drivers;
+   - USB Host Controller drivers;
+   - Renesas USBHS Controller drivers;
+   - ACRN Hypervisor Service Module driver;
+   - File systems infrastructure;
+   - BTRFS file system;
+   - F2FS file system;
+   - Network file system (NFS) server daemon;
+   - NILFS2 file system;
+   - Overlay file system;
+   - SMB network file system;
+   - UBI file system;
+   - KVM subsystem;
+   - L3 Master device support module;
+   - Process Accounting mechanism;
+   - Padata parallel execution mechanism;
+   - printk logging mechanism;
+   - Scheduler infrastructure;
+   - Timer subsystem;
+   - Tracing infrastructure;
+   - Memory management;
+   - 802.1Q VLAN protocol;
+   - B.A.T.M.A.N. meshing protocol;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - Logical Link layer;
+   - Multipath TCP;
+   - Netfilter;
+   - NFC subsystem;
+   - Open vSwitch;
+   - Rose network layer;
+   - Network traffic control;
+   - Wireless networking;
+   - Landlock security;
+   - Linux Security Modules (LSM) Framework;
+   - Tomoyo security module;
+(CVE-2025-21731, CVE-2025-21926, CVE-2025-21830, CVE-2024-58010,
+CVE-2025-21745, CVE-2025-21871, CVE-2024-57980, CVE-2025-21916,
+CVE-2025-21735, CVE-2025-21763, CVE-2025-21799, CVE-2025-21811,
+CVE-2025-21814, CVE-2024-58083, CVE-2025-21922, CVE-2025-21802,
+CVE-2024-58034, CVE-2025-21758, CVE-2024-58069, CVE-2025-21905,
+CVE-2024-57986, CVE-2025-21718, CVE-2024-58020, CVE-2025-21858,
+CVE-2025-21749, CVE-2025-21928, CVE-2024-58085, CVE-2025-21795,
+CVE-2025-21744, CVE-2025-21776, CVE-2025-21804, CVE-2024-57973,
+CVE-2025-21848, CVE-2025-21844, CVE-2024-56721, CVE-2024-58079,
+CVE-2025-21781, CVE-2025-21866, CVE-2024-58052, CVE-2024-58017,
+CVE-2024-58071, CVE-2025-21791, CVE-2024-26982, CVE-2025-21787,
+CVE-2024-58090, CVE-2025-21951, CVE-2025-21846, CVE-2025-21722,
+CVE-2024-58001, CVE-2025-21715, CVE-2025-21919, CVE-2025-21904,
+CVE-2024-57977, CVE-2025-21785, CVE-2025-21950, CVE-2025-21924,
+CVE-2024-57979, CVE-2025-21711, CVE-2024-47726, CVE-2024-58002,
+CVE-2025-21914, CVE-2024-58086, CVE-2024-58005, CVE-2025-21835,
+CVE-2024-58051, CVE-2025-21761, CVE-2025-21760, CVE-2025-21767,
+CVE-2025-21766, CVE-2025-21726, CVE-2025-21865, CVE-2024-58014,
+CVE-2025-21878, CVE-2025-21934, CVE-2024-58007, CVE-2025-21898,
+CVE-2025-21806, CVE-2024-58058, CVE-2025-21779, CVE-2024-58063,
+CVE-2025-21708, CVE-2025-21684, CVE-2024-57834, CVE-2025-21971,
+CVE-2025-21762, CVE-2025-21728, CVE-2024-58076, CVE-2025-21704,
+CVE-2025-21719, CVE-2025-21948, CVE-2025-21707, CVE-2025-21917,
+CVE-2025-21782, CVE-2025-21943, CVE-2025-21765, CVE-2025-21721,
+CVE-2024-58016, CVE-2025-21859, CVE-2025-21909, CVE-2025-21748,
+CVE-2025-21912, CVE-2025-21736, CVE-2025-21862, CVE-2024-57978,
+CVE-2025-21826, CVE-2025-21920, CVE-2025-21772, CVE-2025-21877,
+CVE-2025-21935, CVE-2024-56599, CVE-2025-21820, CVE-2025-21764,
+CVE-2025-21796, CVE-2025-21887, CVE-2025-21753, CVE-2025-21910,
+CVE-2024-57981, CVE-2025-21727, CVE-2025-21875, CVE-2024-58072,
+CVE-2024-58055, CVE-2025-21925, CVE-2025-21823, CVE-2025-21647)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 22.04 LTS
+   linux-image-5.15.0-140-fips     5.15.0-140.150+fips1
+                                   Available with Ubuntu Pro
+   linux-image-fips                5.15.0.140.80
+                                   Available with Ubuntu Pro
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7510-2
+   https://ubuntu.com/security/notices/USN-7510-1
+   CVE-2024-26982, CVE-2024-47726, CVE-2024-56599, CVE-2024-56721,
+   CVE-2024-57834, CVE-2024-57973, CVE-2024-57977, CVE-2024-57978,
+   CVE-2024-57979, CVE-2024-57980, CVE-2024-57981, CVE-2024-57986,
+   CVE-2024-58001, CVE-2024-58002, CVE-2024-58005, CVE-2024-58007,
+   CVE-2024-58010, CVE-2024-58014, CVE-2024-58016, CVE-2024-58017,
+   CVE-2024-58020, CVE-2024-58034, CVE-2024-58051, CVE-2024-58052,
+   CVE-2024-58055, CVE-2024-58058, CVE-2024-58063, CVE-2024-58069,
+   CVE-2024-58071, CVE-2024-58072, CVE-2024-58076, CVE-2024-58079,
+   CVE-2024-58083, CVE-2024-58085, CVE-2024-58086, CVE-2024-58090,
+   CVE-2025-21647, CVE-2025-21684, CVE-2025-21704, CVE-2025-21707,
+   CVE-2025-21708, CVE-2025-21711, CVE-2025-21715, CVE-2025-21718,
+   CVE-2025-21719, CVE-2025-21721, CVE-2025-21722, CVE-2025-21726,
+   CVE-2025-21727, CVE-2025-21728, CVE-2025-21731, CVE-2025-21735,
+   CVE-2025-21736, CVE-2025-21744, CVE-2025-21745, CVE-2025-21748,
+   CVE-2025-21749, CVE-2025-21753, CVE-2025-21758, CVE-2025-21760,
+   CVE-2025-21761, CVE-2025-21762, CVE-2025-21763, CVE-2025-21764,
+   CVE-2025-21765, CVE-2025-21766, CVE-2025-21767, CVE-2025-21772,
+   CVE-2025-21776, CVE-2025-21779, CVE-2025-21781, CVE-2025-21782,
+   CVE-2025-21785, CVE-2025-21787, CVE-2025-21791, CVE-2025-21795,
+   CVE-2025-21796, CVE-2025-21799, CVE-2025-21802, CVE-2025-21804,
+   CVE-2025-21806, CVE-2025-21811, CVE-2025-21814, CVE-2025-21820,
+   CVE-2025-21823, CVE-2025-21826, CVE-2025-21830, CVE-2025-21835,
+   CVE-2025-21844, CVE-2025-21846, CVE-2025-21848, CVE-2025-21858,
+   CVE-2025-21859, CVE-2025-21862, CVE-2025-21865, CVE-2025-21866,
+   CVE-2025-21871, CVE-2025-21875, CVE-2025-21877, CVE-2025-21878,
+   CVE-2025-21887, CVE-2025-21898, CVE-2025-21904, CVE-2025-21905,
+   CVE-2025-21909, CVE-2025-21910, CVE-2025-21912, CVE-2025-21914,
+   CVE-2025-21916, CVE-2025-21917, CVE-2025-21919, CVE-2025-21920,
+   CVE-2025-21922, CVE-2025-21924, CVE-2025-21925, CVE-2025-21926,
+   CVE-2025-21928, CVE-2025-21934, CVE-2025-21935, CVE-2025-21943,
+   CVE-2025-21948, CVE-2025-21950, CVE-2025-21951, CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux-fips/5.15.0-140.150+fips1
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/540e1ead/attachment.sig>
+
+------------------------------
+
+Message: 2
+Date: Fri, 16 May 2025 19:36:51 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7512-1] Linux kernel (GCP) vulnerabilities
+Message-ID: <4afa73c8-6133-4003-98b7-790d60e61444@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7512-1
+May 16, 2025
+
+linux-gcp-5.15 vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 20.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-gcp-5.15: Linux kernel for Google Cloud Platform (GCP) systems
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - ARM64 architecture;
+   - PowerPC architecture;
+   - x86 architecture;
+   - Block layer subsystem;
+   - Network block device driver;
+   - Bus devices;
+   - Character device driver;
+   - TPM device driver;
+   - Clock framework and drivers;
+   - GPIO subsystem;
+   - GPU drivers;
+   - HID subsystem;
+   - I2C subsystem;
+   - InfiniBand drivers;
+   - Media drivers;
+   - NVIDIA Tegra memory controller driver;
+   - Network drivers;
+   - PCI subsystem;
+   - PPS (Pulse Per Second) driver;
+   - PTP clock framework;
+   - RapidIO drivers;
+   - Real Time Clock drivers;
+   - SLIMbus drivers;
+   - QCOM SoC drivers;
+   - Trusted Execution Environment drivers;
+   - TTY drivers;
+   - USB DSL drivers;
+   - USB Device Class drivers;
+   - USB core drivers;
+   - USB Gadget drivers;
+   - USB Host Controller drivers;
+   - Renesas USBHS Controller drivers;
+   - ACRN Hypervisor Service Module driver;
+   - File systems infrastructure;
+   - BTRFS file system;
+   - F2FS file system;
+   - Network file system (NFS) server daemon;
+   - NILFS2 file system;
+   - Overlay file system;
+   - SMB network file system;
+   - UBI file system;
+   - KVM subsystem;
+   - L3 Master device support module;
+   - Netfilter;
+   - Process Accounting mechanism;
+   - Padata parallel execution mechanism;
+   - printk logging mechanism;
+   - Scheduler infrastructure;
+   - Timer subsystem;
+   - Tracing infrastructure;
+   - Memory management;
+   - 802.1Q VLAN protocol;
+   - B.A.T.M.A.N. meshing protocol;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - Logical Link layer;
+   - Multipath TCP;
+   - NFC subsystem;
+   - Open vSwitch;
+   - Rose network layer;
+   - Network traffic control;
+   - Wireless networking;
+   - Landlock security;
+   - Linux Security Modules (LSM) Framework;
+   - Tomoyo security module;
+(CVE-2025-21914, CVE-2024-58090, CVE-2024-58017, CVE-2024-58069,
+CVE-2025-21920, CVE-2025-21935, CVE-2024-57977, CVE-2025-21763,
+CVE-2025-21684, CVE-2025-21721, CVE-2025-21736, CVE-2024-58020,
+CVE-2025-21799, CVE-2025-21904, CVE-2025-21934, CVE-2025-21719,
+CVE-2025-21811, CVE-2025-21727, CVE-2024-58071, CVE-2025-21905,
+CVE-2024-26982, CVE-2025-21820, CVE-2024-58052, CVE-2025-21925,
+CVE-2025-21796, CVE-2025-21779, CVE-2025-21823, CVE-2024-58063,
+CVE-2025-21772, CVE-2025-21924, CVE-2025-21765, CVE-2024-56721,
+CVE-2025-21859, CVE-2025-21760, CVE-2025-21753, CVE-2025-21835,
+CVE-2025-21887, CVE-2024-58002, CVE-2024-58086, CVE-2025-21744,
+CVE-2025-21848, CVE-2024-57986, CVE-2025-21865, CVE-2025-21766,
+CVE-2025-21715, CVE-2023-52664, CVE-2025-21764, CVE-2024-58085,
+CVE-2025-21704, CVE-2024-58072, CVE-2024-58079, CVE-2025-21846,
+CVE-2025-21647, CVE-2025-21726, CVE-2024-58034, CVE-2025-21943,
+CVE-2025-21875, CVE-2025-21871, CVE-2025-21898, CVE-2024-58083,
+CVE-2025-21748, CVE-2024-57834, CVE-2024-58051, CVE-2025-21862,
+CVE-2025-21722, CVE-2025-21912, CVE-2025-21950, CVE-2025-21917,
+CVE-2024-57973, CVE-2024-56599, CVE-2025-21922, CVE-2025-21787,
+CVE-2025-21919, CVE-2025-21971, CVE-2024-57979, CVE-2024-35889,
+CVE-2025-21804, CVE-2025-21782, CVE-2025-21910, CVE-2025-21909,
+CVE-2025-21708, CVE-2025-21830, CVE-2025-21791, CVE-2024-58016,
+CVE-2025-21711, CVE-2025-21928, CVE-2024-58007, CVE-2024-58005,
+CVE-2023-52927, CVE-2025-21802, CVE-2024-58010, CVE-2024-58001,
+CVE-2024-47726, CVE-2024-57978, CVE-2024-58055, CVE-2025-21735,
+CVE-2025-21795, CVE-2025-21745, CVE-2025-21878, CVE-2025-21877,
+CVE-2025-21826, CVE-2024-58076, CVE-2025-21806, CVE-2025-21858,
+CVE-2025-21866, CVE-2025-21776, CVE-2025-21785, CVE-2025-21758,
+CVE-2024-57980, CVE-2025-21728, CVE-2024-58014, CVE-2025-21814,
+CVE-2025-21762, CVE-2025-21951, CVE-2025-21767, CVE-2025-21844,
+CVE-2025-21781, CVE-2024-58058, CVE-2025-21761, CVE-2025-21707,
+CVE-2025-21731, CVE-2024-44964, CVE-2025-21749, CVE-2024-57981,
+CVE-2025-21948, CVE-2025-21926, CVE-2025-21916, CVE-2025-21718)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 20.04 LTS
+   linux-image-5.15.0-1083-gcp     5.15.0-1083.92~20.04.1
+   linux-image-gcp                 5.15.0.1083.92~20.04.1
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7512-1
+   CVE-2023-52664, CVE-2023-52927, CVE-2024-26982, CVE-2024-35889,
+   CVE-2024-44964, CVE-2024-47726, CVE-2024-56599, CVE-2024-56721,
+   CVE-2024-57834, CVE-2024-57973, CVE-2024-57977, CVE-2024-57978,
+   CVE-2024-57979, CVE-2024-57980, CVE-2024-57981, CVE-2024-57986,
+   CVE-2024-58001, CVE-2024-58002, CVE-2024-58005, CVE-2024-58007,
+   CVE-2024-58010, CVE-2024-58014, CVE-2024-58016, CVE-2024-58017,
+   CVE-2024-58020, CVE-2024-58034, CVE-2024-58051, CVE-2024-58052,
+   CVE-2024-58055, CVE-2024-58058, CVE-2024-58063, CVE-2024-58069,
+   CVE-2024-58071, CVE-2024-58072, CVE-2024-58076, CVE-2024-58079,
+   CVE-2024-58083, CVE-2024-58085, CVE-2024-58086, CVE-2024-58090,
+   CVE-2025-21647, CVE-2025-21684, CVE-2025-21704, CVE-2025-21707,
+   CVE-2025-21708, CVE-2025-21711, CVE-2025-21715, CVE-2025-21718,
+   CVE-2025-21719, CVE-2025-21721, CVE-2025-21722, CVE-2025-21726,
+   CVE-2025-21727, CVE-2025-21728, CVE-2025-21731, CVE-2025-21735,
+   CVE-2025-21736, CVE-2025-21744, CVE-2025-21745, CVE-2025-21748,
+   CVE-2025-21749, CVE-2025-21753, CVE-2025-21758, CVE-2025-21760,
+   CVE-2025-21761, CVE-2025-21762, CVE-2025-21763, CVE-2025-21764,
+   CVE-2025-21765, CVE-2025-21766, CVE-2025-21767, CVE-2025-21772,
+   CVE-2025-21776, CVE-2025-21779, CVE-2025-21781, CVE-2025-21782,
+   CVE-2025-21785, CVE-2025-21787, CVE-2025-21791, CVE-2025-21795,
+   CVE-2025-21796, CVE-2025-21799, CVE-2025-21802, CVE-2025-21804,
+   CVE-2025-21806, CVE-2025-21811, CVE-2025-21814, CVE-2025-21820,
+   CVE-2025-21823, CVE-2025-21826, CVE-2025-21830, CVE-2025-21835,
+   CVE-2025-21844, CVE-2025-21846, CVE-2025-21848, CVE-2025-21858,
+   CVE-2025-21859, CVE-2025-21862, CVE-2025-21865, CVE-2025-21866,
+   CVE-2025-21871, CVE-2025-21875, CVE-2025-21877, CVE-2025-21878,
+   CVE-2025-21887, CVE-2025-21898, CVE-2025-21904, CVE-2025-21905,
+   CVE-2025-21909, CVE-2025-21910, CVE-2025-21912, CVE-2025-21914,
+   CVE-2025-21916, CVE-2025-21917, CVE-2025-21919, CVE-2025-21920,
+   CVE-2025-21922, CVE-2025-21924, CVE-2025-21925, CVE-2025-21926,
+   CVE-2025-21928, CVE-2025-21934, CVE-2025-21935, CVE-2025-21943,
+   CVE-2025-21948, CVE-2025-21950, CVE-2025-21951, CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux-gcp-5.15/5.15.0-1083.92~20.04.1
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/00b55496/attachment.sig>
+
+------------------------------
+
+Subject: Digest Footer
+
+-- 
+ubuntu-security-announce mailing list
+ubuntu-security-announce@lists.ubuntu.com
+Modify settings or unsubscribe at: https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+
+
+------------------------------
+
+End of ubuntu-security-announce Digest, Vol 248, Issue 20
+*********************************************************
+	
+
+スレッドを開きました。未読メッセージは 1 件です。
+
+コンテンツへ
+国立遺伝学研究所 メール でのスクリーン リーダーの使用
+5 / 13,285
+ubuntu-security-announce Digest, Vol 248, Issue 23
+受信トレイ
+ubuntu-security-announce-request@lists.ubuntu.com メーリングリストの登録解除
+	
+2:46 (17 時間前)
+	
+To ubuntu-security-announce
+Send ubuntu-security-announce mailing list submissions to
+        ubuntu-security-announce@lists.ubuntu.com
+
+To subscribe or unsubscribe via the World Wide Web, visit
+        https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+or, via email, send a message with subject or body 'help' to
+        ubuntu-security-announce-request@lists.ubuntu.com
+
+You can reach the person managing the list at
+        ubuntu-security-announce-owner@lists.ubuntu.com
+
+When replying, please edit your Subject line so it is more specific
+than "Re: Contents of ubuntu-security-announce digest..."
+
+
+Today's Topics:
+
+   1. [USN-7513-1] Linux kernel vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+   2. [USN-7516-1] Linux kernel vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+
+
+----------------------------------------------------------------------
+
+Message: 1
+Date: Fri, 16 May 2025 19:37:16 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7513-1] Linux kernel vulnerabilities
+Message-ID: <2b5995c8-e1e8-4a7d-a35f-30eacd9794c1@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7513-1
+May 16, 2025
+
+linux, linux-aws, linux-aws-6.8, linux-ibm, linux-lowlatency,
+linux-lowlatency-hwe-6.8, linux-oracle vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 24.04 LTS
+- Ubuntu 22.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux: Linux kernel
+- linux-aws: Linux kernel for Amazon Web Services (AWS) systems
+- linux-ibm: Linux kernel for IBM cloud systems
+- linux-lowlatency: Linux low latency kernel
+- linux-oracle: Linux kernel for Oracle Cloud systems
+- linux-aws-6.8: Linux kernel for Amazon Web Services (AWS) systems
+- linux-lowlatency-hwe-6.8: Linux low latency kernel
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - RISC-V architecture;
+   - x86 architecture;
+   - Block layer subsystem;
+   - Compute Acceleration Framework;
+   - ACPI drivers;
+   - Drivers core;
+   - Ublk userspace block driver;
+   - Virtio block driver;
+   - DMA engine subsystem;
+   - GPU drivers;
+   - Microsoft Hyper-V drivers;
+   - Hardware monitoring drivers;
+   - IIO ADC drivers;
+   - IIO subsystem;
+   - InfiniBand drivers;
+   - Multiple devices driver;
+   - Media drivers;
+   - Microchip PCI driver;
+   - Network drivers;
+   - Mellanox network drivers;
+   - STMicroelectronics network drivers;
+   - PCI subsystem;
+   - Pin controllers subsystem;
+   - x86 platform drivers;
+   - Power supply drivers;
+   - SCSI subsystem;
+   - USB Gadget drivers;
+   - TDX Guest driver;
+   - AFS file system;
+   - BTRFS file system;
+   - Ceph distributed file system;
+   - EROFS file system;
+   - File systems infrastructure;
+   - Network file systems library;
+   - NILFS2 file system;
+   - Overlay file system;
+   - SMB network file system;
+   - VLANs driver;
+   - Memory management;
+   - LAPB network protocol;
+   - io_uring subsystem;
+   - BPF subsystem;
+   - Control group (cgroup);
+   - Tracing infrastructure;
+   - Workqueue subsystem;
+   - Bluetooth subsystem;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - MAC80211 subsystem;
+   - Multipath TCP;
+   - Netfilter;
+   - NET/ROM layer;
+   - Packet sockets;
+   - RDS protocol;
+   - Network traffic control;
+   - SCTP protocol;
+   - SMC sockets;
+   - Wireless networking;
+   - SELinux security module;
+   - ALSA framework;
+   - SOF drivers;
+(CVE-2024-56372, CVE-2025-21639, CVE-2024-57897, CVE-2024-56770,
+CVE-2024-57898, CVE-2025-21655, CVE-2024-56667, CVE-2024-41013,
+CVE-2024-57888, CVE-2025-21658, CVE-2024-57911, CVE-2024-56654,
+CVE-2024-57904, CVE-2024-56664, CVE-2024-57806, CVE-2024-56758,
+CVE-2024-57912, CVE-2025-21649, CVE-2024-56369, CVE-2025-21656,
+CVE-2025-21643, CVE-2024-57884, CVE-2025-21640, CVE-2024-56769,
+CVE-2024-57939, CVE-2025-21635, CVE-2024-57902, CVE-2024-36476,
+CVE-2025-21646, CVE-2024-57887, CVE-2024-57882, CVE-2024-57792,
+CVE-2024-56759, CVE-2024-57901, CVE-2024-56764, CVE-2025-21654,
+CVE-2024-57899, CVE-2025-21664, CVE-2024-56715, CVE-2024-56760,
+CVE-2024-57926, CVE-2024-57938, CVE-2025-21637, CVE-2024-55881,
+CVE-2024-57916, CVE-2024-57908, CVE-2024-57910, CVE-2024-57892,
+CVE-2024-57890, CVE-2024-56662, CVE-2024-57793, CVE-2024-47408,
+CVE-2024-49568, CVE-2024-57946, CVE-2024-53690, CVE-2024-56716,
+CVE-2024-57801, CVE-2024-56670, CVE-2024-56709, CVE-2024-57885,
+CVE-2024-57791, CVE-2024-38608, CVE-2024-56763, CVE-2024-57906,
+CVE-2024-47736, CVE-2024-56761, CVE-2024-56659, CVE-2025-21636,
+CVE-2024-57913, CVE-2024-56710, CVE-2025-21660, CVE-2024-57945,
+CVE-2024-39282, CVE-2024-53687, CVE-2024-57907, CVE-2024-53179,
+CVE-2025-21659, CVE-2024-57805, CVE-2024-57889, CVE-2024-57940,
+CVE-2025-21645, CVE-2024-56660, CVE-2024-56718, CVE-2024-57802,
+CVE-2024-56767, CVE-2024-56717, CVE-2024-58087, CVE-2025-21647,
+CVE-2025-21650, CVE-2024-57895, CVE-2025-21632, CVE-2024-54193,
+CVE-2024-57893, CVE-2025-21652, CVE-2025-21634, CVE-2024-56652,
+CVE-2024-57929, CVE-2024-57804, CVE-2024-57925, CVE-2024-57932,
+CVE-2024-54683, CVE-2025-21663, CVE-2024-56665, CVE-2024-54455,
+CVE-2025-21642, CVE-2024-57931, CVE-2025-21971, CVE-2024-56656,
+CVE-2025-21651, CVE-2024-49571, CVE-2025-21631, CVE-2024-56675,
+CVE-2024-53125, CVE-2025-21938, CVE-2024-57879, CVE-2024-56657,
+CVE-2024-57807, CVE-2024-57841, CVE-2024-57903, CVE-2024-53685,
+CVE-2024-57896, CVE-2024-57900, CVE-2024-57883, CVE-2024-58237,
+CVE-2025-21638, CVE-2024-55639, CVE-2025-21653, CVE-2025-21648,
+CVE-2024-54460, CVE-2024-57933, CVE-2024-55916, CVE-2024-57917,
+CVE-2025-21662)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 24.04 LTS
+   linux-image-6.8.0-1026-ibm      6.8.0-1026.26
+   linux-image-6.8.0-1026-oracle   6.8.0-1026.27
+   linux-image-6.8.0-1026-oracle-64k  6.8.0-1026.27
+   linux-image-6.8.0-1029-aws      6.8.0-1029.31
+   linux-image-6.8.0-60-generic    6.8.0-60.63
+   linux-image-6.8.0-60-generic-64k  6.8.0-60.63
+   linux-image-6.8.0-60-lowlatency  6.8.0-60.63.1
+   linux-image-6.8.0-60-lowlatency-64k  6.8.0-60.63.1
+   linux-image-aws                 6.8.0-1029.31
+   linux-image-aws-lts-24.04       6.8.0-1029.31
+   linux-image-generic             6.8.0-60.63
+   linux-image-generic-64k         6.8.0-60.63
+   linux-image-generic-lpae        6.8.0-60.63
+   linux-image-ibm                 6.8.0-1026.26
+   linux-image-ibm-classic         6.8.0-1026.26
+   linux-image-ibm-lts-24.04       6.8.0-1026.26
+   linux-image-kvm                 6.8.0-60.63
+   linux-image-lowlatency          6.8.0-60.63.1
+   linux-image-lowlatency-64k      6.8.0-60.63.1
+   linux-image-oracle              6.8.0-1026.27
+   linux-image-oracle-64k          6.8.0-1026.27
+   linux-image-oracle-64k-lts-24.04  6.8.0-1026.27
+   linux-image-oracle-lts-24.04    6.8.0-1026.27
+   linux-image-virtual             6.8.0-60.63
+
+Ubuntu 22.04 LTS
+   linux-image-6.8.0-1029-aws      6.8.0-1029.31~22.04.1
+   linux-image-6.8.0-60-lowlatency  6.8.0-60.63.1~22.04.1
+   linux-image-6.8.0-60-lowlatency-64k  6.8.0-60.63.1~22.04.1
+   linux-image-aws                 6.8.0-1029.31~22.04.1
+   linux-image-lowlatency-64k-hwe-22.04  6.8.0-60.63.1~22.04.1
+   linux-image-lowlatency-hwe-22.04  6.8.0-60.63.1~22.04.1
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7513-1
+   CVE-2024-36476, CVE-2024-38608, CVE-2024-39282, CVE-2024-41013,
+   CVE-2024-47408, CVE-2024-47736, CVE-2024-49568, CVE-2024-49571,
+   CVE-2024-53125, CVE-2024-53179, CVE-2024-53685, CVE-2024-53687,
+   CVE-2024-53690, CVE-2024-54193, CVE-2024-54455, CVE-2024-54460,
+   CVE-2024-54683, CVE-2024-55639, CVE-2024-55881, CVE-2024-55916,
+   CVE-2024-56369, CVE-2024-56372, CVE-2024-56652, CVE-2024-56654,
+   CVE-2024-56656, CVE-2024-56657, CVE-2024-56659, CVE-2024-56660,
+   CVE-2024-56662, CVE-2024-56664, CVE-2024-56665, CVE-2024-56667,
+   CVE-2024-56670, CVE-2024-56675, CVE-2024-56709, CVE-2024-56710,
+   CVE-2024-56715, CVE-2024-56716, CVE-2024-56717, CVE-2024-56718,
+   CVE-2024-56758, CVE-2024-56759, CVE-2024-56760, CVE-2024-56761,
+   CVE-2024-56763, CVE-2024-56764, CVE-2024-56767, CVE-2024-56769,
+   CVE-2024-56770, CVE-2024-57791, CVE-2024-57792, CVE-2024-57793,
+   CVE-2024-57801, CVE-2024-57802, CVE-2024-57804, CVE-2024-57805,
+   CVE-2024-57806, CVE-2024-57807, CVE-2024-57841, CVE-2024-57879,
+   CVE-2024-57882, CVE-2024-57883, CVE-2024-57884, CVE-2024-57885,
+   CVE-2024-57887, CVE-2024-57888, CVE-2024-57889, CVE-2024-57890,
+   CVE-2024-57892, CVE-2024-57893, CVE-2024-57895, CVE-2024-57896,
+   CVE-2024-57897, CVE-2024-57898, CVE-2024-57899, CVE-2024-57900,
+   CVE-2024-57901, CVE-2024-57902, CVE-2024-57903, CVE-2024-57904,
+   CVE-2024-57906, CVE-2024-57907, CVE-2024-57908, CVE-2024-57910,
+   CVE-2024-57911, CVE-2024-57912, CVE-2024-57913, CVE-2024-57916,
+   CVE-2024-57917, CVE-2024-57925, CVE-2024-57926, CVE-2024-57929,
+   CVE-2024-57931, CVE-2024-57932, CVE-2024-57933, CVE-2024-57938,
+   CVE-2024-57939, CVE-2024-57940, CVE-2024-57945, CVE-2024-57946,
+   CVE-2024-58087, CVE-2024-58237, CVE-2025-21631, CVE-2025-21632,
+   CVE-2025-21634, CVE-2025-21635, CVE-2025-21636, CVE-2025-21637,
+   CVE-2025-21638, CVE-2025-21639, CVE-2025-21640, CVE-2025-21642,
+   CVE-2025-21643, CVE-2025-21645, CVE-2025-21646, CVE-2025-21647,
+   CVE-2025-21648, CVE-2025-21649, CVE-2025-21650, CVE-2025-21651,
+   CVE-2025-21652, CVE-2025-21653, CVE-2025-21654, CVE-2025-21655,
+   CVE-2025-21656, CVE-2025-21658, CVE-2025-21659, CVE-2025-21660,
+   CVE-2025-21662, CVE-2025-21663, CVE-2025-21664, CVE-2025-21938,
+   CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux/6.8.0-60.63
+   https://launchpad.net/ubuntu/+source/linux-aws/6.8.0-1029.31
+   https://launchpad.net/ubuntu/+source/linux-ibm/6.8.0-1026.26
+   https://launchpad.net/ubuntu/+source/linux-lowlatency/6.8.0-60.63.1
+   https://launchpad.net/ubuntu/+source/linux-oracle/6.8.0-1026.27
+   https://launchpad.net/ubuntu/+source/linux-aws-6.8/6.8.0-1029.31~22.04.1
+
+https://launchpad.net/ubuntu/+source/linux-lowlatency-hwe-6.8/6.8.0-60.63.1~22.04.1
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/e1dd971f/attachment.sig>
+
+------------------------------
+
+Message: 2
+Date: Fri, 16 May 2025 19:38:53 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7516-1] Linux kernel vulnerabilities
+Message-ID: <26494740-1b1c-4e3f-8451-d98ace2890d3@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7516-1
+May 16, 2025
+
+linux, linux-azure-5.4, linux-gcp, linux-gcp-5.4, linux-oracle
+vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 20.04 LTS
+- Ubuntu 18.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux: Linux kernel
+- linux-gcp: Linux kernel for Google Cloud Platform (GCP) systems
+- linux-oracle: Linux kernel for Oracle Cloud systems
+- linux-azure-5.4: Linux kernel for Microsoft Azure cloud systems
+- linux-gcp-5.4: Linux kernel for Google Cloud Platform (GCP) systems
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - ARM64 architecture;
+   - PowerPC architecture;
+   - Block layer subsystem;
+   - Drivers core;
+   - Network block device driver;
+   - Character device driver;
+   - GPU drivers;
+   - HID subsystem;
+   - InfiniBand drivers;
+   - Media drivers;
+   - Network drivers;
+   - PPS (Pulse Per Second) driver;
+   - PTP clock framework;
+   - RapidIO drivers;
+   - Real Time Clock drivers;
+   - SCSI subsystem;
+   - SLIMbus drivers;
+   - QCOM SoC drivers;
+   - Trusted Execution Environment drivers;
+   - USB DSL drivers;
+   - USB Device Class drivers;
+   - USB core drivers;
+   - USB Gadget drivers;
+   - USB Host Controller drivers;
+   - Renesas USBHS Controller drivers;
+   - File systems infrastructure;
+   - BTRFS file system;
+   - NILFS2 file system;
+   - UBI file system;
+   - KVM subsystem;
+   - L3 Master device support module;
+   - Process Accounting mechanism;
+   - printk logging mechanism;
+   - Scheduler infrastructure;
+   - Tracing infrastructure;
+   - Memory management;
+   - 802.1Q VLAN protocol;
+   - B.A.T.M.A.N. meshing protocol;
+   - Bluetooth subsystem;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - Logical Link layer;
+   - NFC subsystem;
+   - Open vSwitch;
+   - Rose network layer;
+   - Network traffic control;
+   - Wireless networking;
+   - Tomoyo security module;
+(CVE-2025-21866, CVE-2025-21846, CVE-2025-21971, CVE-2025-21909,
+CVE-2024-58083, CVE-2025-21811, CVE-2025-21776, CVE-2024-58051,
+CVE-2025-21917, CVE-2025-21935, CVE-2025-21785, CVE-2021-47191,
+CVE-2025-21765, CVE-2025-21704, CVE-2025-21647, CVE-2024-58069,
+CVE-2025-21877, CVE-2025-21948, CVE-2024-58007, CVE-2024-58001,
+CVE-2025-21871, CVE-2024-58055, CVE-2025-21848, CVE-2025-21925,
+CVE-2024-58058, CVE-2025-21814, CVE-2025-21905, CVE-2025-21898,
+CVE-2025-21926, CVE-2025-21760, CVE-2024-57973, CVE-2025-21806,
+CVE-2024-58071, CVE-2025-21761, CVE-2025-21762, CVE-2024-57986,
+CVE-2025-21708, CVE-2025-21744, CVE-2024-26996, CVE-2024-50055,
+CVE-2024-58020, CVE-2025-21858, CVE-2025-21715, CVE-2025-21904,
+CVE-2025-21920, CVE-2024-56599, CVE-2025-21781, CVE-2025-21764,
+CVE-2025-21865, CVE-2025-21772, CVE-2024-58072, CVE-2025-21928,
+CVE-2025-21859, CVE-2025-21721, CVE-2025-21719, CVE-2025-21914,
+CVE-2025-21753, CVE-2024-58009, CVE-2024-57981, CVE-2024-58063,
+CVE-2024-58052, CVE-2025-21722, CVE-2024-57977, CVE-2025-21736,
+CVE-2025-21922, CVE-2024-26982, CVE-2025-21718, CVE-2025-21916,
+CVE-2025-21749, CVE-2025-21787, CVE-2024-58085, CVE-2024-58010,
+CVE-2024-57979, CVE-2024-57980, CVE-2025-21782, CVE-2025-21791,
+CVE-2025-21728, CVE-2023-52741, CVE-2025-21934, CVE-2024-58002,
+CVE-2025-21735, CVE-2025-21910, CVE-2025-21823, CVE-2024-58090,
+CVE-2025-21862, CVE-2025-21731, CVE-2025-21835, CVE-2024-58017,
+CVE-2024-58014, CVE-2025-21763)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 20.04 LTS
+   linux-image-5.4.0-1144-oracle   5.4.0-1144.154
+   linux-image-5.4.0-1149-gcp      5.4.0-1149.158
+   linux-image-5.4.0-216-generic   5.4.0-216.236
+   linux-image-5.4.0-216-generic-lpae  5.4.0-216.236
+   linux-image-5.4.0-216-lowlatency  5.4.0-216.236
+   linux-image-gcp-lts-20.04       5.4.0.1149.151
+   linux-image-generic             5.4.0.216.208
+   linux-image-generic-lpae        5.4.0.216.208
+   linux-image-lowlatency          5.4.0.216.208
+   linux-image-oem                 5.4.0.216.208
+   linux-image-oem-osp1            5.4.0.216.208
+   linux-image-oracle-lts-20.04    5.4.0.1144.138
+   linux-image-virtual             5.4.0.216.208
+
+Ubuntu 18.04 LTS
+   linux-image-5.4.0-1149-gcp      5.4.0-1149.158~18.04.1
+                                   Available with Ubuntu Pro
+   linux-image-5.4.0-1151-azure    5.4.0-1151.158~18.04.1
+                                   Available with Ubuntu Pro
+   linux-image-azure               5.4.0.1151.158~18.04.1
+                                   Available with Ubuntu Pro
+   linux-image-gcp                 5.4.0.1149.158~18.04.1
+                                   Available with Ubuntu Pro
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7516-1
+   CVE-2021-47191, CVE-2023-52741, CVE-2024-26982, CVE-2024-26996,
+   CVE-2024-50055, CVE-2024-56599, CVE-2024-57973, CVE-2024-57977,
+   CVE-2024-57979, CVE-2024-57980, CVE-2024-57981, CVE-2024-57986,
+   CVE-2024-58001, CVE-2024-58002, CVE-2024-58007, CVE-2024-58009,
+   CVE-2024-58010, CVE-2024-58014, CVE-2024-58017, CVE-2024-58020,
+   CVE-2024-58051, CVE-2024-58052, CVE-2024-58055, CVE-2024-58058,
+   CVE-2024-58063, CVE-2024-58069, CVE-2024-58071, CVE-2024-58072,
+   CVE-2024-58083, CVE-2024-58085, CVE-2024-58090, CVE-2025-21647,
+   CVE-2025-21704, CVE-2025-21708, CVE-2025-21715, CVE-2025-21718,
+   CVE-2025-21719, CVE-2025-21721, CVE-2025-21722, CVE-2025-21728,
+   CVE-2025-21731, CVE-2025-21735, CVE-2025-21736, CVE-2025-21744,
+   CVE-2025-21749, CVE-2025-21753, CVE-2025-21760, CVE-2025-21761,
+   CVE-2025-21762, CVE-2025-21763, CVE-2025-21764, CVE-2025-21765,
+   CVE-2025-21772, CVE-2025-21776, CVE-2025-21781, CVE-2025-21782,
+   CVE-2025-21785, CVE-2025-21787, CVE-2025-21791, CVE-2025-21806,
+   CVE-2025-21811, CVE-2025-21814, CVE-2025-21823, CVE-2025-21835,
+   CVE-2025-21846, CVE-2025-21848, CVE-2025-21858, CVE-2025-21859,
+   CVE-2025-21862, CVE-2025-21865, CVE-2025-21866, CVE-2025-21871,
+   CVE-2025-21877, CVE-2025-21898, CVE-2025-21904, CVE-2025-21905,
+   CVE-2025-21909, CVE-2025-21910, CVE-2025-21914, CVE-2025-21916,
+   CVE-2025-21917, CVE-2025-21920, CVE-2025-21922, CVE-2025-21925,
+   CVE-2025-21926, CVE-2025-21928, CVE-2025-21934, CVE-2025-21935,
+   CVE-2025-21948, CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux/5.4.0-216.236
+   https://launchpad.net/ubuntu/+source/linux-gcp/5.4.0-1149.158
+   https://launchpad.net/ubuntu/+source/linux-oracle/5.4.0-1144.154
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/d6ef5394/attachment.sig>
+
+------------------------------
+
+Subject: Digest Footer
+
+-- 
+ubuntu-security-announce mailing list
+ubuntu-security-announce@lists.ubuntu.com
+Modify settings or unsubscribe at: https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+
+
+------------------------------
+
+End of ubuntu-security-announce Digest, Vol 248, Issue 23
+*********************************************************
+	
+
+スレッドを開きました。未読メッセージは 1 件です。
+
+コンテンツへ
+国立遺伝学研究所 メール でのスクリーン リーダーの使用
+5 / 13,284
+ubuntu-security-announce Digest, Vol 248, Issue 22
+受信トレイ
+ubuntu-security-announce-request@lists.ubuntu.com メーリングリストの登録解除
+	
+2:46 (17 時間前)
+	
+To ubuntu-security-announce
+Send ubuntu-security-announce mailing list submissions to
+        ubuntu-security-announce@lists.ubuntu.com
+
+To subscribe or unsubscribe via the World Wide Web, visit
+        https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+or, via email, send a message with subject or body 'help' to
+        ubuntu-security-announce-request@lists.ubuntu.com
+
+You can reach the person managing the list at
+        ubuntu-security-announce-owner@lists.ubuntu.com
+
+When replying, please edit your Subject line so it is more specific
+than "Re: Contents of ubuntu-security-announce digest..."
+
+
+Today's Topics:
+
+   1. [USN-7514-1] Linux kernel (NVIDIA) vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+   2. [USN-7511-1] Linux kernel (GCP) vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+
+
+----------------------------------------------------------------------
+
+Message: 1
+Date: Fri, 16 May 2025 19:38:03 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7514-1] Linux kernel (NVIDIA) vulnerabilities
+Message-ID: <04d536fc-fdb6-4ffe-a754-254d09f8547e@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7514-1
+May 16, 2025
+
+linux-nvidia, linux-nvidia-6.8, linux-nvidia-lowlatency vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 24.04 LTS
+- Ubuntu 22.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-nvidia: Linux kernel for NVIDIA systems
+- linux-nvidia-lowlatency: Linux low latency kernel for NVIDIA systems
+- linux-nvidia-6.8: Linux kernel for NVIDIA systems
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - RISC-V architecture;
+   - x86 architecture;
+   - Block layer subsystem;
+   - Compute Acceleration Framework;
+   - ACPI drivers;
+   - Drivers core;
+   - Ublk userspace block driver;
+   - Virtio block driver;
+   - DMA engine subsystem;
+   - GPU drivers;
+   - Microsoft Hyper-V drivers;
+   - Hardware monitoring drivers;
+   - IIO ADC drivers;
+   - IIO subsystem;
+   - InfiniBand drivers;
+   - Multiple devices driver;
+   - Media drivers;
+   - Microchip PCI driver;
+   - Network drivers;
+   - Mellanox network drivers;
+   - STMicroelectronics network drivers;
+   - PCI subsystem;
+   - Pin controllers subsystem;
+   - x86 platform drivers;
+   - Power supply drivers;
+   - SCSI subsystem;
+   - USB Gadget drivers;
+   - TDX Guest driver;
+   - AFS file system;
+   - BTRFS file system;
+   - Ceph distributed file system;
+   - EROFS file system;
+   - File systems infrastructure;
+   - Network file systems library;
+   - NILFS2 file system;
+   - Overlay file system;
+   - SMB network file system;
+   - VLANs driver;
+   - Memory management;
+   - LAPB network protocol;
+   - io_uring subsystem;
+   - BPF subsystem;
+   - Control group (cgroup);
+   - Tracing infrastructure;
+   - Workqueue subsystem;
+   - Bluetooth subsystem;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - MAC80211 subsystem;
+   - Multipath TCP;
+   - Netfilter;
+   - NET/ROM layer;
+   - Packet sockets;
+   - RDS protocol;
+   - Network traffic control;
+   - SCTP protocol;
+   - SMC sockets;
+   - Wireless networking;
+   - SELinux security module;
+   - ALSA framework;
+   - SOF drivers;
+(CVE-2024-57901, CVE-2024-57889, CVE-2024-53687, CVE-2024-57804,
+CVE-2024-56709, CVE-2025-21631, CVE-2024-57908, CVE-2025-21645,
+CVE-2024-47736, CVE-2024-57896, CVE-2024-38608, CVE-2025-21637,
+CVE-2024-57898, CVE-2024-53179, CVE-2024-56710, CVE-2024-57802,
+CVE-2025-21659, CVE-2024-57903, CVE-2024-56764, CVE-2024-57892,
+CVE-2024-56717, CVE-2024-57938, CVE-2024-55881, CVE-2024-56718,
+CVE-2025-21647, CVE-2024-39282, CVE-2024-57879, CVE-2025-21643,
+CVE-2024-57792, CVE-2024-56657, CVE-2024-53685, CVE-2024-54455,
+CVE-2024-56656, CVE-2025-21638, CVE-2024-57907, CVE-2024-54193,
+CVE-2024-57806, CVE-2025-21655, CVE-2024-56670, CVE-2024-57904,
+CVE-2024-56369, CVE-2024-57945, CVE-2024-56759, CVE-2024-56716,
+CVE-2025-21651, CVE-2024-57911, CVE-2024-56372, CVE-2024-36476,
+CVE-2024-57888, CVE-2024-41013, CVE-2024-57882, CVE-2025-21636,
+CVE-2025-21971, CVE-2024-57841, CVE-2024-56760, CVE-2024-57805,
+CVE-2024-56758, CVE-2025-21648, CVE-2024-57917, CVE-2024-57913,
+CVE-2025-21658, CVE-2024-57926, CVE-2024-57939, CVE-2024-57791,
+CVE-2024-57883, CVE-2024-58087, CVE-2024-56665, CVE-2024-57887,
+CVE-2025-21635, CVE-2024-56662, CVE-2024-57893, CVE-2024-57916,
+CVE-2024-56675, CVE-2024-56763, CVE-2024-56664, CVE-2024-53690,
+CVE-2025-21663, CVE-2024-56761, CVE-2024-57910, CVE-2025-21660,
+CVE-2024-57885, CVE-2024-57899, CVE-2025-21650, CVE-2025-21888,
+CVE-2024-57801, CVE-2024-58237, CVE-2024-56767, CVE-2024-57895,
+CVE-2024-57912, CVE-2024-56654, CVE-2025-21646, CVE-2024-54683,
+CVE-2024-57931, CVE-2024-49568, CVE-2025-21639, CVE-2025-21632,
+CVE-2024-56769, CVE-2024-57807, CVE-2025-21656, CVE-2024-55639,
+CVE-2024-56652, CVE-2024-57933, CVE-2024-57793, CVE-2025-21662,
+CVE-2024-57940, CVE-2024-56715, CVE-2024-57906, CVE-2024-57900,
+CVE-2024-56660, CVE-2024-57897, CVE-2024-49571, CVE-2024-57890,
+CVE-2025-21642, CVE-2025-21634, CVE-2025-21938, CVE-2024-57929,
+CVE-2025-21664, CVE-2024-53125, CVE-2024-54460, CVE-2024-57925,
+CVE-2025-21652, CVE-2025-21653, CVE-2024-55916, CVE-2024-47408,
+CVE-2024-57902, CVE-2025-21654, CVE-2025-21649, CVE-2024-56770,
+CVE-2024-57932, CVE-2024-57946, CVE-2025-21640, CVE-2024-57884,
+CVE-2024-56667, CVE-2024-56659)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 24.04 LTS
+   linux-image-6.8.0-1028-nvidia   6.8.0-1028.31
+   linux-image-6.8.0-1028-nvidia-64k  6.8.0-1028.31
+   linux-image-6.8.0-1028-nvidia-lowlatency  6.8.0-1028.31.1
+   linux-image-6.8.0-1028-nvidia-lowlatency-64k  6.8.0-1028.31.1
+   linux-image-nvidia              6.8.0-1028.31
+   linux-image-nvidia-64k          6.8.0-1028.31
+   linux-image-nvidia-lowlatency   6.8.0-1028.31.1
+   linux-image-nvidia-lowlatency-64k  6.8.0-1028.31.1
+
+Ubuntu 22.04 LTS
+   linux-image-6.8.0-1028-nvidia   6.8.0-1028.31~22.04.1
+   linux-image-6.8.0-1028-nvidia-64k  6.8.0-1028.31~22.04.1
+   linux-image-nvidia-6.8          6.8.0-1028.31~22.04.1
+   linux-image-nvidia-64k-6.8      6.8.0-1028.31~22.04.1
+   linux-image-nvidia-64k-hwe-22.04  6.8.0-1028.31~22.04.1
+   linux-image-nvidia-hwe-22.04    6.8.0-1028.31~22.04.1
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7514-1
+   CVE-2024-36476, CVE-2024-38608, CVE-2024-39282, CVE-2024-41013,
+   CVE-2024-47408, CVE-2024-47736, CVE-2024-49568, CVE-2024-49571,
+   CVE-2024-53125, CVE-2024-53179, CVE-2024-53685, CVE-2024-53687,
+   CVE-2024-53690, CVE-2024-54193, CVE-2024-54455, CVE-2024-54460,
+   CVE-2024-54683, CVE-2024-55639, CVE-2024-55881, CVE-2024-55916,
+   CVE-2024-56369, CVE-2024-56372, CVE-2024-56652, CVE-2024-56654,
+   CVE-2024-56656, CVE-2024-56657, CVE-2024-56659, CVE-2024-56660,
+   CVE-2024-56662, CVE-2024-56664, CVE-2024-56665, CVE-2024-56667,
+   CVE-2024-56670, CVE-2024-56675, CVE-2024-56709, CVE-2024-56710,
+   CVE-2024-56715, CVE-2024-56716, CVE-2024-56717, CVE-2024-56718,
+   CVE-2024-56758, CVE-2024-56759, CVE-2024-56760, CVE-2024-56761,
+   CVE-2024-56763, CVE-2024-56764, CVE-2024-56767, CVE-2024-56769,
+   CVE-2024-56770, CVE-2024-57791, CVE-2024-57792, CVE-2024-57793,
+   CVE-2024-57801, CVE-2024-57802, CVE-2024-57804, CVE-2024-57805,
+   CVE-2024-57806, CVE-2024-57807, CVE-2024-57841, CVE-2024-57879,
+   CVE-2024-57882, CVE-2024-57883, CVE-2024-57884, CVE-2024-57885,
+   CVE-2024-57887, CVE-2024-57888, CVE-2024-57889, CVE-2024-57890,
+   CVE-2024-57892, CVE-2024-57893, CVE-2024-57895, CVE-2024-57896,
+   CVE-2024-57897, CVE-2024-57898, CVE-2024-57899, CVE-2024-57900,
+   CVE-2024-57901, CVE-2024-57902, CVE-2024-57903, CVE-2024-57904,
+   CVE-2024-57906, CVE-2024-57907, CVE-2024-57908, CVE-2024-57910,
+   CVE-2024-57911, CVE-2024-57912, CVE-2024-57913, CVE-2024-57916,
+   CVE-2024-57917, CVE-2024-57925, CVE-2024-57926, CVE-2024-57929,
+   CVE-2024-57931, CVE-2024-57932, CVE-2024-57933, CVE-2024-57938,
+   CVE-2024-57939, CVE-2024-57940, CVE-2024-57945, CVE-2024-57946,
+   CVE-2024-58087, CVE-2024-58237, CVE-2025-21631, CVE-2025-21632,
+   CVE-2025-21634, CVE-2025-21635, CVE-2025-21636, CVE-2025-21637,
+   CVE-2025-21638, CVE-2025-21639, CVE-2025-21640, CVE-2025-21642,
+   CVE-2025-21643, CVE-2025-21645, CVE-2025-21646, CVE-2025-21647,
+   CVE-2025-21648, CVE-2025-21649, CVE-2025-21650, CVE-2025-21651,
+   CVE-2025-21652, CVE-2025-21653, CVE-2025-21654, CVE-2025-21655,
+   CVE-2025-21656, CVE-2025-21658, CVE-2025-21659, CVE-2025-21660,
+   CVE-2025-21662, CVE-2025-21663, CVE-2025-21664, CVE-2025-21888,
+   CVE-2025-21938, CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux-nvidia/6.8.0-1028.31
+   https://launchpad.net/ubuntu/+source/linux-nvidia-lowlatency/6.8.0-1028.31.1
+   https://launchpad.net/ubuntu/+source/linux-nvidia-6.8/6.8.0-1028.31~22.04.1
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/aeb42b8e/attachment-0001.sig>
+
+------------------------------
+
+Message: 2
+Date: Fri, 16 May 2025 19:34:12 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7511-1] Linux kernel (GCP) vulnerabilities
+Message-ID: <5bfe3c22-4e3e-414e-b883-384229af5afd@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7511-1
+May 16, 2025
+
+linux-gcp vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 22.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-gcp: Linux kernel for Google Cloud Platform (GCP) systems
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - ARM64 architecture;
+   - PowerPC architecture;
+   - x86 architecture;
+   - Block layer subsystem;
+   - Network block device driver;
+   - Bus devices;
+   - Character device driver;
+   - TPM device driver;
+   - Clock framework and drivers;
+   - GPIO subsystem;
+   - GPU drivers;
+   - HID subsystem;
+   - I2C subsystem;
+   - InfiniBand drivers;
+   - Media drivers;
+   - NVIDIA Tegra memory controller driver;
+   - Network drivers;
+   - PCI subsystem;
+   - PPS (Pulse Per Second) driver;
+   - PTP clock framework;
+   - RapidIO drivers;
+   - Real Time Clock drivers;
+   - SLIMbus drivers;
+   - QCOM SoC drivers;
+   - Trusted Execution Environment drivers;
+   - TTY drivers;
+   - USB DSL drivers;
+   - USB Device Class drivers;
+   - USB core drivers;
+   - USB Gadget drivers;
+   - USB Host Controller drivers;
+   - Renesas USBHS Controller drivers;
+   - ACRN Hypervisor Service Module driver;
+   - File systems infrastructure;
+   - BTRFS file system;
+   - F2FS file system;
+   - Network file system (NFS) server daemon;
+   - NILFS2 file system;
+   - Overlay file system;
+   - SMB network file system;
+   - UBI file system;
+   - KVM subsystem;
+   - L3 Master device support module;
+   - Process Accounting mechanism;
+   - Padata parallel execution mechanism;
+   - printk logging mechanism;
+   - Scheduler infrastructure;
+   - Timer subsystem;
+   - Tracing infrastructure;
+   - Memory management;
+   - 802.1Q VLAN protocol;
+   - B.A.T.M.A.N. meshing protocol;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - Logical Link layer;
+   - Multipath TCP;
+   - Netfilter;
+   - NFC subsystem;
+   - Open vSwitch;
+   - Rose network layer;
+   - Network traffic control;
+   - Wireless networking;
+   - Landlock security;
+   - Linux Security Modules (LSM) Framework;
+   - Tomoyo security module;
+(CVE-2024-58063, CVE-2025-21802, CVE-2025-21910, CVE-2025-21718,
+CVE-2025-21707, CVE-2025-21781, CVE-2025-21726, CVE-2024-56599,
+CVE-2025-21735, CVE-2025-21859, CVE-2025-21924, CVE-2024-57980,
+CVE-2024-58002, CVE-2024-58090, CVE-2025-21728, CVE-2024-58055,
+CVE-2024-57978, CVE-2025-21704, CVE-2025-21820, CVE-2025-21776,
+CVE-2025-21919, CVE-2025-21765, CVE-2025-21935, CVE-2025-21647,
+CVE-2025-21804, CVE-2024-58072, CVE-2025-21865, CVE-2025-21887,
+CVE-2024-58079, CVE-2024-58020, CVE-2024-35889, CVE-2024-58017,
+CVE-2024-58005, CVE-2025-21862, CVE-2025-21875, CVE-2025-21925,
+CVE-2025-21951, CVE-2025-21866, CVE-2025-21871, CVE-2025-21914,
+CVE-2025-21948, CVE-2025-21715, CVE-2025-21848, CVE-2025-21905,
+CVE-2025-21830, CVE-2024-58051, CVE-2025-21909, CVE-2025-21711,
+CVE-2025-21684, CVE-2025-21844, CVE-2025-21904, CVE-2025-21898,
+CVE-2025-21767, CVE-2024-58069, CVE-2024-57834, CVE-2025-21934,
+CVE-2025-21926, CVE-2025-21708, CVE-2025-21736, CVE-2024-58085,
+CVE-2024-26982, CVE-2024-58083, CVE-2025-21920, CVE-2025-21764,
+CVE-2025-21753, CVE-2025-21799, CVE-2025-21846, CVE-2024-57979,
+CVE-2025-21785, CVE-2024-58010, CVE-2024-57986, CVE-2025-21762,
+CVE-2025-21912, CVE-2025-21744, CVE-2025-21787, CVE-2025-21761,
+CVE-2025-21971, CVE-2025-21943, CVE-2024-47726, CVE-2025-21721,
+CVE-2025-21748, CVE-2025-21791, CVE-2025-21796, CVE-2025-21806,
+CVE-2025-21779, CVE-2024-58001, CVE-2025-21745, CVE-2025-21814,
+CVE-2025-21719, CVE-2025-21950, CVE-2025-21858, CVE-2025-21823,
+CVE-2025-21758, CVE-2024-57981, CVE-2024-58058, CVE-2024-56721,
+CVE-2025-21811, CVE-2024-58086, CVE-2025-21722, CVE-2025-21727,
+CVE-2025-21760, CVE-2024-58076, CVE-2025-21916, CVE-2025-21826,
+CVE-2024-57973, CVE-2025-21795, CVE-2025-21763, CVE-2024-58014,
+CVE-2025-21917, CVE-2024-57977, CVE-2024-44964, CVE-2024-58016,
+CVE-2024-58007, CVE-2025-21928, CVE-2024-58052, CVE-2025-21749,
+CVE-2025-21772, CVE-2025-21877, CVE-2025-21782, CVE-2025-21922,
+CVE-2025-21766, CVE-2024-58034, CVE-2025-21835, CVE-2025-21878,
+CVE-2025-21731, CVE-2024-58071)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 22.04 LTS
+   linux-image-5.15.0-1083-gcp     5.15.0-1083.92
+   linux-image-gcp-lts-22.04       5.15.0.1083.79
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7511-1
+   CVE-2024-26982, CVE-2024-35889, CVE-2024-44964, CVE-2024-47726,
+   CVE-2024-56599, CVE-2024-56721, CVE-2024-57834, CVE-2024-57973,
+   CVE-2024-57977, CVE-2024-57978, CVE-2024-57979, CVE-2024-57980,
+   CVE-2024-57981, CVE-2024-57986, CVE-2024-58001, CVE-2024-58002,
+   CVE-2024-58005, CVE-2024-58007, CVE-2024-58010, CVE-2024-58014,
+   CVE-2024-58016, CVE-2024-58017, CVE-2024-58020, CVE-2024-58034,
+   CVE-2024-58051, CVE-2024-58052, CVE-2024-58055, CVE-2024-58058,
+   CVE-2024-58063, CVE-2024-58069, CVE-2024-58071, CVE-2024-58072,
+   CVE-2024-58076, CVE-2024-58079, CVE-2024-58083, CVE-2024-58085,
+   CVE-2024-58086, CVE-2024-58090, CVE-2025-21647, CVE-2025-21684,
+   CVE-2025-21704, CVE-2025-21707, CVE-2025-21708, CVE-2025-21711,
+   CVE-2025-21715, CVE-2025-21718, CVE-2025-21719, CVE-2025-21721,
+   CVE-2025-21722, CVE-2025-21726, CVE-2025-21727, CVE-2025-21728,
+   CVE-2025-21731, CVE-2025-21735, CVE-2025-21736, CVE-2025-21744,
+   CVE-2025-21745, CVE-2025-21748, CVE-2025-21749, CVE-2025-21753,
+   CVE-2025-21758, CVE-2025-21760, CVE-2025-21761, CVE-2025-21762,
+   CVE-2025-21763, CVE-2025-21764, CVE-2025-21765, CVE-2025-21766,
+   CVE-2025-21767, CVE-2025-21772, CVE-2025-21776, CVE-2025-21779,
+   CVE-2025-21781, CVE-2025-21782, CVE-2025-21785, CVE-2025-21787,
+   CVE-2025-21791, CVE-2025-21795, CVE-2025-21796, CVE-2025-21799,
+   CVE-2025-21802, CVE-2025-21804, CVE-2025-21806, CVE-2025-21811,
+   CVE-2025-21814, CVE-2025-21820, CVE-2025-21823, CVE-2025-21826,
+   CVE-2025-21830, CVE-2025-21835, CVE-2025-21844, CVE-2025-21846,
+   CVE-2025-21848, CVE-2025-21858, CVE-2025-21859, CVE-2025-21862,
+   CVE-2025-21865, CVE-2025-21866, CVE-2025-21871, CVE-2025-21875,
+   CVE-2025-21877, CVE-2025-21878, CVE-2025-21887, CVE-2025-21898,
+   CVE-2025-21904, CVE-2025-21905, CVE-2025-21909, CVE-2025-21910,
+   CVE-2025-21912, CVE-2025-21914, CVE-2025-21916, CVE-2025-21917,
+   CVE-2025-21919, CVE-2025-21920, CVE-2025-21922, CVE-2025-21924,
+   CVE-2025-21925, CVE-2025-21926, CVE-2025-21928, CVE-2025-21934,
+   CVE-2025-21935, CVE-2025-21943, CVE-2025-21948, CVE-2025-21950,
+   CVE-2025-21951, CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux-gcp/5.15.0-1083.92
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/a99a391c/attachment.sig>
+
+------------------------------
+
+Subject: Digest Footer
+
+-- 
+ubuntu-security-announce mailing list
+ubuntu-security-announce@lists.ubuntu.com
+Modify settings or unsubscribe at: https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+
+
+------------------------------
+
+End of ubuntu-security-announce Digest, Vol 248, Issue 22
+*********************************************************
+	
+
+スレッドを開きました。未読メッセージは 1 件です。
+
+コンテンツへ
+国立遺伝学研究所 メール でのスクリーン リーダーの使用
+5 / 13,283
+ubuntu-security-announce Digest, Vol 248, Issue 21
+受信トレイ
+ubuntu-security-announce-request@lists.ubuntu.com メーリングリストの登録解除
+	
+2:46 (17 時間前)
+	
+To ubuntu-security-announce
+Send ubuntu-security-announce mailing list submissions to
+        ubuntu-security-announce@lists.ubuntu.com
+
+To subscribe or unsubscribe via the World Wide Web, visit
+        https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+or, via email, send a message with subject or body 'help' to
+        ubuntu-security-announce-request@lists.ubuntu.com
+
+You can reach the person managing the list at
+        ubuntu-security-announce-owner@lists.ubuntu.com
+
+When replying, please edit your Subject line so it is more specific
+than "Re: Contents of ubuntu-security-announce digest..."
+
+
+Today's Topics:
+
+   1. [USN-7513-2] Linux kernel (Real-time) vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+   2. [USN-7510-1] Linux kernel vulnerabilities
+      (Rodrigo Figueiredo Zaiden)
+
+
+----------------------------------------------------------------------
+
+Message: 1
+Date: Fri, 16 May 2025 19:37:40 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7513-2] Linux kernel (Real-time) vulnerabilities
+Message-ID: <4899b3e2-4112-40a7-a052-f38d7efbeb7a@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7513-2
+May 16, 2025
+
+linux-realtime vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 24.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux-realtime: Linux kernel for Real-time systems
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - RISC-V architecture;
+   - x86 architecture;
+   - Block layer subsystem;
+   - Compute Acceleration Framework;
+   - ACPI drivers;
+   - Drivers core;
+   - Ublk userspace block driver;
+   - Virtio block driver;
+   - DMA engine subsystem;
+   - GPU drivers;
+   - Microsoft Hyper-V drivers;
+   - Hardware monitoring drivers;
+   - IIO ADC drivers;
+   - IIO subsystem;
+   - InfiniBand drivers;
+   - Multiple devices driver;
+   - Media drivers;
+   - Microchip PCI driver;
+   - Network drivers;
+   - Mellanox network drivers;
+   - STMicroelectronics network drivers;
+   - PCI subsystem;
+   - Pin controllers subsystem;
+   - x86 platform drivers;
+   - Power supply drivers;
+   - SCSI subsystem;
+   - USB Gadget drivers;
+   - TDX Guest driver;
+   - AFS file system;
+   - BTRFS file system;
+   - Ceph distributed file system;
+   - EROFS file system;
+   - File systems infrastructure;
+   - Network file systems library;
+   - NILFS2 file system;
+   - Overlay file system;
+   - SMB network file system;
+   - VLANs driver;
+   - Memory management;
+   - LAPB network protocol;
+   - io_uring subsystem;
+   - BPF subsystem;
+   - Control group (cgroup);
+   - Tracing infrastructure;
+   - Workqueue subsystem;
+   - Bluetooth subsystem;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - MAC80211 subsystem;
+   - Multipath TCP;
+   - Netfilter;
+   - NET/ROM layer;
+   - Packet sockets;
+   - RDS protocol;
+   - Network traffic control;
+   - SCTP protocol;
+   - SMC sockets;
+   - Wireless networking;
+   - SELinux security module;
+   - ALSA framework;
+   - SOF drivers;
+(CVE-2024-56372, CVE-2025-21639, CVE-2024-57897, CVE-2024-56770,
+CVE-2024-57898, CVE-2025-21655, CVE-2024-56667, CVE-2024-41013,
+CVE-2024-57888, CVE-2025-21658, CVE-2024-57911, CVE-2024-56654,
+CVE-2024-57904, CVE-2024-56664, CVE-2024-57806, CVE-2024-56758,
+CVE-2024-57912, CVE-2025-21649, CVE-2024-56369, CVE-2025-21656,
+CVE-2025-21643, CVE-2024-57884, CVE-2025-21640, CVE-2024-56769,
+CVE-2024-57939, CVE-2025-21635, CVE-2024-57902, CVE-2024-36476,
+CVE-2025-21646, CVE-2024-57887, CVE-2024-57882, CVE-2024-57792,
+CVE-2024-56759, CVE-2024-57901, CVE-2024-56764, CVE-2025-21654,
+CVE-2024-57899, CVE-2025-21664, CVE-2024-56715, CVE-2024-56760,
+CVE-2024-57926, CVE-2024-57938, CVE-2025-21637, CVE-2024-55881,
+CVE-2024-57916, CVE-2024-57908, CVE-2024-57910, CVE-2024-57892,
+CVE-2024-57890, CVE-2024-56662, CVE-2024-57793, CVE-2024-47408,
+CVE-2024-49568, CVE-2024-57946, CVE-2024-53690, CVE-2024-56716,
+CVE-2024-57801, CVE-2024-56670, CVE-2024-56709, CVE-2024-57885,
+CVE-2024-57791, CVE-2024-38608, CVE-2024-56763, CVE-2024-57906,
+CVE-2024-47736, CVE-2024-56761, CVE-2024-56659, CVE-2025-21636,
+CVE-2024-57913, CVE-2024-56710, CVE-2025-21660, CVE-2024-57945,
+CVE-2024-39282, CVE-2024-53687, CVE-2024-57907, CVE-2024-53179,
+CVE-2025-21659, CVE-2024-57805, CVE-2024-57889, CVE-2024-57940,
+CVE-2025-21645, CVE-2024-56660, CVE-2024-56718, CVE-2024-57802,
+CVE-2024-56767, CVE-2024-56717, CVE-2024-58087, CVE-2025-21647,
+CVE-2025-21650, CVE-2024-57895, CVE-2025-21632, CVE-2024-54193,
+CVE-2024-57893, CVE-2025-21652, CVE-2025-21634, CVE-2024-56652,
+CVE-2024-57929, CVE-2024-57804, CVE-2024-57925, CVE-2024-57932,
+CVE-2024-54683, CVE-2025-21663, CVE-2024-56665, CVE-2024-54455,
+CVE-2025-21642, CVE-2024-57931, CVE-2025-21971, CVE-2024-56656,
+CVE-2025-21651, CVE-2024-49571, CVE-2025-21631, CVE-2024-56675,
+CVE-2024-53125, CVE-2025-21938, CVE-2024-57879, CVE-2024-56657,
+CVE-2024-57807, CVE-2024-57841, CVE-2024-57903, CVE-2024-53685,
+CVE-2024-57896, CVE-2024-57900, CVE-2024-57883, CVE-2024-58237,
+CVE-2025-21638, CVE-2024-55639, CVE-2025-21653, CVE-2025-21648,
+CVE-2024-54460, CVE-2024-57933, CVE-2024-55916, CVE-2024-57917,
+CVE-2025-21662)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 24.04 LTS
+   linux-image-6.8.1-1022-realtime  6.8.1-1022.23
+                                   Available with Ubuntu Pro
+   linux-image-realtime            6.8.1-1022.23
+                                   Available with Ubuntu Pro
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7513-2
+   https://ubuntu.com/security/notices/USN-7513-1
+   CVE-2024-36476, CVE-2024-38608, CVE-2024-39282, CVE-2024-41013,
+   CVE-2024-47408, CVE-2024-47736, CVE-2024-49568, CVE-2024-49571,
+   CVE-2024-53125, CVE-2024-53179, CVE-2024-53685, CVE-2024-53687,
+   CVE-2024-53690, CVE-2024-54193, CVE-2024-54455, CVE-2024-54460,
+   CVE-2024-54683, CVE-2024-55639, CVE-2024-55881, CVE-2024-55916,
+   CVE-2024-56369, CVE-2024-56372, CVE-2024-56652, CVE-2024-56654,
+   CVE-2024-56656, CVE-2024-56657, CVE-2024-56659, CVE-2024-56660,
+   CVE-2024-56662, CVE-2024-56664, CVE-2024-56665, CVE-2024-56667,
+   CVE-2024-56670, CVE-2024-56675, CVE-2024-56709, CVE-2024-56710,
+   CVE-2024-56715, CVE-2024-56716, CVE-2024-56717, CVE-2024-56718,
+   CVE-2024-56758, CVE-2024-56759, CVE-2024-56760, CVE-2024-56761,
+   CVE-2024-56763, CVE-2024-56764, CVE-2024-56767, CVE-2024-56769,
+   CVE-2024-56770, CVE-2024-57791, CVE-2024-57792, CVE-2024-57793,
+   CVE-2024-57801, CVE-2024-57802, CVE-2024-57804, CVE-2024-57805,
+   CVE-2024-57806, CVE-2024-57807, CVE-2024-57841, CVE-2024-57879,
+   CVE-2024-57882, CVE-2024-57883, CVE-2024-57884, CVE-2024-57885,
+   CVE-2024-57887, CVE-2024-57888, CVE-2024-57889, CVE-2024-57890,
+   CVE-2024-57892, CVE-2024-57893, CVE-2024-57895, CVE-2024-57896,
+   CVE-2024-57897, CVE-2024-57898, CVE-2024-57899, CVE-2024-57900,
+   CVE-2024-57901, CVE-2024-57902, CVE-2024-57903, CVE-2024-57904,
+   CVE-2024-57906, CVE-2024-57907, CVE-2024-57908, CVE-2024-57910,
+   CVE-2024-57911, CVE-2024-57912, CVE-2024-57913, CVE-2024-57916,
+   CVE-2024-57917, CVE-2024-57925, CVE-2024-57926, CVE-2024-57929,
+   CVE-2024-57931, CVE-2024-57932, CVE-2024-57933, CVE-2024-57938,
+   CVE-2024-57939, CVE-2024-57940, CVE-2024-57945, CVE-2024-57946,
+   CVE-2024-58087, CVE-2024-58237, CVE-2025-21631, CVE-2025-21632,
+   CVE-2025-21634, CVE-2025-21635, CVE-2025-21636, CVE-2025-21637,
+   CVE-2025-21638, CVE-2025-21639, CVE-2025-21640, CVE-2025-21642,
+   CVE-2025-21643, CVE-2025-21645, CVE-2025-21646, CVE-2025-21647,
+   CVE-2025-21648, CVE-2025-21649, CVE-2025-21650, CVE-2025-21651,
+   CVE-2025-21652, CVE-2025-21653, CVE-2025-21654, CVE-2025-21655,
+   CVE-2025-21656, CVE-2025-21658, CVE-2025-21659, CVE-2025-21660,
+   CVE-2025-21662, CVE-2025-21663, CVE-2025-21664, CVE-2025-21938,
+   CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux-realtime/6.8.1-1022.23
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/c69dd31c/attachment.sig>
+
+------------------------------
+
+Message: 2
+Date: Fri, 16 May 2025 19:33:10 +0200
+From: Rodrigo Figueiredo Zaiden <rodrigo.zaiden@canonical.com>
+To: ubuntu-security-announce@lists.ubuntu.com
+Subject: [USN-7510-1] Linux kernel vulnerabilities
+Message-ID: <1dfa9dbf-2e3f-4477-aaa2-7c75b17b60ee@canonical.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+
+==========================================================================
+Ubuntu Security Notice USN-7510-1
+May 16, 2025
+
+linux, linux-gkeop, linux-ibm, linux-ibm-5.15, linux-intel-iotg,
+linux-kvm, linux-lowlatency, linux-lowlatency-hwe-5.15, linux-nvidia,
+linux-oracle, linux-oracle-5.15 vulnerabilities
+==========================================================================
+
+A security issue affects these releases of Ubuntu and its derivatives:
+
+- Ubuntu 22.04 LTS
+- Ubuntu 20.04 LTS
+
+Summary:
+
+Several security issues were fixed in the Linux kernel.
+
+Software Description:
+- linux: Linux kernel
+- linux-gkeop: Linux kernel for Google Container Engine (GKE) systems
+- linux-ibm: Linux kernel for IBM cloud systems
+- linux-intel-iotg: Linux kernel for Intel IoT platforms
+- linux-kvm: Linux kernel for cloud environments
+- linux-lowlatency: Linux low latency kernel
+- linux-nvidia: Linux kernel for NVIDIA systems
+- linux-oracle: Linux kernel for Oracle Cloud systems
+- linux-ibm-5.15: Linux kernel for IBM cloud systems
+- linux-lowlatency-hwe-5.15: Linux low latency kernel
+- linux-oracle-5.15: Linux kernel for Oracle Cloud systems
+
+Details:
+
+Several security issues were discovered in the Linux kernel.
+An attacker could possibly use these to compromise the system.
+This update corrects flaws in the following subsystems:
+   - ARM64 architecture;
+   - PowerPC architecture;
+   - x86 architecture;
+   - Block layer subsystem;
+   - Network block device driver;
+   - Bus devices;
+   - Character device driver;
+   - TPM device driver;
+   - Clock framework and drivers;
+   - GPIO subsystem;
+   - GPU drivers;
+   - HID subsystem;
+   - I2C subsystem;
+   - InfiniBand drivers;
+   - Media drivers;
+   - NVIDIA Tegra memory controller driver;
+   - Network drivers;
+   - PCI subsystem;
+   - PPS (Pulse Per Second) driver;
+   - PTP clock framework;
+   - RapidIO drivers;
+   - Real Time Clock drivers;
+   - SLIMbus drivers;
+   - QCOM SoC drivers;
+   - Trusted Execution Environment drivers;
+   - TTY drivers;
+   - USB DSL drivers;
+   - USB Device Class drivers;
+   - USB core drivers;
+   - USB Gadget drivers;
+   - USB Host Controller drivers;
+   - Renesas USBHS Controller drivers;
+   - ACRN Hypervisor Service Module driver;
+   - File systems infrastructure;
+   - BTRFS file system;
+   - F2FS file system;
+   - Network file system (NFS) server daemon;
+   - NILFS2 file system;
+   - Overlay file system;
+   - SMB network file system;
+   - UBI file system;
+   - KVM subsystem;
+   - L3 Master device support module;
+   - Process Accounting mechanism;
+   - Padata parallel execution mechanism;
+   - printk logging mechanism;
+   - Scheduler infrastructure;
+   - Timer subsystem;
+   - Tracing infrastructure;
+   - Memory management;
+   - 802.1Q VLAN protocol;
+   - B.A.T.M.A.N. meshing protocol;
+   - Networking core;
+   - IPv4 networking;
+   - IPv6 networking;
+   - Logical Link layer;
+   - Multipath TCP;
+   - Netfilter;
+   - NFC subsystem;
+   - Open vSwitch;
+   - Rose network layer;
+   - Network traffic control;
+   - Wireless networking;
+   - Landlock security;
+   - Linux Security Modules (LSM) Framework;
+   - Tomoyo security module;
+(CVE-2025-21731, CVE-2025-21926, CVE-2025-21830, CVE-2024-58010,
+CVE-2025-21745, CVE-2025-21871, CVE-2024-57980, CVE-2025-21916,
+CVE-2025-21735, CVE-2025-21763, CVE-2025-21799, CVE-2025-21811,
+CVE-2025-21814, CVE-2024-58083, CVE-2025-21922, CVE-2025-21802,
+CVE-2024-58034, CVE-2025-21758, CVE-2024-58069, CVE-2025-21905,
+CVE-2024-57986, CVE-2025-21718, CVE-2024-58020, CVE-2025-21858,
+CVE-2025-21749, CVE-2025-21928, CVE-2024-58085, CVE-2025-21795,
+CVE-2025-21744, CVE-2025-21776, CVE-2025-21804, CVE-2024-57973,
+CVE-2025-21848, CVE-2025-21844, CVE-2024-56721, CVE-2024-58079,
+CVE-2025-21781, CVE-2025-21866, CVE-2024-58052, CVE-2024-58017,
+CVE-2024-58071, CVE-2025-21791, CVE-2024-26982, CVE-2025-21787,
+CVE-2024-58090, CVE-2025-21951, CVE-2025-21846, CVE-2025-21722,
+CVE-2024-58001, CVE-2025-21715, CVE-2025-21919, CVE-2025-21904,
+CVE-2024-57977, CVE-2025-21785, CVE-2025-21950, CVE-2025-21924,
+CVE-2024-57979, CVE-2025-21711, CVE-2024-47726, CVE-2024-58002,
+CVE-2025-21914, CVE-2024-58086, CVE-2024-58005, CVE-2025-21835,
+CVE-2024-58051, CVE-2025-21761, CVE-2025-21760, CVE-2025-21767,
+CVE-2025-21766, CVE-2025-21726, CVE-2025-21865, CVE-2024-58014,
+CVE-2025-21878, CVE-2025-21934, CVE-2024-58007, CVE-2025-21898,
+CVE-2025-21806, CVE-2024-58058, CVE-2025-21779, CVE-2024-58063,
+CVE-2025-21708, CVE-2025-21684, CVE-2024-57834, CVE-2025-21971,
+CVE-2025-21762, CVE-2025-21728, CVE-2024-58076, CVE-2025-21704,
+CVE-2025-21719, CVE-2025-21948, CVE-2025-21707, CVE-2025-21917,
+CVE-2025-21782, CVE-2025-21943, CVE-2025-21765, CVE-2025-21721,
+CVE-2024-58016, CVE-2025-21859, CVE-2025-21909, CVE-2025-21748,
+CVE-2025-21912, CVE-2025-21736, CVE-2025-21862, CVE-2024-57978,
+CVE-2025-21826, CVE-2025-21920, CVE-2025-21772, CVE-2025-21877,
+CVE-2025-21935, CVE-2024-56599, CVE-2025-21820, CVE-2025-21764,
+CVE-2025-21796, CVE-2025-21887, CVE-2025-21753, CVE-2025-21910,
+CVE-2024-57981, CVE-2025-21727, CVE-2025-21875, CVE-2024-58072,
+CVE-2024-58055, CVE-2025-21925, CVE-2025-21823, CVE-2025-21647)
+
+Update instructions:
+
+The problem can be corrected by updating your system to the following
+package versions:
+
+Ubuntu 22.04 LTS
+   linux-image-5.15.0-1066-gkeop   5.15.0-1066.74
+   linux-image-5.15.0-1076-ibm     5.15.0-1076.79
+   linux-image-5.15.0-1078-nvidia  5.15.0-1078.79
+   linux-image-5.15.0-1078-nvidia-lowlatency  5.15.0-1078.79
+   linux-image-5.15.0-1079-intel-iotg  5.15.0-1079.85
+   linux-image-5.15.0-1080-kvm     5.15.0-1080.85
+   linux-image-5.15.0-1081-oracle  5.15.0-1081.87
+   linux-image-5.15.0-140-generic  5.15.0-140.150
+   linux-image-5.15.0-140-generic-64k  5.15.0-140.150
+   linux-image-5.15.0-140-generic-lpae  5.15.0-140.150
+   linux-image-5.15.0-140-lowlatency  5.15.0-140.150
+   linux-image-5.15.0-140-lowlatency-64k  5.15.0-140.150
+   linux-image-generic             5.15.0.140.135
+   linux-image-generic-64k         5.15.0.140.135
+   linux-image-generic-lpae        5.15.0.140.135
+   linux-image-gkeop               5.15.0.1066.65
+   linux-image-gkeop-5.15          5.15.0.1066.65
+   linux-image-ibm                 5.15.0.1076.72
+   linux-image-intel-iotg          5.15.0.1079.79
+   linux-image-kvm                 5.15.0.1080.76
+   linux-image-lowlatency          5.15.0.140.126
+   linux-image-lowlatency-64k      5.15.0.140.126
+   linux-image-nvidia              5.15.0.1078.78
+   linux-image-nvidia-lowlatency   5.15.0.1078.78
+   linux-image-oracle-lts-22.04    5.15.0.1081.77
+   linux-image-virtual             5.15.0.140.135
+
+Ubuntu 20.04 LTS
+   linux-image-5.15.0-1076-ibm     5.15.0-1076.79~20.04.1
+   linux-image-5.15.0-1081-oracle  5.15.0-1081.87~20.04.1
+   linux-image-5.15.0-140-lowlatency  5.15.0-140.150~20.04.1
+   linux-image-5.15.0-140-lowlatency-64k  5.15.0-140.150~20.04.1
+   linux-image-ibm                 5.15.0.1076.79~20.04.1
+   linux-image-lowlatency-64k-hwe-20.04  5.15.0.140.150~20.04.1
+   linux-image-lowlatency-hwe-20.04  5.15.0.140.150~20.04.1
+   linux-image-oracle              5.15.0.1081.87~20.04.1
+
+After a standard system update you need to reboot your computer to make
+all the necessary changes.
+
+ATTENTION: Due to an unavoidable ABI change the kernel updates have
+been given a new version number, which requires you to recompile and
+reinstall all third party kernel modules you might have installed.
+Unless you manually uninstalled the standard kernel metapackages
+(e.g. linux-generic, linux-generic-lts-RELEASE, linux-virtual,
+linux-powerpc), a standard system upgrade will automatically perform
+this as well.
+
+References:
+   https://ubuntu.com/security/notices/USN-7510-1
+   CVE-2024-26982, CVE-2024-47726, CVE-2024-56599, CVE-2024-56721,
+   CVE-2024-57834, CVE-2024-57973, CVE-2024-57977, CVE-2024-57978,
+   CVE-2024-57979, CVE-2024-57980, CVE-2024-57981, CVE-2024-57986,
+   CVE-2024-58001, CVE-2024-58002, CVE-2024-58005, CVE-2024-58007,
+   CVE-2024-58010, CVE-2024-58014, CVE-2024-58016, CVE-2024-58017,
+   CVE-2024-58020, CVE-2024-58034, CVE-2024-58051, CVE-2024-58052,
+   CVE-2024-58055, CVE-2024-58058, CVE-2024-58063, CVE-2024-58069,
+   CVE-2024-58071, CVE-2024-58072, CVE-2024-58076, CVE-2024-58079,
+   CVE-2024-58083, CVE-2024-58085, CVE-2024-58086, CVE-2024-58090,
+   CVE-2025-21647, CVE-2025-21684, CVE-2025-21704, CVE-2025-21707,
+   CVE-2025-21708, CVE-2025-21711, CVE-2025-21715, CVE-2025-21718,
+   CVE-2025-21719, CVE-2025-21721, CVE-2025-21722, CVE-2025-21726,
+   CVE-2025-21727, CVE-2025-21728, CVE-2025-21731, CVE-2025-21735,
+   CVE-2025-21736, CVE-2025-21744, CVE-2025-21745, CVE-2025-21748,
+   CVE-2025-21749, CVE-2025-21753, CVE-2025-21758, CVE-2025-21760,
+   CVE-2025-21761, CVE-2025-21762, CVE-2025-21763, CVE-2025-21764,
+   CVE-2025-21765, CVE-2025-21766, CVE-2025-21767, CVE-2025-21772,
+   CVE-2025-21776, CVE-2025-21779, CVE-2025-21781, CVE-2025-21782,
+   CVE-2025-21785, CVE-2025-21787, CVE-2025-21791, CVE-2025-21795,
+   CVE-2025-21796, CVE-2025-21799, CVE-2025-21802, CVE-2025-21804,
+   CVE-2025-21806, CVE-2025-21811, CVE-2025-21814, CVE-2025-21820,
+   CVE-2025-21823, CVE-2025-21826, CVE-2025-21830, CVE-2025-21835,
+   CVE-2025-21844, CVE-2025-21846, CVE-2025-21848, CVE-2025-21858,
+   CVE-2025-21859, CVE-2025-21862, CVE-2025-21865, CVE-2025-21866,
+   CVE-2025-21871, CVE-2025-21875, CVE-2025-21877, CVE-2025-21878,
+   CVE-2025-21887, CVE-2025-21898, CVE-2025-21904, CVE-2025-21905,
+   CVE-2025-21909, CVE-2025-21910, CVE-2025-21912, CVE-2025-21914,
+   CVE-2025-21916, CVE-2025-21917, CVE-2025-21919, CVE-2025-21920,
+   CVE-2025-21922, CVE-2025-21924, CVE-2025-21925, CVE-2025-21926,
+   CVE-2025-21928, CVE-2025-21934, CVE-2025-21935, CVE-2025-21943,
+   CVE-2025-21948, CVE-2025-21950, CVE-2025-21951, CVE-2025-21971
+
+Package Information:
+   https://launchpad.net/ubuntu/+source/linux/5.15.0-140.150
+   https://launchpad.net/ubuntu/+source/linux-gkeop/5.15.0-1066.74
+   https://launchpad.net/ubuntu/+source/linux-ibm/5.15.0-1076.79
+   https://launchpad.net/ubuntu/+source/linux-intel-iotg/5.15.0-1079.85
+   https://launchpad.net/ubuntu/+source/linux-kvm/5.15.0-1080.85
+   https://launchpad.net/ubuntu/+source/linux-lowlatency/5.15.0-140.150
+   https://launchpad.net/ubuntu/+source/linux-nvidia/5.15.0-1078.79
+   https://launchpad.net/ubuntu/+source/linux-oracle/5.15.0-1081.87
+   https://launchpad.net/ubuntu/+source/linux-ibm-5.15/5.15.0-1076.79~20.04.1
+
+https://launchpad.net/ubuntu/+source/linux-lowlatency-hwe-5.15/5.15.0-140.150~20.04.1
+
+https://launchpad.net/ubuntu/+source/linux-oracle-5.15/5.15.0-1081.87~20.04.1
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: OpenPGP_signature.asc
+Type: application/pgp-signature
+Size: 495 bytes
+Desc: OpenPGP digital signature
+URL: <https://lists.ubuntu.com/archives/ubuntu-security-announce/attachments/20250516/9140e98e/attachment.sig>
+
+------------------------------
+
+Subject: Digest Footer
+
+-- 
+ubuntu-security-announce mailing list
+ubuntu-security-announce@lists.ubuntu.com
+Modify settings or unsubscribe at: https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
+
+
+------------------------------
+
+End of ubuntu-security-announce Digest, Vol 248, Issue 21
+*********************************************************
+	

@@ -1,0 +1,26 @@
+<configuration>
+
+    <!-- Synchronous logging to stderr for error logs -->
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- Asynchronous logging to stderr for error logs (WARN and ERROR) -->
+    <appender name="ASYNC_STDERR" class="ch.qos.logback.classic.AsyncAppender">
+       <includeCallerData>true</includeCallerData> 
+        <queueSize>5000</queueSize>
+        <discardingThreshold>0</discardingThreshold> <!-- Prevent discarding logs -->
+        <appender-ref ref="STDERR" />
+    </appender>
+
+    <!-- Root logger for normal logs (INFO and below) -->
+    <root level="INFO">
+        <appender-ref ref="ASYNC_STDERR" />
+    </root>
+
+
+</configuration>
