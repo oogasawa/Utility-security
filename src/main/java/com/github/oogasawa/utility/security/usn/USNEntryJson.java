@@ -14,7 +14,8 @@ public class USNEntryJson {
     public List<String> cves = new ArrayList<>();
     public List<String> releases = new ArrayList<>();
     public String severity; 
-     public String livepatch = "auto"; // "yes", "no", or "auto"
+     public String livepatch = "auto"; // "yes", "no", or "NA"
+    public String needs_reboot; // "yes", "no"
 }
 
 

@@ -93,8 +93,10 @@ public class USNJsonExporter {
                 try {
                     Document doc = LivepatchHtmlFetcher.fetchUsnDocument(entry.id);
                     determineLivepatchAvailability(entry, doc);
+                    determineRebootRequirement(entry, doc); 
                 } catch (IOException e) {
                     entry.livepatch = "NA";
+                    entry.needs_reboot = "NA";
                 }
             }
 
@@ -159,6 +161,31 @@ public class USNJsonExporter {
         }
     }
 
+
+    /**
+     * Determines whether a reboot is required for the security update described in the given USN
+     * document.
+     * <p>
+     * This method scans the text content of the USN HTML page to identify language indicating that
+     * a system reboot is necessary after applying the update. It searches for key phrases such as
+     * {@code "a reboot is required"} and {@code "you need to reboot your computer"}. The result is
+     * stored in the {@code needs_reboot} field of the given entry as either {@code "yes"} or
+     * {@code "no"}.
+     *
+     * @param entry the USN entry to annotate with reboot information
+     * @param doc the parsed HTML document for the corresponding USN
+     */
+    private void determineRebootRequirement(USNEntryJson entry, Document doc) {
+        String text = doc.body().text().toLowerCase();
+        if (text.contains("a reboot is required")
+                || text.contains("you need to reboot your computer")) {
+            entry.needs_reboot = "yes";
+        } else {
+            entry.needs_reboot = "no";
+        }
+    }
+
+    
 
     /**
      * Determines whether the given USN entry is a generic kernel report,
@@ -430,8 +457,9 @@ public class USNJsonExporter {
                     : "";
             String severity = nullToEmpty(entry.severity);
             String livepatch = nullToEmpty(entry.livepatch);
+            String needsReboot = nullToEmpty(entry.needs_reboot);
 
-            System.out.printf("%s\t%s\t%s\t%s\t%s\t%s%n", id, title, date, summary, severity, livepatch);
+            System.out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s%n", id, title, date, summary, severity, needsReboot, livepatch);
         }
     }
 
