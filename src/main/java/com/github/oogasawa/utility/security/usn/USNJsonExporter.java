@@ -395,7 +395,6 @@ public class USNJsonExporter {
 
 
 
-
     /**
      * Parses a date string like "May 1, 2024" into ISO format ("2024-05-01").
      *
@@ -446,7 +445,7 @@ public class USNJsonExporter {
      */
     private void printAsTsv(List<USNEntryJson> entries) {
         // Print header row
-        System.out.println("id\ttitle\tpublished_date\tsummary\tseverity\tlivepatch");
+        System.out.println("id\ttitle\tpublished_date\tsummary\tseverity\treboot\tlivepatch");
 
         for (USNEntryJson entry : entries) {
             String id = nullToEmpty(entry.id);
@@ -463,6 +462,7 @@ public class USNJsonExporter {
         }
     }
 
+    
 
    /**
      * Initializes a new USN entry based on the Subject line.
