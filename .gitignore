@@ -1,5 +1,7 @@
 # emacs
 *~
+*.tsv
+*.txt
 
 .classpath
 .factorypath
@@ -8,6 +10,7 @@
 
 # maven
 target/
+dependency-reduced-pom.xml
 
 # Compiled class file
 *.class

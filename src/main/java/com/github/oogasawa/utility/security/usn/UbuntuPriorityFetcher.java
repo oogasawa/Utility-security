@@ -10,6 +10,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -31,76 +32,38 @@ public class UbuntuPriorityFetcher {
      */
     public static String fetchUbuntuPriority(String cveId) throws Exception {
         String url = "https://ubuntu.com/security/" + cveId;
-        String html = downloadHtml(url);
-        return extractPriority(html);
-    }
 
-    /**
-     * Downloads the HTML content of the specified URL.
-     *
-     * @param url the URL to fetch
-     * @return the HTML content as a string
-     * @throws Exception if any network or I/O error occurs
-     */
-    private static String downloadHtml(String url) throws Exception {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
-
             try (CloseableHttpResponse response = client.execute(request)) {
                 HttpEntity entity = response.getEntity();
                 if (entity == null) {
-                    throw new RuntimeException("No response entity for URL: " + url);
+                    throw new IOException("No response entity for " + url);
                 }
 
-                try (InputStream in = entity.getContent();
-                     BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-
-                    StringBuilder html = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        html.append(line).append("\n");
-                    }
-                    return html.toString();
+                try (InputStream content = entity.getContent()) {
+                    return extractPriorityFromHtmlLines(content);
                 }
             }
         }
     }
 
-    /**
-     * Parses the HTML and extracts the Ubuntu priority from the correct DOM section.
-     *
-     * @param html the HTML content to parse
-     * @return the priority string if found, otherwise "Unknown"
-     */
-    private static String extractPriority(String html) {
-        Document doc = Jsoup.parse(html);
+    public static String extractPriorityFromHtmlLines(InputStream input) throws IOException {
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+        String line;
+        Pattern pattern = Pattern.compile("CVE-Priority-icon-(Low|Medium|High|Critical)\\.svg",
+                Pattern.CASE_INSENSITIVE);
 
-        for (Element img : doc.select("img[src*=CVE-Priority-icon-]")) {
-            String src = img.attr("src");
-
-            Pattern pattern = Pattern.compile("CVE-Priority-icon-(Low|Medium|High|Critical)\\.svg",
-                    Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(src);
-
+        while ((line = reader.readLine()) != null) {
+            Matcher matcher = pattern.matcher(line);
             if (matcher.find()) {
-                Element section = img.closest("div");
-
-                while (section != null) {
-                    // Check if there is a <p class="p-text--small-caps">Ubuntu priority</p> within
-                    // this block
-                    for (Element p : section.select("p.p-text--small-caps")) {
-                        if (p.text().trim().equalsIgnoreCase("Ubuntu priority")) {
-                            return matcher.group(1);
-                        }
-                    }
-                    section = section.parent();
-                }
+                return matcher.group(1); // First match is assumed to be Ubuntu priority
             }
         }
 
         return "Unknown";
     }
-
 
 
 }

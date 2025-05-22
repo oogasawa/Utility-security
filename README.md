@@ -111,5 +111,24 @@ $ java -jar target/Utility-security-1.0.0.jar ubuntu:report -i ubuntu-security.2
 実行結果
 
 ```
-
+$ cat 2505D.tsv 
+id	title	published_date	summary	severity	reboot	livepatch
+USN-7520-1	PostgreSQL vulnerability	2025-05-20	PostgreSQL could be made to crash if it received specially crafted network traffic.	Medium	no	NA
+USN-7515-2	Linux kernel vulnerabilities	2025-05-20	Several security issues were fixed in the Linux kernel.	Medium	yes	no
+USN-7521-1	Linux kernel vulnerabilities	2025-05-20	Several security issues were fixed in the Linux kernel.	Medium	yes	no
+USN-7513-3	Linux kernel vulnerabilities	2025-05-20	Several security issues were fixed in the Linux kernel.	Medium	yes	no
+USN-7509-1	.NET vulnerability	2025-05-16	.NET could be used to perform spoofing over a network.	Medium	no	NA
 ```
+
+
+## 更新履歴
+
+v1.0.0
+- ubuntu:reportコマンドで、Ubuntu 24.04に関連する情報だけ絞り、多数のCVEに対するubuntu priorityを集計して最大のpriorityをUSN-IDに割り当てる作業を自動化すること、必要な情報を取り出して要約する作業を自動化することで人で作業を省力化できるようにした。
+
+v1.1.0
+- ubuntu:reportコマンドでUbuntu Priorityの判定を単純な正規表現から、DOMベースの文字列マッチに変更し判定精度を向上させた。
+
+v1.2.0 
+- ubuntu:reportコマンドでUbuntu Priorityの判定を単純な正規表現から、DOMベースで画像ファイル名のマッチに変更し判定精度をさらに向上させた。
+- ubuntu:reportコマンドで、多数のCVEについてのpriority判定でUnknownが一つでもあったらUSNのpriorityをUnknown賭するように厳格化した。

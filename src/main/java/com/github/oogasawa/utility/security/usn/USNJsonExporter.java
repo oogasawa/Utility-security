@@ -125,25 +125,40 @@ public class USNJsonExporter {
     }
 
 
+
     /**
-     * Assigns the highest severity level among the entry's CVEs to the entry itself.
+     * Assigns the highest severity level among the entry's CVEs to the entry itself. If any CVE has
+     * an unknown priority, the entry's severity is set to "Unknown".
      *
      * @param entry the USN entry to modify
      */
     private void assignMaxSeverity(USNEntryJson entry) {
         logger.info(String.format("%s, %s, %s", entry.id, entry.title, entry.cves));
-        
-        List<PriorityLevel> levels = entry.cves.stream().map(this::fetchPrioritySafely)
-                .filter(Objects::nonNull).collect(Collectors.toList());
 
-        logger.info(String.format("levels.size() = %d", levels.size()));
-        
-        Optional<PriorityLevel> max =
-                levels.stream().max(Comparator.comparingInt(PriorityLevel::level));
+        List<PriorityLevel> levels = new ArrayList<>();
+        boolean hasUnknown = false;
 
-        entry.severity = max.map(PriorityLevel::nameCapitalized).orElse("Unknown");
+        for (String cve : entry.cves) {
+            PriorityLevel level = fetchPrioritySafely(cve);
+            if (level == null) {
+                hasUnknown = true;
+                break;
+            } else {
+                levels.add(level);
+            }
+        }
+
+        if (hasUnknown || levels.isEmpty()) {
+            entry.severity = "Unknown";
+        } else {
+            PriorityLevel max =
+                    levels.stream().max(Comparator.comparingInt(PriorityLevel::level)).orElse(null);
+            entry.severity = max != null ? max.nameCapitalized() : "Unknown";
+        }
     }
 
+
+    
     /**
      * Determines whether Canonical Livepatch is available for a given USN entry.
      *
