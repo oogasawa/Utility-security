@@ -13,6 +13,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A utility class that fetches the CVE severity level (priority) as defined on the official Ubuntu
@@ -73,39 +75,32 @@ public class UbuntuPriorityFetcher {
     private static String extractPriority(String html) {
         Document doc = Jsoup.parse(html);
 
-        for (Element label : doc.select("p.p-text--small-caps")) {
-            if (label.text().trim().equalsIgnoreCase("Ubuntu priority")) {
-                Element parent = label.parent(); // e.g., <div> containing the label
-                if (parent != null) {
-                    // Search all <strong> tags inside this parent block
-                    for (Element strong : parent.select("strong")) {
-                        String text = strong.text().trim();
-                        if (text.equalsIgnoreCase("Low") || text.equalsIgnoreCase("Medium")
-                                || text.equalsIgnoreCase("High")
-                                || text.equalsIgnoreCase("Critical")) {
-                            return text;
-                        }
-                    }
+        for (Element img : doc.select("img[src*=CVE-Priority-icon-]")) {
+            String src = img.attr("src");
 
-                    // fallback: look into the next siblings (in case structure is deeply split)
-                    Element next = parent.nextElementSibling();
-                    while (next != null) {
-                        for (Element strong : next.select("strong")) {
-                            String text = strong.text().trim();
-                            if (text.equalsIgnoreCase("Low") || text.equalsIgnoreCase("Medium")
-                                    || text.equalsIgnoreCase("High")
-                                    || text.equalsIgnoreCase("Critical")) {
-                                return text;
-                            }
+            Pattern pattern = Pattern.compile("CVE-Priority-icon-(Low|Medium|High|Critical)\\.svg",
+                    Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(src);
+
+            if (matcher.find()) {
+                Element section = img.closest("div");
+
+                while (section != null) {
+                    // Check if there is a <p class="p-text--small-caps">Ubuntu priority</p> within
+                    // this block
+                    for (Element p : section.select("p.p-text--small-caps")) {
+                        if (p.text().trim().equalsIgnoreCase("Ubuntu priority")) {
+                            return matcher.group(1);
                         }
-                        next = next.nextElementSibling();
                     }
+                    section = section.parent();
                 }
             }
         }
 
         return "Unknown";
     }
+
 
 
 }

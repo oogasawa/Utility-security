@@ -4,7 +4,7 @@
   <groupId>com.github.oogasawa</groupId>
   <artifactId>Utility-security</artifactId>
   <name>Utility-security</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <url>https://github.com/oogasawa/Utility-security</url>
   <build>
     <finalName>${project.artifactId}-${project.version}</finalName>
