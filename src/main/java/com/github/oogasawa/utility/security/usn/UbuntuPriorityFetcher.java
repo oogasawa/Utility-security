@@ -13,39 +13,34 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * A utility class that fetches the CVE severity level (priority) as defined on the official
- * Ubuntu security tracker web page.
- * <p>
- * This class retrieves the priority string (e.g., "Low", "Medium", "High", "Critical") by parsing
- * the CVE detail page at {@code https://ubuntu.com/security/<CVE-ID>}.
+ * A utility class that fetches the CVE severity level (priority) as defined on the official Ubuntu
+ * security tracker web page.
  */
 public class UbuntuPriorityFetcher {
 
     /**
-     * A regular expression pattern used to detect priority labels in HTML content.
-     * Example match: {@code <strong>High</strong>}
-     */
-    private static final Pattern PRIORITY_PATTERN = Pattern.compile("<strong>(Low|Medium|High|Critical)</strong>");
-
-    /**
      * Fetches the severity priority assigned to a given CVE ID from the Ubuntu security tracker.
-     * <p>
-     * This method makes an HTTP GET request to the CVE-specific page on ubuntu.com, and attempts
-     * to extract the priority level by scanning for a known HTML pattern. If the pattern is not
-     * matched in the first {@code maxLines} lines, it falls back to parsing the HTML with Jsoup
-     * to look for a specific element.
      *
-     * @param cveId the CVE identifier (e.g., {@code CVE-2024-12345})
+     * @param cveId the CVE identifier (e.g., "CVE-2024-12345")
      * @return the extracted priority string (e.g., "Low", "High"), or "Unknown" if not found
      * @throws Exception if an error occurs during HTTP communication or parsing
      */
     public static String fetchUbuntuPriority(String cveId) throws Exception {
         String url = "https://ubuntu.com/security/" + cveId;
+        String html = downloadHtml(url);
+        return extractPriority(html);
+    }
 
+    /**
+     * Downloads the HTML content of the specified URL.
+     *
+     * @param url the URL to fetch
+     * @return the HTML content as a string
+     * @throws Exception if any network or I/O error occurs
+     */
+    private static String downloadHtml(String url) throws Exception {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
 
@@ -58,28 +53,39 @@ public class UbuntuPriorityFetcher {
                 try (InputStream in = entity.getContent();
                      BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
 
+                    StringBuilder html = new StringBuilder();
                     String line;
-                    StringBuilder headFragment = new StringBuilder();
-                    int linesRead = 0;
-                    final int maxLines = 3000; // Limit the number of lines read to prevent excessive memory use
-
-                    // Attempt to find the priority pattern directly while reading the response
-                    while ((line = reader.readLine()) != null && linesRead++ < maxLines) {
-                        headFragment.append(line).append("\n");
-                        Matcher m = PRIORITY_PATTERN.matcher(line);
-                        if (m.find()) {
-                            return m.group(1);
-                        }
+                    while ((line = reader.readLine()) != null) {
+                        html.append(line).append("\n");
                     }
-
-                    // Fallback: use Jsoup to parse the collected fragment and locate the priority element
-                    Document doc = Jsoup.parse(headFragment.toString());
-                    Element el = doc.selectFirst("div.cve-hero-scores strong");
-                    return el != null ? el.text().trim() : "Unknown";
+                    return html.toString();
                 }
             }
         }
     }
 
+    /**
+     * Parses the HTML and extracts the Ubuntu priority from the correct DOM section.
+     *
+     * @param html the HTML content to parse
+     * @return the priority string if found, otherwise "Unknown"
+     */
+    private static String extractPriority(String html) {
+        Document doc = Jsoup.parse(html);
+
+        for (Element label : doc.select("p.p-text--small-caps")) {
+            if (label.text().trim().equalsIgnoreCase("Ubuntu priority")) {
+                Element container = label.closest("div");  // safer than parent() for nesting
+                if (container != null) {
+                    Element strong = container.selectFirst("strong");
+                    if (strong != null) {
+                        return strong.text().trim();
+                    }
+                }
+            }
+        }
+
+        return "Unknown";
+    }
 }
 

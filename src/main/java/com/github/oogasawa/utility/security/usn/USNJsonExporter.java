@@ -196,9 +196,9 @@ public class USNJsonExporter {
      */
     private boolean isGenericKernelReport(USNEntryJson entry) {
         String title = entry.title != null ? entry.title : "";
-        return !(title.contains("(GKE)") || title.contains("(AWS)") || title.contains("(Azure)")
-                || title.contains("(NVIDIA)") || title.contains("(Real-time)")
-                || title.contains("(OEM)") || title.contains("(Raspberry Pi)"));
+        return !(title.contains("GKE") || title.contains("AWS") || title.contains("Azure")
+                || title.contains("NVIDIA") || title.contains("Real-time")
+                || title.contains("OEM") || title.contains("Raspberry Pi"));
     }
 
 
