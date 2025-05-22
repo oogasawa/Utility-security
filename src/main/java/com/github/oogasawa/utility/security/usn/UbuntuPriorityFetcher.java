@@ -75,9 +75,22 @@ public class UbuntuPriorityFetcher {
 
         for (Element label : doc.select("p.p-text--small-caps")) {
             if (label.text().trim().equalsIgnoreCase("Ubuntu priority")) {
-                Element container = label.closest("div");  // safer than parent() for nesting
-                if (container != null) {
-                    Element strong = container.selectFirst("strong");
+
+                // Start from label and traverse upward to find the enclosing score block
+                Element parentDiv = label.closest("div");
+                if (parentDiv != null) {
+                    // Search for the first <strong> element in the same logical section
+                    Element strong = parentDiv.selectFirst("div.p-heading-icon__header strong");
+                    if (strong != null) {
+                        return strong.text().trim();
+                    }
+                }
+
+                // Fallback: look further up the DOM if necessary
+                Element outerDiv = label.parents().select(".cve-hero-scores").first();
+                if (outerDiv != null) {
+                    Element strong = outerDiv.selectFirst(
+                            "div:has(p.p-text--small-caps:matchesOwn(Ubuntu priority)) strong");
                     if (strong != null) {
                         return strong.text().trim();
                     }
@@ -87,5 +100,7 @@ public class UbuntuPriorityFetcher {
 
         return "Unknown";
     }
+
+
 }
 

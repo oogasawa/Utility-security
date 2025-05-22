@@ -1,9 +1,6 @@
-# data
-paper_list*
-
-
 # emacs
 *~
+
 .classpath
 .factorypath
 .project

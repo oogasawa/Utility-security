@@ -59,35 +59,10 @@ public class App {
      * Registers all available commands by invoking their respective setup methods.
      */
     public void setupCommands() {
-        helloCommand();
         ubuntuSecurityReportCommand();
     }
     
 
-
-    /**
-     * Hello world command for trivial testing.
-     */
-    public void helloCommand() {
-        Options opts = new Options();
-
-        opts.addOption(Option.builder("message")
-                .option("m")
-                .longOpt("message")
-                .hasArg(true)
-                .argName("message")
-                .desc("A message string of the greetings.")
-                .required(false)
-                .build());
-
-        this.cmds.addCommand("Dummy commands", "hello", opts,
-                "Greetings",
-                (CommandLine cl) -> {
-                    String messageStr = cl.getOptionValue("message", "world");
-                    Hello hello = new Hello();
-                    hello.greetings(messageStr);
-                });
-    }
 
 
 
