@@ -131,4 +131,4 @@ v1.1.0
 
 v1.2.0 
 - ubuntu:reportコマンドでUbuntu Priorityの判定を単純な正規表現から、DOMベースで画像ファイル名のマッチに変更し判定精度をさらに向上させた。
-- ubuntu:reportコマンドで、多数のCVEについてのpriority判定でUnknownが一つでもあったらUSNのpriorityをUnknown賭するように厳格化した。
+- ubuntu:reportコマンドで、多数のCVEについてのpriority判定でUnknownが一つでもあったらUSNのpriorityをUnknownとするように厳格化した。
