@@ -3,6 +3,7 @@ package com.github.oogasawa.utility.security;
 
 import java.nio.file.Path;
 import com.github.oogasawa.utility.cli.CommandRepository;
+import com.github.oogasawa.utility.security.log.LogRenamer;
 import com.github.oogasawa.utility.security.usn.USNJsonExporter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -59,16 +60,61 @@ public class App {
      * Registers all available commands by invoking their respective setup methods.
      */
     public void setupCommands() {
+
+        logRenameCommand();
         ubuntuSecurityReportCommand();
+        
     }
     
 
 
+    public void logRenameCommand() {
+        Options opts = new Options();
+
+        opts.addOption(Option.builder("srcDir")
+                .option("s")
+                .longOpt("srcDir")
+                .hasArg(true)
+                .argName("srcDir")
+                .desc("The source directory of the log files.")
+                .required(true)
+                .build());
+
+        opts.addOption(Option.builder("destDir")
+                .option("d")
+                .longOpt("destDir")
+                .hasArg(true)
+                .argName("destDir")
+                .desc("The destination directory of the log files.")
+                .required(true)
+                .build());
 
 
-    /**
-     * 
-     */
+        opts.addOption(Option.builder("hostName")
+                .option("n")
+                .longOpt("hostName")
+                .hasArg(true)
+                .argName("hostName")
+                .desc("host name")
+                .required(false)
+                .build());
+
+        
+
+        this.cmds.addCommand("Ubuntu security commands", "ubuntu:report", opts,
+                "Create TSV format report.",
+                (CommandLine cl) -> {
+                    Path srcPath = Path.of(cl.getOptionValue("srcPath"));
+                    Path destPath = Path.of(cl.getOptionValue("destPath"));
+                    String hostName = cl.getOptionValue("hostName",LogRenamer.hostName());
+                    LogRenamer renamer = new LogRenamer();
+                    renamer.rename(hostName, srcPath, destPath);
+                });
+        
+    }
+
+
+
     public void ubuntuSecurityReportCommand() {
         Options opts = new Options();
 
