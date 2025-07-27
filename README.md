@@ -18,7 +18,7 @@ Utilit-cliはMaven Repositoryには登録されていないので、
 以下のようにしてあらかじめビルドする計算機のローカルリポジトリ`$HOME/.m2/`にインストールしておく必要がある。
 
 ``` 
-git clone https://github.com/oogasawa/Utility-cli
+git clone --branch v3.1.0 --depth 1 https://github.com/your-organization/utility-cli.git
 cd Utility-cli
 mvn clean install
 ```
@@ -132,3 +132,4 @@ v1.1.0
 v1.2.0 
 - ubuntu:reportコマンドでUbuntu Priorityの判定を単純な正規表現から、DOMベースで画像ファイル名のマッチに変更し判定精度をさらに向上させた。
 - ubuntu:reportコマンドで、多数のCVEについてのpriority判定でUnknownが一つでもあったらUSNのpriorityをUnknownとするように厳格化した。
+
