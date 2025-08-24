@@ -82,11 +82,39 @@ public class USNJsonExporter {
     public void report(Path inputPath, String format) {
         try (BufferedReader reader = Files.newBufferedReader(inputPath)) {
             List<USNEntryJson> entries = parseUSNMessages(reader);
+            
+            // Log parsing statistics
+            logger.info("=== USN PARSING STATISTICS ===");
+            logger.info("Total entries parsed: {}", entries.size());
+            
+            long nullIdCount = entries.stream()
+                .filter(entry -> entry.id == null || entry.id.trim().isEmpty())
+                .count();
+            logger.info("Entries with null/empty ID: {}", nullIdCount);
+            
+            long validIdCount = entries.size() - nullIdCount;
+            logger.info("Entries with valid ID: {}", validIdCount);
+            
+            // Show valid USN IDs for debugging
+            entries.stream()
+                .filter(entry -> entry.id != null && !entry.id.trim().isEmpty())
+                .limit(5) // Show first 5 for debugging
+                .forEach(entry -> logger.info("Valid USN: ID=[{}], Title=[{}]", 
+                    entry.id, entry.title != null ? entry.title.substring(0, Math.min(50, entry.title.length())) + "..." : "null"));
 
             List<USNEntryJson> filtered = entries.stream()
+                .filter(entry -> entry.id != null && !entry.id.trim().isEmpty())
                 .filter(this::appliesToUbuntu2404)
                 .filter(this::isGenericKernelReport)
                 .collect(Collectors.toList());
+                
+            long ubuntu2404Count = entries.stream()
+                .filter(entry -> entry.id != null && !entry.id.trim().isEmpty())
+                .filter(this::appliesToUbuntu2404)
+                .count();
+            logger.info("Entries applicable to Ubuntu 24.04: {}", ubuntu2404Count);
+            logger.info("Final filtered entries (generic kernel only): {}", filtered.size());
+            logger.info("=== END PARSING STATISTICS ===");
 
             for (USNEntryJson entry : filtered) {
                 assignMaxSeverity(entry);
@@ -95,6 +123,7 @@ public class USNJsonExporter {
                     determineLivepatchAvailability(entry, doc);
                     determineRebootRequirement(entry, doc); 
                 } catch (IOException e) {
+                    logger.warn("Failed to fetch USN document for {}: {}", entry.id, e.getMessage());
                     entry.livepatch = "NA";
                     entry.needs_reboot = "NA";
                 }
@@ -133,6 +162,12 @@ public class USNJsonExporter {
      * @param entry the USN entry to modify
      */
     private void assignMaxSeverity(USNEntryJson entry) {
+        // Check for null ID before processing
+        if (entry.id == null) {
+            logger.error("WARNING: assignMaxSeverity called with null ID entry! Title: {}, CVEs: {}", 
+                entry.title, entry.cves);
+        }
+        
         logger.info(String.format("%s, %s, %s", entry.id, entry.title, entry.cves));
 
         List<PriorityLevel> levels = new ArrayList<>();
@@ -397,6 +432,10 @@ public class USNJsonExporter {
                     finalizeCurrentEntry(current, detailsBuf, updateBuf, entries);
                 }
                 current = startNewEntry(line);
+                if (current == null) {
+                    logger.error("Skipping malformed USN entry due to parsing failure: {}", line);
+                    continue;
+                }
                 inSummary = inDetails = inUpdate = false;
                 detailsBuf.setLength(0);
                 updateBuf.setLength(0);
@@ -489,7 +528,17 @@ public class USNJsonExporter {
         // Print header row
         System.out.println("id\ttitle\tpublished_date\tsummary\tseverity\treboot\tlivepatch");
 
-        for (USNEntryJson entry : entries) {
+        // Filter out any remaining entries with null or empty ID
+        List<USNEntryJson> validEntries = entries.stream()
+            .filter(entry -> entry.id != null && !entry.id.trim().isEmpty())
+            .collect(Collectors.toList());
+            
+        if (validEntries.size() != entries.size()) {
+            logger.warn("Filtered out {} entries with null/empty ID from TSV output", 
+                entries.size() - validEntries.size());
+        }
+
+        for (USNEntryJson entry : validEntries) {
             String id = nullToEmpty(entry.id);
             String title = nullToEmpty(entry.title);
             String date = nullToEmpty(entry.published_date);
@@ -510,16 +559,50 @@ public class USNJsonExporter {
      * Initializes a new USN entry based on the Subject line.
      *
      * @param line the Subject line from input
-     * @return the initialized USNEntryJson object
+     * @return the initialized USNEntryJson object, or null if parsing fails
      */
     private static USNEntryJson startNewEntry(String line) {
         USNEntryJson entry = new USNEntryJson();
-        Matcher m = Pattern.compile("^Subject: \\[(USN-[\\d-]+)] (.+)$").matcher(line);
+        
+        // Log all Subject lines for debugging
+        logger.debug("Processing Subject line: [{}]", line);
+        
+        // Expected pattern: "Subject: [USN-xxxx-x] Title"
+        Pattern pattern = Pattern.compile("^Subject: \\[(USN-[\\d-]+)] (.+)$");
+        Matcher m = pattern.matcher(line);
+        
         if (m.find()) {
             entry.id = m.group(1);
             entry.title = m.group(2);
+            logger.info("Successfully parsed USN entry: ID=[{}], Title=[{}]", entry.id, entry.title);
+            return entry;
+        } else {
+            // Detailed analysis of why parsing failed
+            logger.warn("=== SUBJECT LINE PARSE FAILURE ===");
+            logger.warn("Failed Subject line: [{}]", line);
+            logger.warn("Line length: {} characters", line.length());
+            logger.warn("Starts with 'Subject: ': {}", line.startsWith("Subject: "));
+            
+            if (line.startsWith("Subject: ")) {
+                String afterSubject = line.substring(9); // Remove "Subject: "
+                logger.warn("After 'Subject: ': [{}]", afterSubject);
+                logger.warn("Starts with '[': {}", afterSubject.startsWith("["));
+                
+                if (afterSubject.startsWith("[")) {
+                    int closingBracket = afterSubject.indexOf(']');
+                    if (closingBracket > 0) {
+                        String bracketContent = afterSubject.substring(1, closingBracket);
+                        logger.warn("Bracket content: [{}]", bracketContent);
+                        logger.warn("Matches USN-pattern: {}", bracketContent.matches("USN-[\\d-]+"));
+                    } else {
+                        logger.warn("No closing bracket found");
+                    }
+                }
+            }
+            logger.warn("Expected pattern: Subject: [USN-xxxx-x] Title");
+            logger.warn("=== END PARSE FAILURE ANALYSIS ===");
+            return null;
         }
-        return entry;
     }
 
 

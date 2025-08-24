@@ -25,9 +25,13 @@ public class LivepatchHtmlFetcher {
      * @param usnId e.g., "USN-7513-1"
      * @return the parsed Document object from the USN web page
      * @throws IOException if connection or parsing fails after all retries
+     * @throws IllegalArgumentException if usnId is null or empty
      */
     public static Document fetchUsnDocument(String usnId) throws IOException {
-        String url = "https://ubuntu.com/security/notices/" + usnId;
+        if (usnId == null || usnId.trim().isEmpty()) {
+            throw new IllegalArgumentException("USN ID cannot be null or empty");
+        }
+        String url = "https://ubuntu.com/security/notices/" + usnId.trim();
         IOException lastException = null;
         
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
