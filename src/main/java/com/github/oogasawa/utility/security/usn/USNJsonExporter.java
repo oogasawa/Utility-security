@@ -137,23 +137,34 @@ public class USNJsonExporter {
 
         List<PriorityLevel> levels = new ArrayList<>();
         boolean hasUnknown = false;
+        List<String> failedCves = new ArrayList<>();
 
         for (String cve : entry.cves) {
             PriorityLevel level = fetchPrioritySafely(cve);
             if (level == null) {
                 hasUnknown = true;
+                failedCves.add(cve);
                 break;
             } else {
                 levels.add(level);
             }
         }
 
-        if (hasUnknown || levels.isEmpty()) {
+        logger.info(String.format("levels.size() = %d", levels.size()));
+        
+        if (hasUnknown) {
+            logger.warn("Setting severity to Unknown for {} due to failed CVE lookups: {}", 
+                entry.id, failedCves);
+            entry.severity = "Unknown";
+        } else if (levels.isEmpty()) {
+            logger.warn("No CVEs found for {}, setting severity to Unknown", entry.id);
             entry.severity = "Unknown";
         } else {
             PriorityLevel max =
                     levels.stream().max(Comparator.comparingInt(PriorityLevel::level)).orElse(null);
             entry.severity = max != null ? max.nameCapitalized() : "Unknown";
+            logger.info("Assigned severity '{}' to {} based on {} CVEs", 
+                entry.severity, entry.id, levels.size());
         }
     }
 
@@ -232,9 +243,25 @@ public class USNJsonExporter {
         try {
             String rawPriority = UbuntuPriorityFetcher.fetchUbuntuPriority(cveId);
             logger.info(String.format("rawPriority: %s, %s", rawPriority, cveId));
-            return PriorityLevel.fromString(rawPriority);
+            
+            if ("Unknown".equalsIgnoreCase(rawPriority)) {
+                logger.warn("Ubuntu priority is 'Unknown' for CVE {} (may not exist in Ubuntu tracker)", cveId);
+                return null;
+            }
+            
+            PriorityLevel level = PriorityLevel.fromString(rawPriority);
+            if (level == null) {
+                logger.error("Unexpected priority value '{}' for CVE {}", rawPriority, cveId);
+            }
+            return level;
+            
+        } catch (IOException e) {
+            logger.error("Network/IO error fetching priority for CVE {}: {} - This typically indicates connection issues or server problems", 
+                cveId, e.getMessage());
+            return null;
         } catch (Exception e) {
-            logger.warn("Failed to fetch priority for CVE {}: {}", cveId, e.getMessage());
+            logger.error("Unexpected error fetching priority for CVE {}: {} ({})", 
+                cveId, e.getMessage(), e.getClass().getSimpleName());
             return null;
         }
     }
