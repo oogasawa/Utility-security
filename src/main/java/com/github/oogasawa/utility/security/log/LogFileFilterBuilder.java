@@ -33,14 +33,17 @@ class LogFileFilterBuilder {
         List<String> patterns = new ArrayList<>();
 
         // Apache logs
-        patterns.add("access\\.log(\\..*|-[0-9]{8}\\.gz)?$");
-        patterns.add("error\\.log(\\..*|-[0-9]{8}\\.gz)?$");
+        patterns.add("access\\.log(\\.\\d+|-[0-9]{8}\\.gz)?$");
+        patterns.add("error\\.log(\\.\\d+|-[0-9]{8}\\.gz)?$");
 
         // Generic system logs
-        patterns.add("(auth|kern|syslog|ufw|dmesg)(\\..*|-\\d{8})?$");
+        patterns.add("(auth|kern|syslog|ufw|dmesg)\\.log(\\.\\d+(\\.gz)?)?$");
+        patterns.add("(auth|kern|syslog|ufw)\\.log-\\d{8}$");
+        patterns.add("syslog-\\d{8}$");
+        patterns.add("dmesg\\.\\d+\\.gz$");
 
         // journal-export logs
-        patterns.add("journal-\\d{8}\\.log(\\.\\d+\\.gz)?$");
+        patterns.add("journal-\\d{8}\\.log(\\.\\d+(\\.gz)?)?$");
 
         // Package manager logs
         patterns.add("dpkg\\.log$");
@@ -55,7 +58,8 @@ class LogFileFilterBuilder {
         // APT and unattended upgrade logs
         patterns.add("history\\.log$");
         patterns.add("term\\.log$");
-        patterns.add("unattended-upgrades.*\\.log$");
+        patterns.add("unattended-upgrades\\.log$");
+        patterns.add("unattended-upgrades-dpkg\\.log$");
 
         // Compile regex strings to Pattern objects
         List<Pattern> compiled = new ArrayList<>();

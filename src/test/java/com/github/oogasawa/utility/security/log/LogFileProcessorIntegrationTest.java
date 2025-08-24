@@ -33,19 +33,11 @@ public class LogFileProcessorIntegrationTest {
                 .forEach(path -> {
                     String fileName = path.getFileName().toString();
                     if (LogFileFilter.isTarget(fileName)) {
-                        // Skip files ending with .log, .log.1, or containing -nigscHP2
-                        if (fileName.matches(".*(\\.log(\\.\\d+)?|-nigscHP2)(\\.gz)?$")) {
-                            return;
-                        }
                         String date = LogFileNameHelper.extractDateFromFileName(fileName);
-                        if (date == null) {
-                            try {
-                                date = LogFileNameHelper.getDateFromTimestamp(Files.getLastModifiedTime(path));
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
+                        // Skip files without a date in the name
+                        if (date != null) {
+                            expectedFileNames.add(LogFileNameHelper.buildNewFileName(fileName, date, serverName));
                         }
-                        expectedFileNames.add(LogFileNameHelper.buildNewFileName(fileName, date, serverName));
                     }
                 });
 

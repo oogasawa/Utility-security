@@ -22,15 +22,13 @@ class LogFileFilter {
      * @return {@code true} if the file name matches a known log pattern; {@code false} otherwise
      */
     public static boolean isTarget(String fileName) {
-        // 除外パターンにマッチするなら false を返す
-        if (fileName.matches(".*(\\.log(\\.\\d+)?|-nigscHP2)(\\.gz)?$")) {
-            return false;
+        // Check against all target patterns
+        for (Pattern pattern : targetPatterns) {
+            if (pattern.matcher(fileName).matches()) {
+                return true;
+            }
         }
-
-        // その他の条件に基づき true を返す（ログファイル拡張子やプレフィックスなど）
-        return fileName.matches(".*\\.(log|log\\.\\d+|gz|txt)$")
-                || fileName.matches(".*\\.(sa\\d+|sar\\d+|dmesg(\\.\\d+)?(\\.gz)?)$")
-                || fileName.matches(".*journal.*\\.log(\\.\\d+)?(\\.gz)?$");
+        return false;
     }
 
 }
