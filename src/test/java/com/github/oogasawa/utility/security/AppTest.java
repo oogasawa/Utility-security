@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * Smoke-test scaffold verifying the test harness is wired correctly.
+ */
 @DisplayName("a trivial test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -18,6 +21,9 @@ public class AppTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AppTest.class.getName());
     
+    /**
+     * Verifies that the JUnit infrastructure executes without failures.
+     */
     @Test
     @Order(1)
     public void trivialTest() {

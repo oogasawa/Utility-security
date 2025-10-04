@@ -40,7 +40,7 @@ fat-jarファイル(依存ライブラリがすべて入った単一のjarファ
 ## 使用方法
 
 引数なしで実行すると使い方が表示される。
-今のところ一つのコマンド(`ubuntu:report`)しか実装されていない。
+現在は `ubuntu:report` と `ubuntu:fetch-digest` の 2 つのコマンドを提供している。
 
 ``` bash
 $ java -jar target/Utility-security-1.0.0.jar 
@@ -121,6 +121,30 @@ USN-7509-1	.NET vulnerability	2025-05-16	.NET could be used to perform spoofing 
 ```
 
 
+### `ubuntu:fetch-digest`コマンド
+
+`ubuntu-security-announce Digest, Vol...` のメールを Gmail の IMAP から取得し、指定した期間の本文を 1 つのテキストファイルにまとめる。週次でまとめ作業を自動化したい場合に利用する。
+
+1. Gmail アカウントでアプリパスワードを発行し、以下の環境変数を設定する。
+
+   ```bash
+   export GMAIL_USERNAME='youraccount@gmail.com'
+   export GMAIL_APP_PASSWORD='16桁のアプリパスワード'
+   ```
+
+2. 取得したい期間（ISO 形式の日付）と出力ファイルを指定して実行する。
+
+   ```bash
+   java -jar target/Utility-security-1.5.0.jar ubuntu:fetch-digest \
+     --start 2025-05-01 --end 2025-05-07 \
+     --outfile ~/logs-security/ubuntu-security.2025W18.txt
+   ```
+
+   - `--start`, `--end`: 期間の開始・終了日。`--end` は `--start` 以上の日付で指定する。
+   - `--outfile`: 連結結果を書き出すテキストファイル。既に存在する場合は上書きされる。
+   - 取得対象は送信元 `security-announce@lists.ubuntu.com` かつ件名に `ubuntu-security-announce Digest, Vol` を含むメールのみ。
+
+
 ## 更新履歴
 
 v1.0.0
@@ -140,3 +164,7 @@ v1.4.0
 - 404エラー（CVEが存在しない場合）の適切な処理を追加
 - これらの改善により、severityがUnknownとなる頻度を大幅に削減
 
+v1.5.0
+- Gmail IMAP を利用した `ubuntu:fetch-digest` コマンドを追加し、Digest メールの取得と連結を自動化
+- README に新コマンドの環境変数設定と実行例を追記
+- コード全体に Javadoc を整備して保守性を向上

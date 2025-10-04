@@ -7,12 +7,18 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Integration tests for {@link LogFileProcessor} verifying end-to-end log renaming behavior.
+ */
 public class LogFileProcessorIntegrationTest {
 
     private static Path sourceDir;
     private static Path destDir;
     private static final String serverName = "testServer";
 
+    /**
+     * Creates temporary source and destination directories populated with simulated log data.
+     */
     @BeforeAll
     static void setup() throws IOException {
         sourceDir = Files.createTempDirectory("log-test-src");
@@ -20,6 +26,10 @@ public class LogFileProcessorIntegrationTest {
         SimulatedLogDataPopulator.populate(sourceDir);
     }
 
+    /**
+     * Ensures that every eligible log file is copied to the destination directory with the expected
+     * normalized file name.
+     */
     @Test
     void testAllExpectedFilesAreRenamedCorrectly() throws IOException {
         LogFileProcessor processor = new LogFileProcessor(serverName, destDir);
@@ -57,12 +67,21 @@ public class LogFileProcessorIntegrationTest {
         assertEquals(expectedFileNames, destFileNames, "Mismatch between expected and actual renamed files.");
     }
 
+    /**
+     * Removes the temporary directories and files created for the integration test.
+     */
     @AfterAll
     static void cleanup() throws IOException {
         deleteRecursively(sourceDir);
         deleteRecursively(destDir);
     }
 
+    /**
+     * Deletes a directory tree, ignoring failures to remove individual files.
+     *
+     * @param path root directory to delete recursively
+     * @throws IOException if the file walk cannot be initiated
+     */
     private static void deleteRecursively(Path path) throws IOException {
         if (!Files.exists(path)) return;
         Files.walk(path)

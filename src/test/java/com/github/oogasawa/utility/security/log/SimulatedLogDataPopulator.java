@@ -125,7 +125,13 @@ public class SimulatedLogDataPopulator {
     );
 
 
-    
+    /**
+     * Creates a rich set of synthetic log files under the supplied directory to mimic a production
+     * {@code /var/log} tree.
+     *
+     * @param baseDir base directory that will receive the simulated log structure
+     * @throws IOException if file or directory creation fails
+     */
     public static void populate(Path baseDir) throws IOException {
         // apache2
         Path apache2 = baseDir.resolve("apache2");
@@ -197,13 +203,26 @@ public class SimulatedLogDataPopulator {
         Files.writeString(baseDir.resolve("README"), "README -> ../../usr/share/doc/systemd/README.logs");
         Files.createDirectories(baseDir.resolve("private"));
     }
-
+    /**
+     * Writes placeholder content for each file name in the provided directory.
+     *
+     * @param dir destination directory
+     * @param names file names to create beneath {@code dir}
+     * @throws IOException if a file cannot be written
+     */
     private static void writeAll(Path dir, String... names) throws IOException {
         for (String name : names) {
             Files.write(dir.resolve(name), ("dummy content for " + name).getBytes());
         }
     }
-
+    /**
+     * Generates a consecutive range of rotated log files for the given prefix.
+     *
+     * @param dir destination directory
+     * @param prefix base log file prefix (e.g., {@code access.log})
+     * @param gzipped true when the generated files should include the {@code .gz} suffix
+     * @throws IOException if file creation fails
+     */
     private static void writeDailyLogs(Path dir, String prefix, boolean gzipped) throws IOException {
         IntStream.rangeClosed(10, 21).forEach(day -> {
             try {

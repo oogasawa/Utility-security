@@ -6,9 +6,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import java.io.IOException;
 
+/**
+ * Integration-style tests that exercise {@link UbuntuPriorityFetcher} against live Ubuntu trackers.
+ */
 public class UbuntuPriorityFetcherTest {
 
 
+    /**
+     * Ensures that the live Ubuntu tracker returns a non-empty priority for a recent CVE.
+     */
     @Test
     public void testFetchUbuntuPriority_liveAccess() throws Exception {
         String cveId = "CVE-2025-46727";
@@ -31,6 +37,9 @@ public class UbuntuPriorityFetcherTest {
         System.out.println("Live Ubuntu priority for " + cveId + ": " + priority);
     }
 
+    /**
+     * Confirms that non-existent CVEs are reported with the {@code Unknown} priority value.
+     */
     @Test
     public void testFetchUbuntuPriority_nonExistentCVE() throws Exception {
         String cveId = "CVE-1999-99999";
@@ -40,6 +49,10 @@ public class UbuntuPriorityFetcherTest {
             "Non-existent CVE should return 'Unknown' priority");
     }
     
+    /**
+     * Verifies retry behavior by asserting that failures mention the number of attempts or yield a
+     * valid priority when the request succeeds.
+     */
     @Test
     @Timeout(value = 35) // Should complete within 35 seconds even with retries
     public void testFetchUbuntuPriority_retriesOnFailure() throws Exception {
@@ -63,6 +76,9 @@ public class UbuntuPriorityFetcherTest {
         }
     }
     
+    /**
+     * Checks that the fetcher accepts well-formed CVE identifiers and handles network failures.
+     */
     @Test
     public void testFetchUbuntuPriority_validCVEFormat() throws Exception {
         // Test with a known CVE that should exist

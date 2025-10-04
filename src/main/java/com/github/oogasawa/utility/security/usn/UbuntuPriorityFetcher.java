@@ -108,6 +108,15 @@ public class UbuntuPriorityFetcher {
                 cveId, MAX_RETRIES), lastException);
     }
 
+    /**
+     * Scans the Ubuntu tracker HTML response for the first occurrence of a CVE priority icon and
+     * returns its textual severity representation.
+     *
+     * @param input response stream from the Ubuntu security tracker
+     * @return priority label such as {@code Low}, {@code Medium}, {@code High}, {@code Critical}, or
+     *         {@code Unknown} when no icon is found
+     * @throws IOException if the response stream cannot be read
+     */
     public static String extractPriorityFromHtmlLines(InputStream input) throws IOException {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
@@ -127,4 +136,3 @@ public class UbuntuPriorityFetcher {
 
 
 }
-

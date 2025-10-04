@@ -37,10 +37,21 @@ public class USNJsonExporter {
             this.level = level;
         }
 
+        /**
+         * Returns the numeric severity ordering associated with the priority.
+         *
+         * @return integer value where higher numbers indicate higher severity
+         */
         public int level() {
             return level;
         }
 
+        /**
+         * Parses a user-provided string into a {@link PriorityLevel} if possible.
+         *
+         * @param value textual severity label, e.g. {@code "High"}
+         * @return corresponding {@link PriorityLevel}, or {@code null} when the text is unrecognized
+         */
         public static PriorityLevel fromString(String value) {
             if (value == null)
                 return null;
@@ -58,6 +69,11 @@ public class USNJsonExporter {
             }
         }
 
+        /**
+         * Returns the name with only the first letter capitalized for display in TSV output.
+         *
+         * @return capitalized representation such as {@code "Medium"}
+         */
         public String nameCapitalized() {
             return name().charAt(0) + name().substring(1).toLowerCase();
         }

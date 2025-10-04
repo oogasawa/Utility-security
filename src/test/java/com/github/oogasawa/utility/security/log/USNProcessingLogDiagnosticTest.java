@@ -7,15 +7,24 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests that cover the diagnostic helpers for parsing USN processing logs.
+ */
 public class USNProcessingLogDiagnosticTest {
 
     private static Path tempLogFile;
 
+    /**
+     * Creates a temporary log file for each test case.
+     */
     @BeforeEach
     void setup() throws IOException {
         tempLogFile = Files.createTempFile("test-log", ".log");
     }
 
+    /**
+     * Deletes the temporary log file created for each test.
+     */
     @AfterEach
     void cleanup() throws IOException {
         if (Files.exists(tempLogFile)) {
@@ -23,6 +32,9 @@ public class USNProcessingLogDiagnosticTest {
         }
     }
 
+    /**
+     * Ensures that the extractor flags log lines reporting null or empty USN identifiers.
+     */
     @Test
     void testNullIdDetection() throws IOException {
         String logContent = "2024-01-15 10:30:45 ERROR - USN ID cannot be null or empty\n" +
@@ -35,6 +47,9 @@ public class USNProcessingLogDiagnosticTest {
         assertTrue(problematic.get(0).contains("USN ID cannot be null or empty"));
     }
 
+    /**
+     * Verifies that messages referencing unknown severity indicators are collected.
+     */
     @Test
     void testUnknownSeverityDetection() throws IOException {
         String logContent = "2024-01-15 10:30:45 WARN - Severity is unknown due to parsing failure\n" +
@@ -48,6 +63,9 @@ public class USNProcessingLogDiagnosticTest {
         assertTrue(problematic.get(0).toLowerCase().contains("unknown"));
     }
 
+    /**
+     * Confirms that subject line parse failures are recognized as problematic entries.
+     */
     @Test
     void testParseFailureDetection() throws IOException {
         String logContent = "2024-01-15 10:30:45 WARN - === SUBJECT LINE PARSE FAILURE ===\n" +
@@ -60,6 +78,9 @@ public class USNProcessingLogDiagnosticTest {
         assertTrue(problematic.get(0).contains("SUBJECT LINE PARSE FAILURE"));
     }
 
+    /**
+     * Checks that HTTP errors and connection timeouts are included in the diagnostic output.
+     */
     @Test
     void testHttpErrorDetection() throws IOException {
         String logContent = "2024-01-15 10:30:45 ERROR - HTTP error 404 while fetching USN\n" +
@@ -72,6 +93,9 @@ public class USNProcessingLogDiagnosticTest {
         assertEquals(2, problematic.size());
     }
 
+    /**
+     * Exercises the boolean helper that classifies individual log lines.
+     */
     @Test
     void testIsProblematicMethod() {
         assertTrue(USNProcessingLogDiagnostic.isProblematic("ERROR - USN ID cannot be null or empty"));
@@ -84,6 +108,9 @@ public class USNProcessingLogDiagnosticTest {
         assertFalse(USNProcessingLogDiagnostic.isProblematic("DEBUG - Normal log entry"));
     }
 
+    /**
+     * Validates that issue categorization returns the expected labels for the sample log lines.
+     */
     @Test
     void testCategorizeIssue() {
         assertEquals("NULL_ID", USNProcessingLogDiagnostic.categorizeIssue("ERROR - USN ID cannot be null or empty"));
@@ -93,6 +120,9 @@ public class USNProcessingLogDiagnosticTest {
         assertEquals("OTHER", USNProcessingLogDiagnostic.categorizeIssue("INFO - Normal log entry"));
     }
 
+    /**
+     * Ensures the summary report aggregates counts for each issue category.
+     */
     @Test
     void testGenerateSummaryReport() throws IOException {
         String logContent = "2024-01-15 10:30:45 ERROR - USN ID cannot be null or empty\n" +
@@ -112,6 +142,9 @@ public class USNProcessingLogDiagnosticTest {
         assertTrue(report.contains("HTTP error issues: 1"));
     }
 
+    /**
+     * Confirms that empty log files produce empty diagnostics and zero-count reports.
+     */
     @Test
     void testEmptyLogFile() throws IOException {
         Files.write(tempLogFile, "".getBytes());

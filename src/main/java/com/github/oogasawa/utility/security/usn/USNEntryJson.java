@@ -3,6 +3,10 @@ package com.github.oogasawa.utility.security.usn;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Mutable data holder representing a single Ubuntu Security Notice entry enriched with metadata
+ * required for JSON/TSV export.
+ */
 public class USNEntryJson {
     public String id;
     public String title;
@@ -17,7 +21,6 @@ public class USNEntryJson {
      public String livepatch = "auto"; // "yes", "no", or "NA"
     public String needs_reboot; // "yes", "no"
 }
-
 
 
 
