@@ -345,11 +345,18 @@ java -jar target/Utility-security-1.6.0.jar ubuntu:append-xlsx \
 | `-s`, `--sheet` | 追記先のシート。無ければ作る |
 | `-k`, `--kind` | `usn`または`livepatch`。既定は`usn` |
 
-**原本は書き換えない。** `【C-19】`は文書管理番号・バージョン・承認者を持つ管理文書であり、
-既存の行には人が手で書いた判断が入っている。
-差分を確認して原本を置き換える操作と、バージョンおよび更新日の記入は人が行う。
+**このコマンドは読み込んだファイルを書き換えない。** `--xlsx`で指定した記録簿を開き、
+行を足した別のファイルを`--outfile`へ書き出す。同じパスを両方に指定すると受け付けない。
+原本を置き換えるかどうかはこのコマンドの外で決める。
+`bin/update-patch-history.sh`はこれを毎回控えを取ってから置き換える(後述)。
 
 記録簿のどこかに既に載っているUSN番号・LSN番号は書かない。二度実行しても増えない。
+
+ただし`severity`が`LookupFailed`の行は書き直す。
+この値はUbuntu Security Noticeについての事実ではなく、
+ubuntu.comが応答しなかったという実行時の事情を記録したものだからである。
+書き直すのはプログラムが埋める8列だけで、人が埋める9列には触れない。
+`LookupFailed`以外のseverityを持つ行は、値が変わっていても書き直さない。
 
 作ったシートには`2025`シートと同じ書式を設定する。
 見出し行の固定、列幅、フォント(Arial)、見出しの色(プログラムが埋める列は緑`93C47D`、
@@ -358,6 +365,54 @@ java -jar target/Utility-security-1.6.0.jar ubuntu:append-xlsx \
 `summary`が数行になる行で、隣の短いセルの文字が下端に沈むのを避けるためである。
 
 人が埋める9列(対策内容・対策日・確認完了日・確認者・備考)は空のままにする。
+
+### 定期実行
+
+`bin/update-patch-history.sh`は、上の3つのコマンドを順に実行して記録簿そのものを更新する。
+cronから週に1回呼ぶことを想定している。
+
+``` bash
+$ crontab -l
+30 10 * * 1 /home/devteam/works/Utility-security/bin/update-patch-history.sh
+```
+
+1回の実行は次の4つの状態を順に通る。
+どの状態で失敗しても記録簿は元のままである。
+
+| 状態 | 意味 |
+|---|---|
+| Alone | ロックを取得した。他の実行が走っていない |
+| Reported | 2つの報告書をTSVとして書き終えた |
+| Candidate | 新しい行を持つ記録簿の複製が、記録簿の隣にできた |
+| Recorded | 元の記録簿を控えの置き場へ移し、複製を記録簿の位置に置いた |
+
+対象期間は実行日から30日前までとする。
+実行が失敗した週の分を次の実行が拾うためであり、
+既に載っている番号は書かないので期間が重なっても行は増えない。
+1月の実行では開始日を1月1日に切り上げる。前年に公開されたものは前年のシートに載るからである。
+
+| ファイル | 位置 |
+|---|---|
+| 記録簿 | `$HOME/Downloads/【C-19】セキュリティパッチ対策履歴.xlsx` |
+| 実行記録 | `$HOME/logs-security/patch-history/update-patch-history.log` |
+| 報告書のTSV | `$HOME/logs-security/patch-history/usn-<日時>.tsv`, `lsn-<日時>.tsv` |
+| 置き換える前の記録簿 | `$HOME/logs-security/patch-history/backup/`に12世代 |
+
+記録簿の位置は環境変数`PATCH_HISTORY_RECORD`で、
+jarの位置は`UTILITY_SECURITY_JAR`で、対象リリースは`UBUNTU_RELEASE`で変えられる。
+
+次の場合は記録簿を置き換えずに終わる。
+
+- 他の実行がロックを持っている(何もせず終了ステータス0で終わる)
+- `ubuntu:report`が見出し行を書かなかった。引数が受け付けられなかった場合である
+- 30日間のUbuntu Security Noticeが0件だった。Canonicalは週に数件公開するので、
+  0件は「公開が無かった」ではなく「読めなかった」を意味する
+- 書き出した複製が元の記録簿より小さい。行は増える一方なので、小さいのは何かを失っている
+
+Kernel Live Patch Security Noticeは数週間に1件なので、30日間で0件でも実行を続ける。
+
+**記録簿の`表紙・文書履歴`シートは書き換えない。**
+バージョンと最終更新日の記入は人が行う。
 
 ### Ubuntu Security APIに到達できるかの確認
 
@@ -439,4 +494,6 @@ v1.6.0
 - Kernel Live Patch Security Notice を1件1行で出す `ubuntu:livepatch-report` コマンドを追加した
 - 報告書を記録簿の xlsx へ追記する `ubuntu:append-xlsx` コマンドを追加した。原本は書き換えず別ファイルに書き出す
 - 依存する CLI ライブラリを `com.github.oogasawa:Utility-cli` 3.1.0 から `com.scivicslab:pluggable-cli` 1.0.0 へ変更した。前者はどこにも存在せず依存を解決できなかった
-- ユニットテストを110件に増やし、いずれも外部サービスに接続しないようにした。ubuntu.com へ実際に届くかの確認は `UbuntuSecurityApiLiveCheck` として `main()` を持つプログラムに分離した
+- `severity` が `LookupFailed` の行を後の実行で書き直すようにした。この値は Ubuntu Security Notice についての事実ではなく、ubuntu.com が応答しなかったという実行時の事情だからである。書き直すのはプログラムが埋める8列だけで、人が埋める9列には触れない
+- 報告書の作成から記録簿への追記までを cron から週に1回実行する `bin/update-patch-history.sh` を追加した。置き換える前の記録簿は12世代を控えとして残す
+- ユニットテストを114件に増やし、いずれも外部サービスに接続しないようにした。ubuntu.com へ実際に届くかの確認は `UbuntuSecurityApiLiveCheck` として `main()` を持つプログラムに分離した

@@ -22,8 +22,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -56,6 +58,17 @@ import java.util.Set;
 public class PatchHistoryWorkbook {
 
     private static final Logger logger = LoggerFactory.getLogger(PatchHistoryWorkbook.class);
+
+    /**
+     * The severity of a row that a later run writes over.
+     *
+     * <p>
+     * A run made while ubuntu.com was refusing writes this value. It says nothing about the notice;
+     * it records a failure on this side. Every other severity is a fact about the notice, so a row
+     * carrying one is never written over.
+     * </p>
+     */
+    private static final String SEVERITY_LOOKUP_FAILED = "LookupFailed";
 
     /** Header of the columns that a report of Ubuntu Security Notices fills in. */
     private static final List<String> USN_REPORT_HEADERS = List.of(
@@ -181,7 +194,7 @@ public class PatchHistoryWorkbook {
     public void addReport(Path sourceWorkbook, Path reportTsv, Path outputWorkbook,
             String sheetName) throws IOException {
         addTable(sourceWorkbook, reportTsv, outputWorkbook, sheetName,
-                USN_REPORT_HEADERS, USN_REPORT_WIDTHS);
+                USN_REPORT_HEADERS, USN_REPORT_WIDTHS, 4);
     }
 
     /**
@@ -197,7 +210,7 @@ public class PatchHistoryWorkbook {
     public void addLivePatchReport(Path sourceWorkbook, Path reportTsv, Path outputWorkbook,
             String sheetName) throws IOException {
         addTable(sourceWorkbook, reportTsv, outputWorkbook, sheetName,
-                LIVE_PATCH_REPORT_HEADERS, LIVE_PATCH_REPORT_WIDTHS);
+                LIVE_PATCH_REPORT_HEADERS, LIVE_PATCH_REPORT_WIDTHS, 3);
     }
 
     /**
@@ -214,11 +227,12 @@ public class PatchHistoryWorkbook {
      * @param sheetName the sheet that receives the rows
      * @param reportHeaders the header of the columns the report fills in
      * @param reportWidths the width of each of those columns
+     * @param severityColumn the column holding the severity, counting from zero
      * @throws IOException if a file cannot be read or written
      */
     private void addTable(Path sourceWorkbook, Path reportTsv, Path outputWorkbook,
-            String sheetName, List<String> reportHeaders, double[] reportWidths)
-            throws IOException {
+            String sheetName, List<String> reportHeaders, double[] reportWidths,
+            int severityColumn) throws IOException {
 
         List<List<String>> reportRows = readReport(reportTsv, reportHeaders.size());
         logger.info("Read {} rows from {}", reportRows.size(), reportTsv);
@@ -239,23 +253,35 @@ public class PatchHistoryWorkbook {
                 logger.info("Created the sheet {}", sheetName);
             }
 
+            Map<String, Row> rowsAwaitingARank = rowsWithoutARank(sheet, severityColumn);
             int rowIndex = lastFilledRowIndex(sheet) + 1;
             int added = 0;
+            int repaired = 0;
             int skipped = 0;
 
             for (List<String> reportRow : reportRows) {
-                if (knownNoticeIds.contains(reportRow.get(0))) {
+                String noticeId = reportRow.get(0);
+                Row awaiting = rowsAwaitingARank.get(noticeId);
+
+                if (awaiting != null && !SEVERITY_LOOKUP_FAILED.equals(reportRow.get(
+                        severityColumn))) {
+                    writeRow(awaiting, reportRow, styles, reportHeaders.size(), false);
+                    repaired++;
+                    continue;
+                }
+                if (knownNoticeIds.contains(noticeId)) {
                     skipped++;
                     continue;
                 }
-                writeRow(sheet.createRow(rowIndex), reportRow, styles, reportHeaders.size());
-                knownNoticeIds.add(reportRow.get(0));
+                writeRow(sheet.createRow(rowIndex), reportRow, styles, reportHeaders.size(), true);
+                knownNoticeIds.add(noticeId);
                 rowIndex++;
                 added++;
             }
 
-            logger.info("Added {} rows to the sheet {} and skipped {} already recorded notices",
-                    added, sheetName, skipped);
+            logger.info("Added {} rows to the sheet {}, gave a rank to {} rows that had none, "
+                    + "and skipped {} notices already recorded", added, sheetName, repaired,
+                    skipped);
 
             try (OutputStream out = Files.newOutputStream(outputWorkbook)) {
                 workbook.write(out);
@@ -381,20 +407,63 @@ public class PatchHistoryWorkbook {
      * @param reportRow the columns of the report
      * @param styles the styles of the workbook
      * @param reportColumnCount how many columns the report fills in
+     * @param newRow true when the row is new, so that the columns for people are given their
+     *        formatting. A row being written over keeps whatever people wrote in them.
      */
     private static void writeRow(Row row, List<String> reportRow, Styles styles,
-            int reportColumnCount) {
+            int reportColumnCount, boolean newRow) {
 
         for (int column = 0; column < reportRow.size(); column++) {
+            // A cell already holding a value is removed rather than written over. A writer other
+            // than this one may have stored the text of the cell in place, as an inline string,
+            // and setting a new value on such a cell replaces only one of the two places the text
+            // sits in. The cell then reads as the new value to this program and as the old one to
+            // a spreadsheet program. Building the cell afresh leaves one value in it.
+            Cell existing = row.getCell(column);
+            if (existing != null) {
+                row.removeCell(existing);
+            }
             Cell cell = row.createCell(column);
             cell.setCellValue(reportRow.get(column));
             cell.setCellStyle(styles.text);
         }
 
+        if (!newRow) {
+            return;
+        }
         for (int i = 0; i < MANUAL_HEADERS.size(); i++) {
             Cell cell = row.createCell(reportColumnCount + i);
             cell.setCellStyle(MANUAL_DATE_COLUMNS.contains(i) ? styles.date : styles.text);
         }
+    }
+
+    /**
+     * Finds the rows whose severity says the priority could not be retrieved.
+     *
+     * <p>
+     * A row written while ubuntu.com was refusing carries {@link #SEVERITY_LOOKUP_FAILED}. It is
+     * the one kind of row a later run should write over, because the value in it is not a fact
+     * about the notice but a record of a failure on this side. Every other row is left alone.
+     * </p>
+     *
+     * @param sheet the sheet to scan
+     * @param severityColumn the column holding the severity, counting from zero
+     * @return the rows, by notice identifier
+     */
+    private static Map<String, Row> rowsWithoutARank(Sheet sheet, int severityColumn) {
+        Map<String, Row> rows = new HashMap<String, Row>();
+
+        for (Row row : sheet) {
+            Cell id = row.getCell(0);
+            Cell severity = row.getCell(severityColumn);
+            if (id == null || severity == null) {
+                continue;
+            }
+            if (SEVERITY_LOOKUP_FAILED.equals(readAsText(severity))) {
+                rows.put(readAsText(id), row);
+            }
+        }
+        return rows;
     }
 
     /**
