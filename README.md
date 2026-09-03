@@ -9,27 +9,26 @@
 - Ubuntu Linux 24.04
 - JDK 23
 - Apache Maven 3.9.9
-- Utility-cli 3.1.0 https://github.com/oogasawa/Utility-cli
 
 JDKおよびMavenのインストール方法は例えば以下のURLを参照(SDKMAN!で入れると簡単)
 https://sc.ddbj.nig.ac.jp/guides/software/DevelopmentEnvironment/java/
 
-Utilit-cliはMaven Repositoryには登録されていないので、
-以下のようにしてあらかじめビルドする計算機のローカルリポジトリ`$HOME/.m2/`にインストールしておく必要がある。
+コマンドラインの解析には `com.scivicslab:pluggable-cli` を使う。
+これはMaven Centralに登録されているので、事前に手元でビルドする作業は要らない。
 
-``` 
-git clone --branch v3.1.0 --depth 1 https://github.com/your-organization/utility-cli.git
-cd Utility-cli
-mvn clean install
-```
+以前は `com.github.oogasawa:Utility-cli` の 3.1.0 に依存していたが、
+このバージョンはMaven Centralにも `v3.1.0` タグにも存在せず(タグのpom.xmlは3.0.0を宣言している)、
+依存を解決できずビルドが止まる状態だった。
 
 ## ビルド方法
 
 ``` 
 git clone https://github.com/oogasawa/Utility-security
 cd Utility-security
-mvn clean package
+rm -rf target && mvn package
 ```
+
+`mvn clean` は効かないため、ビルド前に `rm -rf target` を実行する。
 
 これにより`Utility-security/target/Utility-security-VERSION.jar`という名前で
 fat-jarファイル(依存ライブラリがすべて入った単一のjarファイル)が作られる。
@@ -40,86 +39,341 @@ fat-jarファイル(依存ライブラリがすべて入った単一のjarファ
 ## 使用方法
 
 引数なしで実行すると使い方が表示される。
-現在は `ubuntu:report` と `ubuntu:fetch-digest` の 2 つのコマンドを提供している。
 
 ``` bash
-$ java -jar target/Utility-security-1.0.0.jar 
+$ java -jar target/Utility-security-1.6.0.jar
 
 ## Usage
 
 java -jar Utility-security-<VERSION>.jar <command> <options>
 
+
+## Log utilities
+
+log:rename      Rename and relocate collected log files.
+
+
 ## Ubuntu security commands
 
-ubuntu:report   Create TSV format report.
-
-$ java -jar target/Utility-security-1.0.0.jar ubuntu:report -h
-Error: Failed to parse the command. Reason: Unrecognized option: -h
-See the help below for correct usage:
-usage: ubuntu:report
- -f,--format <format>   The format of the report (tsv or json)
- -i,--infile <infile>   An input file of ubuntu security report.
-
-
-## Description
-
-Create TSV format report.
+ubuntu:append-xlsx  Add a report to the patch history workbook, writing a new file.
+ubuntu:fetch-digest Fetch ubuntu-security-announce digests from Gmail within the date range.
+ubuntu:livepatch-report Create a report of Kernel Live Patch Security Notices in TSV format.
+ubuntu:report   Create a report of Ubuntu Security Notices in TSV or JSON format.
 ```
 
 ### `ubuntu:report`コマンド
 
-このコマンドは、ubuntu-security-announceから必要な情報だけを取り出しタブ区切り形式(TSV)で出力するものである。
+対応が必要なUbuntu Security Noticeを選び出し、タブ区切り形式(TSV)またはJSONで出力する。
+データはUbuntu Security APIから直接取得するので、メーリングリストへの登録も、
+届いたメールを1つのファイルに連結する作業も要らない。
 
-使用方法は以下のとおり。
-
-1. 以下のURLからubuntu-security-announce mailing listに登録する。
-https://lists.ubuntu.com/mailman/listinfo/ubuntu-security-announce
-
-2. 上記mailing listから送られてきた多数のメールをそのまま1つのテキストファイルに全部つなげて(concatenateして)保存しておく。
-例えば ubuntu-security.2505A.txtに5月第一週に来たメールを保存するなど。
-
-3. 以下のようにコマンドを実行する
+#### 期間を指定して実行する
 
 ``` bash
-java -jar Ubuntu-security-1.0.0-jar ubuntu:report -i ubuntu-security.2505A.txt | tee ubuntu-security.2505A.tsv
+java -jar target/Utility-security-1.6.0.jar ubuntu:report \
+  --start 2026-08-24 --end 2026-08-31 | tee ubuntu-security.2026W35.tsv
 ```
 
-- 標準出力にTSV形式のデータが出力される。
-- 標準エラー出力に実行時のログが出力される。
+| オプション | 意味 |
+|---|---|
+| `-S`, `--start` | 取得する公開日の下限(その日を含む)。ISO形式(`YYYY-MM-DD`)。 |
+| `-E`, `--end` | 取得する公開日の上限(その日を含む)。ISO形式。 |
+| `-r`, `--release` | 対象とするUbuntuリリースのコードネーム。既定は`noble`(24.04 LTS)。 |
+| `-f`, `--format` | 出力形式(`tsv`または`json`)。既定は`tsv`。 |
+| `-i`, `--infile` | Ubuntu Security APIの代わりに、連結済みのメールを入力とする(後述)。 |
 
+標準出力にTSV形式のデータが、標準エラー出力に実行時のログが出力される。
 
 実行例
 
 ``` bash
-$ java -jar target/Utility-security-1.0.0.jar ubuntu:report -i ubuntu-security.2505D.txt | tee 2505D.tsv
-2025-05-22 10:02:03,040 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:134] USN-7520-1, PostgreSQL vulnerability, [CVE-2025-4207]
-2025-05-22 10:02:04,794 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: Medium, CVE-2025-4207
-2025-05-22 10:02:04,800 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:139] levels.size() = 1
-2025-05-22 10:02:05,818 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:134] USN-7522-1, Linux kernel (Azure, N-Series) vulnerabilities, [CVE-2024-56653, CVE-2024-57932, CVE-2024-54455, CVE-2024-57938, CVE-2024-57896, CVE-2024-53179, CVE-2024-57903, CVE-2025-21640, CVE-2024-56654, CVE-2024-57906, CVE-2024-53690, CVE-2025-21648, CVE-2024-57913, CVE-2025-21655, CVE-2024-57907, CVE-2025-21634, CVE-2024-57926, CVE-2025-21659, CVE-2024-54460, CVE-2024-57898, CVE-2024-56769, CVE-2024-36476, CVE-2025-21938, CVE-2025-21637, CVE-2024-57888, CVE-2024-57901, CVE-2024-57887, CVE-2024-57940, CVE-2024-49571, CVE-2024-57889, CVE-2024-55639, CVE-2024-57899, CVE-2024-56759, CVE-2024-41013, CVE-2024-57895, CVE-2024-57933, CVE-2024-56662, CVE-2024-56767, CVE-2025-21639, CVE-2024-56715, CVE-2024-57883, CVE-2025-21636, CVE-2024-57931, CVE-2025-21642, CVE-2024-53685, CVE-2024-56659, CVE-2025-21971, CVE-2024-56716, CVE-2025-21652, CVE-2024-57792, CVE-2025-21638, CVE-2024-56764, CVE-2024-55916, CVE-2024-57916, CVE-2024-56718, CVE-2024-57929, CVE-2024-57900, CVE-2025-21660, CVE-2024-57879, CVE-2024-56758, CVE-2024-57908, CVE-2025-21664, CVE-2024-56652, CVE-2024-57882, CVE-2024-39282, CVE-2025-21663, CVE-2024-47736, CVE-2024-54193, CVE-2025-21650, CVE-2024-56665, CVE-2024-57793, CVE-2024-58087, CVE-2025-21658, CVE-2025-21643, CVE-2024-54683, CVE-2024-56667, CVE-2024-56664, CVE-2024-56770, CVE-2024-57946, CVE-2024-57904, CVE-2024-56709, CVE-2024-56369, CVE-2024-58237, CVE-2024-57885, CVE-2024-56763, CVE-2024-56657, CVE-2025-21645, CVE-2024-57893, CVE-2025-21631, CVE-2024-57791, CVE-2024-57910, CVE-2024-57902, CVE-2024-57806, CVE-2025-21656, CVE-2024-53125, CVE-2024-56761, CVE-2024-56717, CVE-2024-47408, CVE-2025-21654, CVE-2025-21649, CVE-2024-57807, CVE-2024-56675, CVE-2025-21653, CVE-2024-57897, CVE-2024-53687, CVE-2024-56760, CVE-2025-21635, CVE-2025-21632, CVE-2024-57890, CVE-2025-21647, CVE-2024-57917, CVE-2024-56372, CVE-2024-56656, CVE-2024-57912, CVE-2024-57841, CVE-2025-21953, CVE-2024-56710, CVE-2024-57884, CVE-2024-57804, CVE-2025-21888, CVE-2024-56660, CVE-2024-57805, CVE-2024-57801, CVE-2024-38608, CVE-2024-57945, CVE-2024-55881, CVE-2024-57802, CVE-2024-57892, CVE-2025-21646, CVE-2024-56670, CVE-2025-21651, CVE-2024-57939, CVE-2024-57925, CVE-2024-57911, CVE-2025-21662, CVE-2024-49568]
-2025-05-22 10:02:07,133 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: High, CVE-2024-56653
-2025-05-22 10:02:08,400 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: Medium, CVE-2024-57932
-2025-05-22 10:02:10,037 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: Medium, CVE-2024-54455
-2025-05-22 10:02:11,475 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: Medium, CVE-2024-57938
-2025-05-22 10:02:12,862 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: Medium, CVE-2024-57896
-2025-05-22 10:02:14,196 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: Medium, CVE-2024-53179
-2025-05-22 10:02:15,644 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: Medium, CVE-2024-57903
-2025-05-22 10:02:17,006 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: Medium, CVE-2025-21640
-2025-05-22 10:02:18,333 INFO [main] c.g.o.u.s.u.USNJsonExporter [USNJsonExporter.java:219] rawPriority: Medium, CVE-2024-56654
+$ java -jar target/Utility-security-1.6.0.jar ubuntu:report --start 2026-04-01 --end 2026-09-01
+INFO c.g.o.u.s.u.UsnApiFetcher  Requesting notices 1 to 20 for release noble
+INFO c.g.o.u.s.u.UsnApiFetcher  Fetched 418 notices for release noble between 2026-04-01 and 2026-09-01
+INFO c.g.o.u.s.u.USNJsonExporter Merged 364 notices into 337 by their USN number
+INFO c.g.o.u.s.u.USNJsonExporter Final entries after keeping only the kernels in use: 337
+INFO c.g.o.u.s.u.USNJsonExporter storedPriority: Medium, CVE-2026-33056
+INFO c.g.o.u.s.u.USNJsonExporter rawPriority: High, CVE-2026-43406
+INFO c.g.o.u.s.u.USNJsonExporter Assigned severity 'Critical' to USN-8574-2 based on 913 CVEs, 12 of them High or above
 ... 以下略
 ```
 
 実行結果
 
 ```
-$ cat 2505D.tsv 
-id	title	published_date	summary	severity	reboot	livepatch
-USN-7520-1	PostgreSQL vulnerability	2025-05-20	PostgreSQL could be made to crash if it received specially crafted network traffic.	Medium	no	NA
-USN-7515-2	Linux kernel vulnerabilities	2025-05-20	Several security issues were fixed in the Linux kernel.	Medium	yes	no
-USN-7521-1	Linux kernel vulnerabilities	2025-05-20	Several security issues were fixed in the Linux kernel.	Medium	yes	no
-USN-7513-3	Linux kernel vulnerabilities	2025-05-20	Several security issues were fixed in the Linux kernel.	Medium	yes	no
-USN-7509-1	.NET vulnerability	2025-05-16	.NET could be used to perform spoofing over a network.	Medium	no	NA
+id	title	published_date	summary	severity	reboot	livepatch	severe_cves
+USN-8138-1	Vim vulnerability	2026-04-01	Vim could be made to crash.	Medium	no	NA	
+USN-8147-1	libarchive vulnerabilities	2026-04-02	Several security issues were fixed in libarchive.	Medium	no	NA	
+USN-8155-1	Linux kernel vulnerabilities	2026-04-06	Several security issues were fixed in the Linux kernel.	High	yes	no	CVE-2026-21823
 ```
 
+2026-04-01から2026-09-01までのUbuntu Security Noticeは344件で、
+severityの内訳はCritical 16、High 35、Medium 279、Low 7、`NoCve` 7である。
+
+#### 実行にかかる時間
+
+ubuntu.comへの要求は3秒以上の間隔を空けて出す。
+間隔を空けずに要求を連続して出すと、サーバはHTTP 503を返し、
+やがてそのホストからの要求そのものに応答しなくなる。
+このため要求間隔は`UbuntuSecurityHttpClient`に組み込んであり、短縮するオプションは設けていない。
+
+5か月分(Ubuntu Security Notice 344件)を、保存済みのUbuntu priorityが無い状態から作ると、
+CVEを3400件あまり取得することになり、19時間かかった。
+保存済みのUbuntu priorityが揃っていれば、同じ期間が5分前後で終わる。
+
+要求が失敗した場合は最大10回まで試し、待ち時間を1回ごとに5秒ずつ延ばす。
+
+| 試行回数 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 待ち時間(秒) | 3 | 8 | 13 | 18 | 23 | 28 | 33 | 38 | 43 | 48 |
+
+応答を待つ上限は120秒である。30秒にしていたときは、失敗51回のうち39回が読み取りの打ち切りだった。
+120秒にすると打ち切りは0回になり、失敗はすべてサーバが返すHTTP 503とHTTP 504になった。
+つまり待ちきれずに諦めていた分は無くなった。
+
+#### CVE 1件あたりの実測値
+
+1073件の新規取得に6.6時間かかった。取得できた割合は次のとおりで、
+数え方によって値が大きく違うので、どれを指しているかを明示する。
+
+| 数え方 | 値 |
+|---|---|
+| CVE単位(Ubuntu priorityが取れたCVE / 取得を試みたCVE) | 1073 / 1075 = 99.8% |
+| 要求単位(応答が返った要求 / 全要求) | 1206 / 1753 = 69% |
+
+運用上意味を持つのはCVE単位である。目的はUbuntu priorityを得ることで、
+そのために何回要求したかは手段だからである。
+4回に1回の要求が失敗していても、失敗した要求は再試行され、
+そのほとんどが次かその次で成功するので、CVEそのものはほぼ全部取れる。
+
+#### 応答は必要なところまで読んで打ち切る
+
+CVEのページは約85キロバイトあり、Ubuntu priorityはその25%の位置(21217バイト目)にある。
+1行ずつ読み、優先度アイコンが見つかった行で読むのをやめる。
+
+以前は応答本体を全部読んでから探していた。この形だと、優先度が届いた後の残り75%の受信中に
+制限時間を超えると、手元にある答えを捨てて失敗として扱ってしまう。
+
+#### CVEのpriorityはJSONエンドポイントからは取れない
+
+Ubuntu Security APIは同じ値を`/security/cves/<CVE番号>.json`の`priority`フィールドでも公開しているが、
+このエンドポイントは長時間にわたってHTTP 503とHTTP 504を返す。
+同じ`CVE-2026-66484`について、JSONが10回の試行すべてに失敗している間、
+`https://ubuntu.com/security/CVE-2026-66484`のページはHTTP 200を即座に返した。
+このためpriorityはページから読む。
+
+#### severityの決め方
+
+Ubuntuが重要度を付ける対象は個々のCVEであって、Ubuntu Security Noticeではない。
+このコマンドはUbuntu Security Noticeが参照する全CVEのUbuntu priorityを取得し、
+その最大値をそのUbuntu Security Noticeのseverityとする。
+
+| severity | 意味 | 読み手が取る行動 |
+|---|---|---|
+| `Low` `Medium` `High` `Critical` | 参照する全CVEのUbuntu priorityのうち最大のもの | 値に応じて対応する |
+| `LookupFailed` | いずれかのCVEのUbuntu priorityを取得できなかった | 報告書が不完全である。手で確認する |
+| `Unrated` | 参照するCVEのどれにもUbuntuが順位を付けていない | Ubuntu側の判定待ちである |
+| `NoCve` | CVEが1件も割り当てられていない | CVE以外の情報(Launchpadのバグ等)を見る |
+
+順位の付かないCVEが混ざっていても、順位の付いたCVEが1件でもあれば、その最大値を書く。
+Ubuntuが各CVEを見た上で一部をまだ判定していないだけであり、
+判定済みの順位は報告に値する事実だからである。
+Criticalと分かっているCVEを含むUbuntu Security Noticeは、
+未判定のCVEが何であろうとCriticalである。
+
+`LookupFailed`だけは扱いが違う。こちらが取得できなかった場合であり、
+そのCVEのUbuntu priorityが何であるかを一切知らない。
+順位の付いたCVEがあっても、取得できなかったCVEがそれより深刻でないとは言えないので、
+最大値は書かず`LookupFailed`とする。
+
+#### severe_cves列
+
+Ubuntu priorityがHigh以上のCVE番号を空白区切りで並べる。
+severityは最悪の値がいくつかを示すが、それがどのCVEかを示さない。
+今夜対応するか次の定期メンテナンスまで待つかを判断する読み手は、
+その深刻なCVEを調べる必要がある。
+
+#### CVEの取得を途中で打ち切らない
+
+1件のCVEが取得できなくても、そのUbuntu Security Noticeが参照する残りのCVEを最後まで取得する。
+
+以前は最初に取得できなかったCVEの時点で打ち切っていた。
+その時点でそのUbuntu Security Noticeのseverityは`LookupFailed`と決まるので、
+残りを引く意味がないという理由だった。
+これは目の前の実行では要求を節約するが、次回以降により大きな代償を払う。
+一度取得したUbuntu priorityは保存され二度と要求しないので、
+到達しなかったCVEは次回の実行でも取得されないままである。
+1件で数百のCVEを参照するカーネルのUbuntu Security Noticeでこれが起きると、
+次の実行も同じ場所で打ち切られ、何度流しても先へ進まない。
+実際に1回の実行で16件のUbuntu Security Noticeがこの状態になり、
+1074件のCVEが未取得のまま残った。
+
+#### CVEのpriorityの保存
+
+一度取得したCVEのpriorityは次のファイルに保存し、次回以降は要求を出さずに読む。
+
+```
+$HOME/.cache/Utility-security/cve-priority.tsv
+```
+
+CVE識別子とpriorityをタブ区切りで並べた表で、CVE識別子で整列してある。
+同じCVEは複数の記事から参照され、翌週以降の報告書にも現れるので、
+保存しておくと実行時間が大きく縮む。
+このファイルを削除すると、次回の実行で全てのCVEを取得し直す。
+
+保存するのは`Low` `Medium` `High` `Critical`の4つだけである。
+Ubuntuが順位を付けていないCVEや、取得に失敗したCVEは保存しない。
+前者は後から順位が付くことがあり、保存すると新しい判定を二度と見なくなるためである。
+
+#### 表に載せるUbuntu Security Noticeの選び方
+
+`--release`で指定したUbuntuリリースに該当するものだけを、Ubuntu Security APIの側で絞り込む。
+
+その上で、対象の計算機が使っているカーネル以外のUbuntu Security Noticeを除く。
+残すのは、タイトルがカーネルのflavourを名乗らないもの(汎用カーネル)と、
+括弧の中身が`NVIDIA`と完全に一致するものだけである。
+`NVIDIA Tegra`や`Low Latency NVIDIA`は別のカーネルなので残さない。
+
+残すflavourを列挙する方式にしてある。除外する語を並べる方式だと、
+Canonicalがflavourを追加するたびに漏れる。
+実際に`Oracle`・`FIPS`・`HWE`・`Xilinx`・`GCP`・`Low Latency`の17件が漏れて表に載っていた。
+
+Ubuntu Security APIは、Kernel Live Patch Security Notice(`LSN-`で始まるもの)を
+Ubuntu Security Noticeと同じ一覧に入れて返す。このコマンドは`type`が`USN`のものだけを残す。
+
+#### 同じUSN番号のものを1行にまとめる
+
+Canonicalは同じ修正をカーネルのflavourごと・Ubuntuリリースごとに出し直し、
+同じUSN番号に異なる枝番を付ける(`USN-8643-1`と`USN-8643-5`)。
+記録簿は修正1件につき1行なので、同じUSN番号のものは1行にまとめる。
+
+代表にするのは、タイトルがカーネルのflavourを名乗らないもののうち最も古く公開されたものである。
+`USN-8574-1`が`Linux kernel (GCP FIPS)`で`-2`と`-3`が汎用の場合、`-2`を代表とする。
+古い方を機械的に選ぶと、汎用の修正がGCP FIPSの見出しで記録されてしまう。
+まとめられた側のCVEと対象リリースは代表に足し込むので、severityの判断材料は失われない。
+
+#### 並び順
+
+公開日の昇順に並べる。記録簿が古い順に読める形になっているためである。
+Ubuntu Security APIは新しい順に返すので、出力前に並べ替える。
+同じ日に公開されたものはUSN番号の順にする。同じ期間を2回実行しても同じ並びになる。
+
+#### アーカイブしたメールから作る
+
+過去に受信して保存してあるメールから報告書を作る場合は`--infile`を渡す。
+この経路はメール本文を解析し、更新方法はUSNのHTMLページから取得する。
+このHTMLページへの要求も`UbuntuSecurityHttpClient`を通るので、同じ3秒間隔が適用される。
+記事1件につき1回の要求が出るため、こちらも記事の件数に応じて時間がかかる。
+
+``` bash
+java -jar target/Utility-security-1.6.0.jar ubuntu:report -i ubuntu-security.2505A.txt | tee 2505A.tsv
+```
+
+#### ヘルプの表示
+
+`-h`を付けるとエラー行が1行出た後にヘルプが表示される。
+
+``` bash
+$ java -jar target/Utility-security-1.6.0.jar ubuntu:report -h
+Error: Failed to parse the command. Reason: Unrecognized option: -h
+See the help below for correct usage:
+Usage:
+  usage: ubuntu:report [-E <YYYY-MM-DD>] [-f <format>] [-i <infile>] [-r <codename>] [-S <YYYY-MM-DD>]
+...
+```
+
+先頭のエラー行は`pluggable-cli` 1.0.0の挙動である。
+`-h`を受け取った時点でオプションの解析を打ち切る修正は、`pluggable-cli`側の未公開の変更として存在する。
+
+### `ubuntu:livepatch-report`コマンド
+
+Kernel Live Patch Security Noticeを1件1行で出力する。
+無停止でカーネルを修正できるかどうかを判断するための表である。
+
+``` bash
+java -jar target/Utility-security-1.6.0.jar ubuntu:livepatch-report \
+  --start 2026-04-01 --end 2026-09-01 --release noble | tee livepatch.2026.tsv
+```
+
+```
+id	published_date	summary	severity	flavours	patch_version	kernel_version	cve_count	severe_cves
+LSN-0119-1	2026-04-13	Several security issues were fixed in the kernel.	High	linux	119.1	6.8.0-1	8	CVE-2025-21704 ...
+LSN-120-1	2026-06-01	Several security issues were fixed in the kernel.	High	linux	120.2	6.8.0-1	3	CVE-2026-31431 ...
+LSN-0121-1	2026-08-27	Several security issues were fixed in the kernel.	Critical	linux	121.7	6.8.0-1	34	CVE-2026-43406 ...
+```
+
+| 列 | 意味 |
+|---|---|
+| `flavours` | 無停止修正が出ているカーネルのflavourのうち、対象の計算機が使っているもの |
+| `patch_version` | live patch自体の版 |
+| `kernel_version` | 適用先のカーネルの版 |
+| `cve_count` | そのKernel Live Patch Security Noticeが直すCVEの件数 |
+
+`flavours`が空の行は、そのlive patchが対象の計算機のカーネルを含んでいないことを示す。
+
+2026年4月から9月のnobleでlive patchが出ているflavourは
+`aws` `azure` `gcp` `gke` `ibm` `linux` `oracle`の7つで、`nvidia`は1件も出ていない。
+NVIDIAカーネルを使う計算機は、カーネル更新のたびに再起動が要る。
+
+Canonicalはこれを2か月に1回ほどまとめて出す。
+同じ期間のカーネル向けUbuntu Security Noticeが29件あるのに対し、
+Kernel Live Patch Security Noticeは3件である。
+
+`ubuntu:report`が出力する`livepatch`列とは別のものである。
+`livepatch`列は各Ubuntu Security Noticeの更新方法の文に
+`canonical livepatch is available`という文字列があるかどうかで判定するが、
+Canonicalはこの文言を削除しており、2025年5月以降`yes`が1件も出ていない。
+
+### `ubuntu:append-xlsx`コマンド
+
+`ubuntu:report`または`ubuntu:livepatch-report`が出したTSVを、
+記録簿`【C-19】セキュリティパッチ対策履歴.xlsx`のシートへ追記する。
+
+``` bash
+java -jar target/Utility-security-1.6.0.jar ubuntu:append-xlsx \
+  --infile report_2026.tsv \
+  --xlsx  "【C-19】セキュリティパッチ対策履歴.xlsx" \
+  --outfile "【C-19】セキュリティパッチ対策履歴_2026追記.xlsx" \
+  --sheet 2026 --kind usn
+```
+
+| オプション | 意味 |
+|---|---|
+| `-i`, `--infile` | 追記するTSV |
+| `-x`, `--xlsx` | 読み込む記録簿。書き換えない |
+| `-o`, `--outfile` | 書き出すファイル。`--xlsx`と同じパスは受け付けない |
+| `-s`, `--sheet` | 追記先のシート。無ければ作る |
+| `-k`, `--kind` | `usn`または`livepatch`。既定は`usn` |
+
+**原本は書き換えない。** `【C-19】`は文書管理番号・バージョン・承認者を持つ管理文書であり、
+既存の行には人が手で書いた判断が入っている。
+差分を確認して原本を置き換える操作と、バージョンおよび更新日の記入は人が行う。
+
+記録簿のどこかに既に載っているUSN番号・LSN番号は書かない。二度実行しても増えない。
+
+作ったシートには`2025`シートと同じ書式を設定する。
+見出し行の固定、列幅、フォント(Arial)、見出しの色(プログラムが埋める列は緑`93C47D`、
+人が埋める列は橙`FCE5CD`)、対策日欄の`yyyy-mm-dd`表示形式である。
+全セルを上揃えかつ文字列の折り返し表示にする。
+`summary`が数行になる行で、隣の短いセルの文字が下端に沈むのを避けるためである。
+
+人が埋める9列(対策内容・対策日・確認完了日・確認者・備考)は空のままにする。
+
+### Ubuntu Security APIに到達できるかの確認
+
+`UbuntuSecurityApiLiveCheck`は、報告書が使う2つのエンドポイントに1回ずつ要求を出し、
+応答が返るかを確かめるプログラムである。ユニットテストではないので`mvn test`では実行されない。
+外部サービスへの要求をビルドのたびに出さないためである。
+
+``` bash
+$ java -cp target/Utility-security-1.6.0.jar \
+    com.github.oogasawa.utility.security.usn.UbuntuSecurityApiLiveCheck
+notices endpoint: USN-8643-5, published 2026-08-27T21:29:15.524720, type USN, 4 CVEs
+cve endpoint: CVE-2025-4207 has priority Medium
+PASS: both endpoints of the Ubuntu Security API answered.
+```
+
+両方のエンドポイントが応答すれば終了ステータス0、そうでなければ1を返す。
 
 ### `ubuntu:fetch-digest`コマンド
 
@@ -135,7 +389,7 @@ USN-7509-1	.NET vulnerability	2025-05-16	.NET could be used to perform spoofing 
 2. 取得したい期間（ISO 形式の日付）と出力ファイルを指定して実行する。
 
    ```bash
-   java -jar target/Utility-security-1.5.0.jar ubuntu:fetch-digest \
+   java -jar target/Utility-security-1.6.0.jar ubuntu:fetch-digest \
      --start 2025-05-01 --end 2025-05-07 \
      --outfile ~/logs-security/ubuntu-security.2025W18.txt
    ```
@@ -168,3 +422,21 @@ v1.5.0
 - Gmail IMAP を利用した `ubuntu:fetch-digest` コマンドを追加し、Digest メールの取得と連結を自動化
 - README に新コマンドの環境変数設定と実行例を追記
 - コード全体に Javadoc を整備して保守性を向上
+
+v1.6.0
+- `ubuntu:report` の入手元を、Gmail から取得したメール本文から Ubuntu Security API (`https://ubuntu.com/security/notices.json`) へ変更した。`--start` と `--end` で期間を指定する。`--infile` を渡せば従来どおりメールからも作れる
+- CVE の Ubuntu priority の入手元は `https://ubuntu.com/security/<CVE番号>` の HTML のままとした。同じ値を返す JSON エンドポイントは HTTP 503 と 504 を長時間返すため使わない
+- 一度取得した Ubuntu priority を `$HOME/.cache/Utility-security/cve-priority.tsv` に保存し、次回以降は要求を出さずに読むようにした。取得した時点で1件ずつ追記するので、途中で止めても失われない
+- CVE を1件取得できなくても、残りの CVE を最後まで取得するようにした。以前は打ち切っており、到達しなかった CVE が保存されないため、何度実行しても同じ場所で止まっていた
+- 順位の付かない CVE が混ざっていても、順位の付いた CVE があればその最大値を severity に書くようにした
+- severity が定まらない場合を `LookupFailed`(取得に失敗)・`Unrated`(Ubuntu が1件も順位を付けていない)・`NoCve`(CVE が無い)の3つに分けた。以前はすべて `Unknown` だった
+- Ubuntu priority が High 以上の CVE 番号を並べる `severe_cves` 列を追加した
+- 同じ USN 番号の枝番を1行にまとめるようにした
+- 表に載せるカーネルの flavour を、汎用と `NVIDIA` の完全一致だけに絞った。以前は除外する語を並べる方式で、`Oracle`・`FIPS`・`HWE` 等が漏れていた
+- 出力を公開日の昇順に並べるようにした
+- ubuntu.com への要求を `UbuntuSecurityHttpClient` に集約し、3秒以上の間隔、最大10回の再試行(待ち時間は5秒ずつ増加)、応答待ち120秒を全経路に適用した
+- 応答を1行ずつ読み、必要な値が見つかった時点で読むのをやめるようにした
+- Kernel Live Patch Security Notice を1件1行で出す `ubuntu:livepatch-report` コマンドを追加した
+- 報告書を記録簿の xlsx へ追記する `ubuntu:append-xlsx` コマンドを追加した。原本は書き換えず別ファイルに書き出す
+- 依存する CLI ライブラリを `com.github.oogasawa:Utility-cli` 3.1.0 から `com.scivicslab:pluggable-cli` 1.0.0 へ変更した。前者はどこにも存在せず依存を解決できなかった
+- ユニットテストを110件に増やし、いずれも外部サービスに接続しないようにした。ubuntu.com へ実際に届くかの確認は `UbuntuSecurityApiLiveCheck` として `main()` を持つプログラムに分離した

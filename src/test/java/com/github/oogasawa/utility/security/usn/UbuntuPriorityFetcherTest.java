@@ -1,98 +1,127 @@
 package com.github.oogasawa.utility.security.usn;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import java.io.IOException;
 
 /**
- * Integration-style tests that exercise {@link UbuntuPriorityFetcher} against live Ubuntu trackers.
+ * Unit tests for {@link UbuntuPriorityFetcher}.
+ *
+ * <p>
+ * These tests touch no external service. They feed the parsing methods with pages of the shape that
+ * {@code https://ubuntu.com/security/<CVE id>} returns, so the mapping from what the page shows to
+ * the value used by the report is verified without issuing a request. Whether the live pages answer
+ * is checked by {@code UbuntuSecurityApiLiveCheck}, which is run on demand.
+ * </p>
  */
+@DisplayName("UbuntuPriorityFetcher — the Ubuntu CVE priority read from the page of a CVE")
 public class UbuntuPriorityFetcherTest {
 
+    /** The part of a CVE page that shows the priority Ubuntu assigned, as the site writes it. */
+    private static final String PAGE_WITH_MEDIUM = """
+            <div>
+              <p class="p-text--small-caps">Ubuntu priority</p>
+              <div class="p-heading-icon--small">
+                <img src="https://res.cloudinary.com/image/fetch/f_svg/https%3A%2F%2Fassets.ubuntu.com%2Fv1%2F8010f9e0-CVE-Priority-icon-Medium.svg" alt="" width="16" height="16" />
+                <p>Medium</p>
+              </div>
+              <p><a href="/security/cves/about#priority">Why this priority?</a></p>
+            </div>
+            """;
 
-    /**
-     * Ensures that the live Ubuntu tracker returns a non-empty priority for a recent CVE.
-     */
+    /** A page that shows more than one priority icon. */
+    private static final String PAGE_WITH_AN_EARLIER_ICON = """
+            <div class="related">
+              <img src="https://assets.ubuntu.com/v1/CVE-Priority-icon-Low.svg" alt="" />
+            </div>
+            <div>
+              <p class="p-text--small-caps">Ubuntu priority</p>
+              <img src="https://assets.ubuntu.com/v1/CVE-Priority-icon-Critical.svg" alt="" />
+            </div>
+            """;
+
+    /** A page of a CVE that Ubuntu rates as negligible. */
+    private static final String PAGE_WITH_NEGLIGIBLE = """
+            <p class="p-text--small-caps">Ubuntu priority</p>
+            <img src="https://assets.ubuntu.com/v1/CVE-Priority-icon-Negligible.svg" alt="" />
+            """;
+
+    /** A page that shows no priority icon at all. */
+    private static final String PAGE_WITHOUT_AN_ICON = """
+            <div>
+              <p class="p-text--small-caps">Ubuntu priority</p>
+              <p>This CVE is not known to affect any Ubuntu release.</p>
+            </div>
+            """;
+
     @Test
-    public void testFetchUbuntuPriority_liveAccess() throws Exception {
-        String cveId = "CVE-2025-46727";
-        String priority = UbuntuPriorityFetcher.fetchUbuntuPriority(cveId);
-
-        // Priority should not be null or empty
-        assertNotNull(priority, "Ubuntu priority should not be null from live page");
-        assertFalse(priority.isBlank(), "Ubuntu priority should not be blank");
-
-        // Optionally: check that it's a known valid value
-        assertTrue(
-            priority.equalsIgnoreCase("Low") ||
-            priority.equalsIgnoreCase("Medium") ||
-            priority.equalsIgnoreCase("High") ||
-            priority.equalsIgnoreCase("Critical") ||
-            priority.equalsIgnoreCase("Unknown"),
-            "Priority must be one of the expected values"
-        );
-
-        System.out.println("Live Ubuntu priority for " + cveId + ": " + priority);
+    @DisplayName("The priority is read from the name of the icon file")
+    void extractPriority_pageShowingMedium_returnsMedium() {
+        assertEquals("Medium", UbuntuPriorityFetcher.extractPriority(PAGE_WITH_MEDIUM));
     }
 
-    /**
-     * Confirms that non-existent CVEs are reported with the {@code Unknown} priority value.
-     */
     @Test
-    public void testFetchUbuntuPriority_nonExistentCVE() throws Exception {
-        String cveId = "CVE-1999-99999";
-        String priority = UbuntuPriorityFetcher.fetchUbuntuPriority(cveId);
-        
-        assertEquals("Unknown", priority, 
-            "Non-existent CVE should return 'Unknown' priority");
+    @DisplayName("The first icon of the page is the one taken")
+    void extractPriority_pageWithSeveralIcons_takesTheFirst() {
+        assertEquals("Low", UbuntuPriorityFetcher.extractPriority(PAGE_WITH_AN_EARLIER_ICON));
     }
-    
-    /**
-     * Verifies retry behavior by asserting that failures mention the number of attempts or yield a
-     * valid priority when the request succeeds.
-     */
+
     @Test
-    @Timeout(value = 35) // Should complete within 35 seconds even with retries
-    public void testFetchUbuntuPriority_retriesOnFailure() throws Exception {
-        // This test verifies the retry mechanism is working
-        // We use a real CVE to ensure the test is meaningful
-        String cveId = "CVE-2024-12345";
-        
-        try {
-            String priority = UbuntuPriorityFetcher.fetchUbuntuPriority(cveId);
-            // If successful, verify we got a valid response
-            assertNotNull(priority);
-            assertTrue(priority.equals("Unknown") || 
-                      priority.equals("Low") || 
-                      priority.equals("Medium") || 
-                      priority.equals("High") || 
-                      priority.equals("Critical"));
-        } catch (IOException e) {
-            // If it fails after all retries, verify the error message mentions retries
-            assertTrue(e.getMessage().contains("after 3 attempts"),
-                "Error message should indicate retry attempts were made");
-        }
+    @DisplayName("A negligible priority is reported as Unknown, as this class has always done")
+    void extractPriority_pageShowingNegligible_returnsUnknown() {
+        assertEquals(UbuntuPriorityFetcher.UNKNOWN_PRIORITY,
+                UbuntuPriorityFetcher.extractPriority(PAGE_WITH_NEGLIGIBLE));
     }
-    
-    /**
-     * Checks that the fetcher accepts well-formed CVE identifiers and handles network failures.
-     */
+
     @Test
-    public void testFetchUbuntuPriority_validCVEFormat() throws Exception {
-        // Test with a known CVE that should exist
-        String cveId = "CVE-2024-39282"; // From the README example
-        
-        try {
-            String priority = UbuntuPriorityFetcher.fetchUbuntuPriority(cveId);
-            assertNotNull(priority, "Priority should not be null");
-            assertFalse(priority.isBlank(), "Priority should not be blank");
-        } catch (IOException e) {
-            // Even if network fails, verify proper error handling
-            assertNotNull(e.getMessage());
-            assertTrue(e.getMessage().contains("CVE-2024-39282"));
-        }
+    @DisplayName("A page without a priority icon is reported as Unknown")
+    void extractPriority_pageWithoutAnIcon_returnsUnknown() {
+        assertEquals(UbuntuPriorityFetcher.UNKNOWN_PRIORITY,
+                UbuntuPriorityFetcher.extractPriority(PAGE_WITHOUT_AN_ICON));
     }
-    
+
+    @Test
+    @DisplayName("A page that could not be read at all is reported as Unknown")
+    void extractPriority_null_returnsUnknown() {
+        assertEquals(UbuntuPriorityFetcher.UNKNOWN_PRIORITY,
+                UbuntuPriorityFetcher.extractPriority(null));
+    }
+
+    @Test
+    @DisplayName("Every priority that the report ranks is mapped to its capitalized form")
+    void normalizePriority_rankedValues_returnsCapitalizedForm() {
+        assertEquals("Low", UbuntuPriorityFetcher.normalizePriority("low"));
+        assertEquals("Medium", UbuntuPriorityFetcher.normalizePriority("medium"));
+        assertEquals("High", UbuntuPriorityFetcher.normalizePriority("high"));
+        assertEquals("Critical", UbuntuPriorityFetcher.normalizePriority("critical"));
+    }
+
+    @Test
+    @DisplayName("Surrounding whitespace and letter case do not change the result")
+    void normalizePriority_mixedCaseWithWhitespace_returnsCapitalizedForm() {
+        assertEquals("High", UbuntuPriorityFetcher.normalizePriority("  HIGH  "));
+    }
+
+    @Test
+    @DisplayName("A value the report does not rank is reported as Unknown")
+    void normalizePriority_unrankedValue_returnsUnknown() {
+        assertEquals(UbuntuPriorityFetcher.UNKNOWN_PRIORITY,
+                UbuntuPriorityFetcher.normalizePriority("untriaged"));
+    }
+
+    @Test
+    @DisplayName("A null value is reported as Unknown")
+    void normalizePriority_null_returnsUnknown() {
+        assertEquals(UbuntuPriorityFetcher.UNKNOWN_PRIORITY,
+                UbuntuPriorityFetcher.normalizePriority(null));
+    }
+
+    @Test
+    @DisplayName("A blank CVE identifier is rejected before any request is issued")
+    void fetchUbuntuPriority_blankCveId_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> UbuntuPriorityFetcher.fetchUbuntuPriority("   "));
+    }
 }

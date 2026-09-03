@@ -1,138 +1,165 @@
 package com.github.oogasawa.utility.security.usn;
 
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.util.Timeout;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A utility class that fetches the CVE severity level (priority) as defined on the official Ubuntu
- * security tracker web page.
+ * Reads the priority that Ubuntu assigns to a CVE from the page of that CVE.
+ *
+ * <p>
+ * The priority is shown on the page as a small icon, and the name of the icon file carries the
+ * value: {@code CVE-Priority-icon-Medium.svg}. This class requests the page and reads that name.
+ * </p>
+ *
+ * <h2>Why the page and not the JSON endpoint</h2>
+ *
+ * <p>
+ * The Ubuntu Security API offers the same value as the {@code priority} field of
+ * {@code /security/cves/<CVE id>.json}, and reading a named field is the more direct way to get it.
+ * That endpoint, however, answers HTTP 503 and HTTP 504 for long stretches. On 2026-09-01 it failed
+ * ten attempts in a row for {@code CVE-2026-66484} while the page of the very same CVE answered
+ * HTTP 200 at once. A report that cannot be produced is worth less than one built from a page, so
+ * the page is what this class reads.
+ * </p>
+ *
+ * <p>
+ * The returned value is one of {@code Low}, {@code Medium}, {@code High}, {@code Critical} or
+ * {@link #UNKNOWN_PRIORITY}. Ubuntu also assigns {@code negligible} and leaves some CVEs unrated,
+ * and both are reported as {@link #UNKNOWN_PRIORITY}, which is what this class has always done.
+ * </p>
  */
 public class UbuntuPriorityFetcher {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(UbuntuPriorityFetcher.class);
-    private static final int MAX_RETRIES = 3;
-    private static final int RETRY_DELAY_MS = 2000;
-    private static final int TIMEOUT_SECONDS = 30;
+
+    /** Value returned when the priority cannot be determined. */
+    public static final String UNKNOWN_PRIORITY = "Unknown";
+
+    private static final String CVE_URL_PREFIX = "https://ubuntu.com/security/";
+
+    /** The name of the icon file carries the priority. */
+    private static final Pattern PRIORITY_ICON =
+            Pattern.compile("CVE-Priority-icon-([A-Za-z]+)\\.svg", Pattern.CASE_INSENSITIVE);
 
     /**
-     * Fetches the severity priority assigned to a given CVE ID from the Ubuntu security tracker.
-     * Implements retry logic with exponential backoff for network failures.
+     * Requests the page of the given CVE and reads the priority Ubuntu assigned to it.
      *
-     * @param cveId the CVE identifier (e.g., "CVE-2024-12345")
-     * @return the extracted priority string (e.g., "Low", "High"), or "Unknown" if not found
-     * @throws Exception if an error occurs during HTTP communication or parsing after all retries
+     * @param cveId the CVE identifier, for example {@code CVE-2024-12345}
+     * @return {@code Low}, {@code Medium}, {@code High}, {@code Critical} or
+     *         {@link #UNKNOWN_PRIORITY}
+     * @throws IOException if the page cannot be obtained after all retries
+     * @throws IllegalArgumentException if the identifier is null or blank
      */
-    public static String fetchUbuntuPriority(String cveId) throws Exception {
-        String url = "https://ubuntu.com/security/" + cveId;
-        
-        Exception lastException = null;
-        
-        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-            try {
-                logger.debug("Fetching Ubuntu priority for {} (attempt {}/{})", cveId, attempt, MAX_RETRIES);
-                
-                RequestConfig requestConfig = RequestConfig.custom()
-                    .setConnectionRequestTimeout(Timeout.ofSeconds(TIMEOUT_SECONDS))
-                    .setResponseTimeout(Timeout.ofSeconds(TIMEOUT_SECONDS))
-                    .build();
-                
-                try (CloseableHttpClient client = HttpClients.custom()
-                        .setDefaultRequestConfig(requestConfig)
-                        .build()) {
-                    
-                    HttpGet request = new HttpGet(url);
-                    request.setHeader("User-Agent", "Mozilla/5.0 (compatible; USNChecker/1.0)");
-                    
-                    try (CloseableHttpResponse response = client.execute(request)) {
-                        int statusCode = response.getCode();
-                        
-                        if (statusCode == HttpStatus.SC_NOT_FOUND) {
-                            logger.warn("CVE {} not found on Ubuntu tracker (404)", cveId);
-                            return "Unknown";
-                        }
-                        
-                        if (statusCode != HttpStatus.SC_OK) {
-                            throw new IOException(String.format(
-                                "HTTP error %d for %s", statusCode, url));
-                        }
-                        
-                        HttpEntity entity = response.getEntity();
-                        if (entity == null) {
-                            throw new IOException("No response entity for " + url);
-                        }
+    public static String fetchUbuntuPriority(String cveId) throws IOException {
 
-                        try (InputStream content = entity.getContent()) {
-                            String priority = extractPriorityFromHtmlLines(content);
-                            logger.debug("Successfully fetched priority '{}' for {}", priority, cveId);
-                            return priority;
-                        }
-                    }
-                }
-                
-            } catch (Exception e) {
-                lastException = e;
-                logger.warn("Attempt {}/{} failed for {}: {}", 
-                    attempt, MAX_RETRIES, cveId, e.getMessage());
-                
-                if (attempt < MAX_RETRIES) {
-                    int delay = RETRY_DELAY_MS * attempt;
-                    logger.debug("Retrying after {} ms...", delay);
-                    Thread.sleep(delay);
-                } else {
-                    logger.error("All {} attempts failed for {}", MAX_RETRIES, cveId);
-                }
-            }
-        }
-        
-        throw new IOException(
-            String.format("Failed to fetch Ubuntu priority for %s after %d attempts", 
-                cveId, MAX_RETRIES), lastException);
-    }
-
-    /**
-     * Scans the Ubuntu tracker HTML response for the first occurrence of a CVE priority icon and
-     * returns its textual severity representation.
-     *
-     * @param input response stream from the Ubuntu security tracker
-     * @return priority label such as {@code Low}, {@code Medium}, {@code High}, {@code Critical}, or
-     *         {@code Unknown} when no icon is found
-     * @throws IOException if the response stream cannot be read
-     */
-    public static String extractPriorityFromHtmlLines(InputStream input) throws IOException {
-        BufferedReader reader =
-                new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
-        String line;
-        Pattern pattern = Pattern.compile("CVE-Priority-icon-(Low|Medium|High|Critical)\\.svg",
-                Pattern.CASE_INSENSITIVE);
-
-        while ((line = reader.readLine()) != null) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) {
-                return matcher.group(1); // First match is assumed to be Ubuntu priority
-            }
+        if (cveId == null || cveId.isBlank()) {
+            throw new IllegalArgumentException("CVE ID must not be null or blank");
         }
 
-        return "Unknown";
+        String url = CVE_URL_PREFIX + cveId.trim();
+        PriorityScanner scanner = new PriorityScanner();
+
+        if (!UbuntuSecurityHttpClient.fetchLines(url, "text/html", scanner)) {
+            logger.warn("CVE {} is not present in the Ubuntu security tracker (HTTP 404)", cveId);
+            return UNKNOWN_PRIORITY;
+        }
+
+        String priority = scanner.priority();
+        logger.debug("Ubuntu priority for {} is {}", cveId, priority);
+        return priority;
     }
 
 
+    /**
+     * Reads the priority out of a page one line at a time and stops at the first icon it sees.
+     *
+     * <p>
+     * The value sought sits a quarter of the way into a page of about eighty five kilobytes, so
+     * reading to the end would spend three quarters of the transfer on bytes that cannot change the
+     * answer, and a response that stalls after the value has arrived would be thrown away.
+     * </p>
+     *
+     * <p>
+     * The first icon of the page is the one taken. Anchoring the search on the heading that names
+     * the priority Ubuntu assigned was tried and abandoned: the pages are not all written to the
+     * same pattern, so a rule that depends on a particular heading being present does not hold
+     * across them, while the first icon does.
+     * </p>
+     */
+    static class PriorityScanner implements UbuntuSecurityHttpClient.LineScanner {
+
+        private String found = null;
+
+        @Override
+        public boolean scan(String line) {
+            Matcher matcher = PRIORITY_ICON.matcher(line);
+            if (!matcher.find()) {
+                return false;
+            }
+            this.found = normalizePriority(matcher.group(1));
+            return true;
+        }
+
+        /**
+         * Returns the priority found.
+         *
+         * @return the priority, or {@link #UNKNOWN_PRIORITY} when the page showed none
+         */
+        String priority() {
+            return this.found != null ? this.found : UNKNOWN_PRIORITY;
+        }
+    }
+
+    /**
+     * Reads the priority out of the page of a CVE.
+     *
+     * <p>
+     * The first icon of the page is the one taken.
+     * </p>
+     *
+     * @param html the page of a CVE
+     * @return {@code Low}, {@code Medium}, {@code High}, {@code Critical} or
+     *         {@link #UNKNOWN_PRIORITY}
+     */
+    public static String extractPriority(String html) {
+        if (html == null) {
+            return UNKNOWN_PRIORITY;
+        }
+        PriorityScanner scanner = new PriorityScanner();
+        for (String line : html.split("\\R")) {
+            if (scanner.scan(line)) {
+                break;
+            }
+        }
+        return scanner.priority();
+    }
+
+    /**
+     * Maps a priority read from the page to the value used by the report.
+     *
+     * @param rawPriority the value taken from the name of the icon file
+     * @return {@code Low}, {@code Medium}, {@code High}, {@code Critical} or
+     *         {@link #UNKNOWN_PRIORITY}
+     */
+    public static String normalizePriority(String rawPriority) {
+        if (rawPriority == null) {
+            return UNKNOWN_PRIORITY;
+        }
+        switch (rawPriority.trim().toLowerCase()) {
+            case "low":
+                return "Low";
+            case "medium":
+                return "Medium";
+            case "high":
+                return "High";
+            case "critical":
+                return "Critical";
+            default:
+                return UNKNOWN_PRIORITY;
+        }
+    }
 }

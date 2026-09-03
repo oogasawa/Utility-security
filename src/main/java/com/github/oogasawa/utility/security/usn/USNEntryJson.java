@@ -20,6 +20,15 @@ public class USNEntryJson {
     public String severity; 
      public String livepatch = "auto"; // "yes", "no", or "NA"
     public String needs_reboot; // "yes", "no"
+
+    /**
+     * Identifiers of the notices that were merged into this one because they share its USN number
+     * and differ only in the suffix. Empty when nothing was merged.
+     */
+    public List<String> mergedNoticeIds = new ArrayList<>();
+
+    /** CVEs of this notice whose Ubuntu priority is High or Critical. */
+    public List<String> severeCves = new ArrayList<>();
 }
 
 

@@ -7,7 +7,7 @@
 
     <groupId>com.github.oogasawa</groupId>
     <artifactId>Utility-security</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
     <packaging>jar</packaging>
 
     <name>Utility-security</name>
@@ -20,9 +20,9 @@
     <dependencies>
 
       <dependency>
-        <groupId>com.github.oogasawa</groupId>
-        <artifactId>Utility-cli</artifactId>
-        <version>3.1.0</version>
+        <groupId>com.scivicslab</groupId>
+        <artifactId>pluggable-cli</artifactId>
+        <version>1.0.0</version>
       </dependency>
 
 
@@ -36,6 +36,13 @@
           <groupId>org.jsoup</groupId>
           <artifactId>jsoup</artifactId>
           <version>1.17.2</version>
+      </dependency>
+
+      <!-- Reads and writes the .xlsx workbook that holds the patch history. -->
+      <dependency>
+          <groupId>org.apache.poi</groupId>
+          <artifactId>poi-ooxml</artifactId>
+          <version>5.4.1</version>
       </dependency>
 
       <dependency>

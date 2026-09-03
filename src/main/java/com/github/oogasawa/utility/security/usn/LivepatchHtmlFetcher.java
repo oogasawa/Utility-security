@@ -6,75 +6,53 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 
 /**
- * A utility class to fetch the HTML document for a given USN ID
- * from the Ubuntu Security Notices website.
+ * Fetches the HTML page of a given USN from the Ubuntu Security Notices website.
+ *
+ * <p>
+ * Only the path that reads a file of mailing list digests uses this class. That path has no update
+ * instructions of its own, so it reads them from the page of each notice. The path that reads the
+ * Ubuntu Security API takes the same text from the {@code instructions} field of the response and
+ * issues no request here.
+ * </p>
+ *
+ * <p>
+ * The request goes through {@link UbuntuSecurityHttpClient} so that it is paced like every other
+ * request this project sends to ubuntu.com. Before that, this class called jsoup directly and left
+ * no interval between two notices, which is one of the two places that made the server refuse this
+ * host.
+ * </p>
  */
 public class LivepatchHtmlFetcher {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(LivepatchHtmlFetcher.class);
-    private static final int MAX_RETRIES = 3;
-    private static final int TIMEOUT_MS = 30_000;
+
+    private static final String NOTICE_URL_PREFIX = "https://ubuntu.com/security/notices/";
 
     /**
-     * Fetches the HTML Document of the given USN ID from https://ubuntu.com/security/notices/.
-     * Implements retry logic for network failures.
+     * Fetches the HTML page of the given USN.
      *
-     * @param usnId e.g., "USN-7513-1"
-     * @return the parsed Document object from the USN web page
-     * @throws IOException if connection or parsing fails after all retries
-     * @throws IllegalArgumentException if usnId is null or empty
+     * @param usnId the USN identifier, for example {@code USN-7513-1}
+     * @return the parsed page
+     * @throws IOException if the page cannot be obtained after all retries, or if the server
+     *         answers HTTP 404
+     * @throws IllegalArgumentException if the identifier is null or blank
      */
     public static Document fetchUsnDocument(String usnId) throws IOException {
-        if (usnId == null || usnId.trim().isEmpty()) {
-            throw new IllegalArgumentException("USN ID cannot be null or empty");
+
+        if (usnId == null || usnId.isBlank()) {
+            throw new IllegalArgumentException("USN ID must not be null or empty");
         }
-        String url = "https://ubuntu.com/security/notices/" + usnId.trim();
-        IOException lastException = null;
-        
-        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-            try {
-                logger.debug("Fetching USN document for {} (attempt {}/{})", usnId, attempt, MAX_RETRIES);
-                
-                Document doc = Jsoup.connect(url)
-                        .userAgent("Mozilla/5.0 (compatible; USNChecker/1.0)")
-                        .timeout(TIMEOUT_MS)
-                        .ignoreHttpErrors(false)
-                        .get();
-                
-                logger.debug("Successfully fetched USN document for {}", usnId);
-                return doc;
-                
-            } catch (SocketTimeoutException e) {
-                lastException = new IOException(
-                    String.format("Timeout while fetching %s (attempt %d/%d)", 
-                        url, attempt, MAX_RETRIES), e);
-                logger.warn("Timeout fetching {} (attempt {}/{}): {}", 
-                    usnId, attempt, MAX_RETRIES, e.getMessage());
-                    
-            } catch (IOException e) {
-                lastException = e;
-                logger.warn("Failed to fetch {} (attempt {}/{}): {}", 
-                    usnId, attempt, MAX_RETRIES, e.getMessage());
-            }
-            
-            if (attempt < MAX_RETRIES) {
-                int delay = 2000 * attempt;
-                logger.debug("Retrying after {} ms...", delay);
-                try {
-                    Thread.sleep(delay);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Interrupted while retrying", ie);
-                }
-            }
+
+        String url = NOTICE_URL_PREFIX + usnId.trim();
+        String html = UbuntuSecurityHttpClient.fetchBody(url, "text/html");
+
+        if (html == null) {
+            throw new IOException("The notice page answered HTTP 404 for " + usnId);
         }
-        
-        logger.error("Failed to fetch USN document for {} after {} attempts", usnId, MAX_RETRIES);
-        throw new IOException(
-            String.format("Failed to fetch USN document for %s after %d attempts", 
-                usnId, MAX_RETRIES), lastException);
+
+        logger.debug("Fetched the notice page for {}", usnId);
+        return Jsoup.parse(html, url);
     }
-} 
+}

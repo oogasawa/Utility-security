@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.*;
 import java.nio.file.*;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.*;
 import java.util.stream.Collectors;
@@ -24,6 +25,128 @@ import org.slf4j.LoggerFactory;
 public class USNJsonExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(USNJsonExporter.class);
+
+    /** Severity reported when the notice refers to no CVE at all. */
+    public static final String SEVERITY_NO_CVE = "NoCve";
+
+    /** Severity reported when the priority of a CVE could not be retrieved. */
+    public static final String SEVERITY_LOOKUP_FAILED = "LookupFailed";
+
+    /**
+     * Severity reported when Ubuntu has ranked none of the CVEs of the notice.
+     *
+     * <p>
+     * A notice that refers to both ranked and unranked CVEs is given the highest rank among the
+     * ranked ones. Ubuntu has looked at each of its CVEs and has not yet decided on some of them,
+     * and a rank it has decided on is a fact worth reporting: a notice known to carry a Critical
+     * CVE is Critical whatever the undecided ones turn out to be.
+     * </p>
+     */
+    public static final String SEVERITY_UNRATED = "Unrated";
+
+    /**
+     * Why the priority of one CVE could or could not be used.
+     *
+     * <p>
+     * The three outcomes are kept apart because the reader of the report has to act differently on
+     * each. A failed retrieval means the report is incomplete and the notice must be looked at by
+     * hand; an unranked CVE means Ubuntu itself has not decided yet.
+     * </p>
+     */
+    enum PriorityLookupOutcome {
+
+        /** Ubuntu ranks the CVE, and the rank was obtained. */
+        RANKED,
+
+        /** Ubuntu answered, but with a priority the report does not rank. */
+        UNRATED,
+
+        /** The priority could not be retrieved. */
+        FAILED
+    }
+
+    /**
+     * The result of looking up the priority of one CVE.
+     *
+     * @param outcome why the priority could or could not be used
+     * @param level the rank, present only when the outcome is {@link PriorityLookupOutcome#RANKED}
+     */
+    record PriorityLookup(PriorityLookupOutcome outcome, PriorityLevel level) {}
+
+    /**
+     * What the CVEs of one notice add up to.
+     *
+     * <p>
+     * The severity alone says how bad the worst CVE is, but not which CVE that is. A reader who has
+     * to decide whether to act tonight or at the next maintenance window needs to look the severe
+     * ones up, so they are listed as well.
+     * </p>
+     *
+     * @param severity the highest Ubuntu priority, or the reason no priority could be given
+     * @param severeCveIds the CVEs whose Ubuntu priority is High or Critical, in the order they
+     *        appear in the notice
+     */
+    record CveRating(String severity, List<String> severeCveIds) {}
+
+    /**
+     * Answers the priority that Ubuntu assigns to one CVE.
+     *
+     * <p>
+     * The severity logic depends on this interface rather than on the HTTP client so that the three
+     * outcomes above can be verified with a stub that answers without a request.
+     * </p>
+     */
+    public interface CvePriorityLookup {
+
+        /**
+         * Returns the priority of the given CVE.
+         *
+         * @param cveId the CVE identifier
+         * @return {@code Low}, {@code Medium}, {@code High}, {@code Critical} or
+         *         {@code Unknown}
+         * @throws IOException if the priority cannot be obtained
+         */
+        String fetchPriority(String cveId) throws IOException;
+    }
+
+    private final CvePriorityCache priorityCache;
+    private final CvePriorityLookup cvePriorityLookup;
+
+    /**
+     * Creates an exporter that asks the Ubuntu Security API and stores CVE priorities in the
+     * default file.
+     */
+    public USNJsonExporter() {
+        this(new CvePriorityCache(CvePriorityCache.defaultCacheFile()),
+                UbuntuPriorityFetcher::fetchUbuntuPriority);
+    }
+
+    /**
+     * Creates an exporter that asks the Ubuntu Security API and stores CVE priorities in the given
+     * cache.
+     *
+     * @param priorityCache the cache of CVE priorities
+     */
+    public USNJsonExporter(CvePriorityCache priorityCache) {
+        this(priorityCache, UbuntuPriorityFetcher::fetchUbuntuPriority);
+    }
+
+    /**
+     * Creates an exporter that obtains CVE priorities from the given source.
+     *
+     * @param priorityCache the cache of CVE priorities
+     * @param cvePriorityLookup the source of CVE priorities
+     */
+    public USNJsonExporter(CvePriorityCache priorityCache, CvePriorityLookup cvePriorityLookup) {
+        if (priorityCache == null) {
+            throw new IllegalArgumentException("Priority cache must not be null");
+        }
+        if (cvePriorityLookup == null) {
+            throw new IllegalArgumentException("CVE priority lookup must not be null");
+        }
+        this.priorityCache = priorityCache;
+        this.cvePriorityLookup = cvePriorityLookup;
+    }
 
     /**
      * Enumeration representing severity levels for CVEs, in increasing order of seriousness.
@@ -96,6 +219,7 @@ public class USNJsonExporter {
      * @param format    the desired output format ("json" or "tsv")
      */
     public void report(Path inputPath, String format) {
+        loadPriorityCache();
         try (BufferedReader reader = Files.newBufferedReader(inputPath)) {
             List<USNEntryJson> entries = parseUSNMessages(reader);
             
@@ -118,26 +242,27 @@ public class USNJsonExporter {
                 .forEach(entry -> logger.info("Valid USN: ID=[{}], Title=[{}]", 
                     entry.id, entry.title != null ? entry.title.substring(0, Math.min(50, entry.title.length())) + "..." : "null"));
 
-            List<USNEntryJson> filtered = entries.stream()
+            List<USNEntryJson> filtered = collapseReissues(entries.stream()
                 .filter(entry -> entry.id != null && !entry.id.trim().isEmpty())
                 .filter(this::appliesToUbuntu2404)
-                .filter(this::isGenericKernelReport)
-                .collect(Collectors.toList());
+                .filter(this::coversAKernelInUse)
+                .collect(Collectors.toList()));
                 
             long ubuntu2404Count = entries.stream()
                 .filter(entry -> entry.id != null && !entry.id.trim().isEmpty())
                 .filter(this::appliesToUbuntu2404)
                 .count();
             logger.info("Entries applicable to Ubuntu 24.04: {}", ubuntu2404Count);
-            logger.info("Final filtered entries (generic kernel only): {}", filtered.size());
+            logger.info("Final entries after keeping only the kernels in use: {}", filtered.size());
             logger.info("=== END PARSING STATISTICS ===");
 
             for (USNEntryJson entry : filtered) {
                 assignMaxSeverity(entry);
                 try {
                     Document doc = LivepatchHtmlFetcher.fetchUsnDocument(entry.id);
-                    determineLivepatchAvailability(entry, doc);
-                    determineRebootRequirement(entry, doc); 
+                    String updateInstructions = doc.body().text();
+                    determineLivepatchAvailability(entry, updateInstructions);
+                    determineRebootRequirement(entry, updateInstructions);
                 } catch (IOException e) {
                     logger.warn("Failed to fetch USN document for {}: {}", entry.id, e.getMessage());
                     entry.livepatch = "NA";
@@ -145,15 +270,102 @@ public class USNJsonExporter {
                 }
             }
 
-            if ("tsv".equalsIgnoreCase(format)) {
-                printAsTsv(filtered);
-            } else {
-                printAsJson(filtered);
-            }
+            print(filtered, format);
 
         } catch (IOException e) {
             System.err.println("Failed to process security report file: " + e.getMessage());
+        } finally {
+            this.priorityCache.save();
         }
+    }
+
+
+    /**
+     * Generates a report from the Ubuntu Security API instead of from a file of mailing list
+     * digests.
+     *
+     * <p>
+     * The notices of the requested period are retrieved from the API, the same filters and
+     * judgements as the file based path are applied, and the result is printed in the requested
+     * format. The update instructions come from the {@code instructions} field of each notice, so
+     * no request to the USN HTML page is made.
+     * </p>
+     *
+     * @param start the first publication date to include, inclusive
+     * @param end the last publication date to include, inclusive
+     * @param releaseCodename the Ubuntu release codename, for example {@code noble} for 24.04 LTS
+     * @param format the desired output format ("json" or "tsv")
+     */
+    public void report(LocalDate start, LocalDate end, String releaseCodename, String format) {
+        loadPriorityCache();
+        try {
+            List<USNEntryJson> entries =
+                    new UsnApiFetcher().fetchNotices(start, end, releaseCodename);
+
+            logger.info("Retrieved {} notices from the Ubuntu Security API", entries.size());
+
+            List<USNEntryJson> filtered = collapseReissues(entries.stream()
+                    .filter(entry -> entry.id != null && !entry.id.trim().isEmpty())
+                    .filter(this::appliesToUbuntu2404)
+                    .filter(this::coversAKernelInUse)
+                    .collect(Collectors.toList()));
+
+            logger.info("Final entries after keeping only the kernels in use: {}", filtered.size());
+
+            for (USNEntryJson entry : filtered) {
+                assignMaxSeverity(entry);
+                determineLivepatchAvailability(entry, entry.update_instructions);
+                determineRebootRequirement(entry, entry.update_instructions);
+            }
+
+            print(filtered, format);
+
+        } catch (IOException e) {
+            System.err.println("Failed to retrieve notices from the Ubuntu Security API: "
+                    + e.getMessage());
+        } finally {
+            this.priorityCache.save();
+        }
+    }
+
+
+    /**
+     * Prints the entries in the requested format.
+     *
+     * @param entries the entries to print
+     * @param format the desired output format ("json" or "tsv")
+     * @throws IOException if JSON serialization fails
+     */
+    private void print(List<USNEntryJson> entries, String format) throws IOException {
+        List<USNEntryJson> ordered = sortByPublicationDate(entries);
+        if ("tsv".equalsIgnoreCase(format)) {
+            printAsTsv(ordered);
+        } else {
+            printAsJson(ordered);
+        }
+    }
+
+
+    /**
+     * Orders the entries by publication date, oldest first.
+     *
+     * <p>
+     * The record reads from the top down in the order the notices were published, so a report
+     * appended to it has to arrive in the same order. The Ubuntu Security API answers newest first,
+     * which is the opposite. Entries published on the same day are ordered by their identifier, so
+     * that two runs of the same period produce the same file.
+     * </p>
+     *
+     * @param entries the entries to order
+     * @return a new list, oldest first
+     */
+    static List<USNEntryJson> sortByPublicationDate(List<USNEntryJson> entries) {
+        List<USNEntryJson> ordered = new ArrayList<>(entries);
+        ordered.sort(Comparator
+                .comparing((USNEntryJson entry) -> entry.published_date == null
+                        ? "9999-99-99" : entry.published_date)
+                .thenComparing(entry -> entry.id == null ? "" : entry.id));
+        return ordered;
     }
     
 
@@ -177,46 +389,222 @@ public class USNJsonExporter {
      *
      * @param entry the USN entry to modify
      */
-    private void assignMaxSeverity(USNEntryJson entry) {
-        // Check for null ID before processing
-        if (entry.id == null) {
-            logger.error("WARNING: assignMaxSeverity called with null ID entry! Title: {}, CVEs: {}", 
-                entry.title, entry.cves);
+    /**
+     * Tells whether the notice is about the Linux kernel.
+     *
+     * @param entry the entry to judge
+     * @return true when the title names the Linux kernel
+     */
+    static boolean isKernelNotice(USNEntryJson entry) {
+        return entry.title != null && entry.title.contains("Linux kernel");
+    }
+
+
+    /**
+     * Returns the USN number of a notice without the suffix that distinguishes a re-issue.
+     *
+     * @param noticeId an identifier such as {@code USN-8643-5}
+     * @return the number such as {@code USN-8643}, or the identifier itself when it has no suffix
+     */
+    static String baseNoticeId(String noticeId) {
+        if (noticeId == null) {
+            return "";
         }
-        
-        logger.info(String.format("%s, %s, %s", entry.id, entry.title, entry.cves));
+        Matcher matcher = Pattern.compile("^([A-Z]+-\\d+)").matcher(noticeId.trim());
+        return matcher.find() ? matcher.group(1) : noticeId.trim();
+    }
 
-        List<PriorityLevel> levels = new ArrayList<>();
-        boolean hasUnknown = false;
-        List<String> failedCves = new ArrayList<>();
 
-        for (String cve : entry.cves) {
-            PriorityLevel level = fetchPrioritySafely(cve);
-            if (level == null) {
-                hasUnknown = true;
-                failedCves.add(cve);
-                break;
-            } else {
-                levels.add(level);
+    /**
+     * Merges the notices that share a USN number into one entry each.
+     *
+     * <p>
+     * Canonical issues the same fix again for each kernel flavour and for each Ubuntu release it
+     * reaches, and gives each issue the same USN number with a different suffix. The record keeps
+     * one row per fix, so the entries of one number become one entry here. Of twenty-one numbers
+     * that had more than one issue in the five months to September 2026, thirteen had exactly the
+     * same set of CVEs in every issue.
+     * </p>
+     *
+     * <p>
+     * The entry that represents the number is the one whose title names no kernel flavour, because
+     * a title such as {@code Linux kernel (GCP FIPS) vulnerabilities} would otherwise stand for
+     * issues that are not about that flavour at all. Among the entries that qualify, the earliest
+     * published one is taken, since that is when the fix was announced. The CVEs and the Ubuntu
+     * releases of every merged entry are added to it, so that nothing the severity depends on is
+     * lost.
+     * </p>
+     *
+     * @param entries the entries to merge, in the order they were retrieved
+     * @return one entry per USN number, in the order the numbers first appeared
+     */
+    static List<USNEntryJson> collapseReissues(List<USNEntryJson> entries) {
+
+        Map<String, List<USNEntryJson>> byNumber = new LinkedHashMap<>();
+        for (USNEntryJson entry : entries) {
+            byNumber.computeIfAbsent(baseNoticeId(entry.id), key -> new ArrayList<>()).add(entry);
+        }
+
+        List<USNEntryJson> merged = new ArrayList<>();
+        for (Map.Entry<String, List<USNEntryJson>> group : byNumber.entrySet()) {
+            List<USNEntryJson> issues = group.getValue();
+            if (issues.size() == 1) {
+                merged.add(issues.get(0));
+                continue;
+            }
+            merged.add(mergeIssues(issues));
+        }
+
+        logger.info("Merged {} notices into {} by their USN number", entries.size(), merged.size());
+        return merged;
+    }
+
+
+    /**
+     * Builds one entry out of the several issues of one USN number.
+     *
+     * @param issues the entries that share a USN number, at least two of them
+     * @return the representative entry, carrying the CVEs and releases of them all
+     */
+    private static USNEntryJson mergeIssues(List<USNEntryJson> issues) {
+
+        USNEntryJson representative = issues.stream()
+                .filter(issue -> issue.title != null && !issue.title.contains("("))
+                .min(Comparator.comparing(issue -> nullToLast(issue.published_date)))
+                .orElseGet(() -> issues.stream()
+                        .min(Comparator.comparing(issue -> nullToLast(issue.published_date)))
+                        .orElse(issues.get(0)));
+
+        for (USNEntryJson issue : issues) {
+            if (issue == representative) {
+                continue;
+            }
+            representative.mergedNoticeIds.add(issue.id);
+            for (String cve : issue.cves) {
+                if (!representative.cves.contains(cve)) {
+                    representative.cves.add(cve);
+                }
+            }
+            for (String release : issue.releases) {
+                if (!representative.releases.contains(release)) {
+                    representative.releases.add(release);
+                }
             }
         }
 
-        logger.info(String.format("levels.size() = %d", levels.size()));
-        
-        if (hasUnknown) {
-            logger.warn("Setting severity to Unknown for {} due to failed CVE lookups: {}", 
-                entry.id, failedCves);
-            entry.severity = "Unknown";
-        } else if (levels.isEmpty()) {
-            logger.warn("No CVEs found for {}, setting severity to Unknown", entry.id);
-            entry.severity = "Unknown";
-        } else {
-            PriorityLevel max =
-                    levels.stream().max(Comparator.comparingInt(PriorityLevel::level)).orElse(null);
-            entry.severity = max != null ? max.nameCapitalized() : "Unknown";
-            logger.info("Assigned severity '{}' to {} based on {} CVEs", 
-                entry.severity, entry.id, levels.size());
+        logger.info("{} represents {} and now refers to {} CVEs",
+                representative.id, representative.mergedNoticeIds, representative.cves.size());
+        return representative;
+    }
+
+
+    /**
+     * Orders a missing publication date after every present one.
+     *
+     * @param publishedDate the date in ISO form, which may be null
+     * @return the date, or a string that sorts last
+     */
+    private static String nullToLast(String publishedDate) {
+        return publishedDate == null ? "9999-99-99" : publishedDate;
+    }
+
+
+    /**
+     * Reads the stored CVE priorities so that a CVE already known is not requested again.
+     */
+    void loadPriorityCache() {
+        this.priorityCache.load();
+    }
+
+
+    void assignMaxSeverity(USNEntryJson entry) {
+        logger.info(String.format("%s, %s, %s", entry.id, entry.title, entry.cves));
+
+        CveRating rating = rateCves(entry.cves, entry.id);
+        entry.severity = rating.severity();
+        entry.severeCves = rating.severeCveIds();
+    }
+
+
+    /**
+     * Determines the severity of a notice from the CVEs it refers to.
+     *
+     * <p>
+     * The severity is the highest Ubuntu priority among the CVEs. A CVE whose priority could not be
+     * retrieved, and a CVE that Ubuntu has not ranked, each keep the notice from being given a
+     * rank, because a CVE whose rank is unknown cannot be assumed to be no worse than the highest
+     * rank found so far.
+     * </p>
+     *
+     * <h2>Every CVE is looked up, even after one of them fails</h2>
+     *
+     * <p>
+     * An earlier version stopped at the first CVE it could not rate, since the answer for the
+     * notice was already settled at that point. That saved requests in the run at hand and cost
+     * far more in the runs after it. A priority obtained once is stored and never requested again,
+     * so a CVE that was never reached is a CVE the next run still has to fetch. One kernel notice
+     * refers to several hundred CVEs; stopping at the first failure among them left the rest
+     * unstored, and the following run stopped at the same place. Sixteen notices in one run left
+     * 1074 CVEs unfetched that way.
+     * </p>
+     *
+     * @param cveIds the CVEs the notice refers to
+     * @param noticeId the notice, used in the log
+     * @return a ranked priority, or {@link #SEVERITY_NO_CVE}, {@link #SEVERITY_LOOKUP_FAILED} or
+     *         {@link #SEVERITY_UNRATED}
+     */
+    CveRating rateCves(List<String> cveIds, String noticeId) {
+
+        if (cveIds.isEmpty()) {
+            return new CveRating(SEVERITY_NO_CVE, List.of());
         }
+
+        List<PriorityLevel> levels = new ArrayList<>();
+        List<String> severeCveIds = new ArrayList<>();
+        List<String> failedCveIds = new ArrayList<>();
+        List<String> unratedCveIds = new ArrayList<>();
+
+        for (String cve : cveIds) {
+            PriorityLookup lookup = lookupPriority(cve);
+
+            switch (lookup.outcome()) {
+                case FAILED:
+                    failedCveIds.add(cve);
+                    break;
+                case UNRATED:
+                    unratedCveIds.add(cve);
+                    break;
+                default:
+                    levels.add(lookup.level());
+                    if (lookup.level().level() >= PriorityLevel.HIGH.level()) {
+                        severeCveIds.add(cve);
+                    }
+                    break;
+            }
+        }
+
+        if (!failedCveIds.isEmpty()) {
+            logger.warn("Severity of {} is {} because the priority of {} of its {} CVEs could not "
+                    + "be retrieved: {}", noticeId, SEVERITY_LOOKUP_FAILED, failedCveIds.size(),
+                    cveIds.size(), failedCveIds);
+            return new CveRating(SEVERITY_LOOKUP_FAILED, severeCveIds);
+        }
+        if (levels.isEmpty()) {
+            logger.warn("Severity of {} is {} because Ubuntu has ranked none of its {} CVEs: {}",
+                    noticeId, SEVERITY_UNRATED, cveIds.size(), unratedCveIds);
+            return new CveRating(SEVERITY_UNRATED, severeCveIds);
+        }
+        if (!unratedCveIds.isEmpty()) {
+            logger.info("Ubuntu has not ranked {} of the {} CVEs of {}: {}. The severity is taken "
+                    + "from the {} it has ranked.", unratedCveIds.size(), cveIds.size(), noticeId,
+                    unratedCveIds, levels.size());
+        }
+
+        PriorityLevel max =
+                levels.stream().max(Comparator.comparingInt(PriorityLevel::level)).orElseThrow();
+        logger.info("Assigned severity '{}' to {} based on {} CVEs, {} of them High or above",
+                max.nameCapitalized(), noticeId, levels.size(), severeCveIds.size());
+        return new CveRating(max.nameCapitalized(), severeCveIds);
     }
 
 
@@ -224,12 +612,18 @@ public class USNJsonExporter {
     /**
      * Determines whether Canonical Livepatch is available for a given USN entry.
      *
+     * <p>
+     * The judgement reads the update instructions of the notice. The previous version took that
+     * text from the body of the USN HTML page; the Ubuntu Security API returns the same text in the
+     * {@code instructions} field. The rule applied to the text is unchanged.
+     * </p>
+     *
      * @param entry the USN entry to evaluate
-     * @param doc   the HTML document fetched for the USN
+     * @param updateInstructions the update instructions of the notice
      */
-    private void determineLivepatchAvailability(USNEntryJson entry, Document doc) {
-        String bodyText = doc.body().text().toLowerCase();
-        if (bodyText.contains("canonical livepatch is available")) {
+    static void determineLivepatchAvailability(USNEntryJson entry, String updateInstructions) {
+        String text = normalizeForMatching(updateInstructions);
+        if (text.contains("canonical livepatch is available")) {
             entry.livepatch = "yes";
         } else if (entry.title != null && entry.title.toLowerCase().contains("linux kernel")) {
             entry.livepatch = "no";
@@ -250,10 +644,10 @@ public class USNJsonExporter {
      * {@code "no"}.
      *
      * @param entry the USN entry to annotate with reboot information
-     * @param doc the parsed HTML document for the corresponding USN
+     * @param updateInstructions the update instructions of the notice
      */
-    private void determineRebootRequirement(USNEntryJson entry, Document doc) {
-        String text = doc.body().text().toLowerCase();
+    static void determineRebootRequirement(USNEntryJson entry, String updateInstructions) {
+        String text = normalizeForMatching(updateInstructions);
         if (text.contains("a reboot is required")
                 || text.contains("you need to reboot your computer")) {
             entry.needs_reboot = "yes";
@@ -262,58 +656,145 @@ public class USNJsonExporter {
         }
     }
 
+
+    /**
+     * Prepares a text for the string matching used by the reboot and livepatch judgements.
+     *
+     * <p>
+     * The text is lowercased, and every run of whitespace is replaced with a single space so that a
+     * phrase broken across lines still matches. The body text of the USN HTML page arrives already
+     * collapsed because jsoup collapses it; the {@code instructions} field of the Ubuntu Security
+     * API keeps its line breaks. Collapsing here makes both sources yield the same judgement.
+     * </p>
+     *
+     * @param text the text to prepare, which may be null
+     * @return the prepared text, which is empty when the input is null
+     */
+    static String normalizeForMatching(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replaceAll("\\s+", " ").toLowerCase();
+    }
+
     
 
     /**
-     * Determines whether the given USN entry is a generic kernel report,
-     * excluding cloud, OEM, and other specific variants.
+     * Kernel flavours, besides the generic one, whose notices belong in the report.
+     *
+     * <p>
+     * Ubuntu builds the kernel in many flavours and issues a separate notice for each. The machines
+     * this report is written for run the generic kernel and the NVIDIA one, so a notice about any
+     * other flavour describes a fix for a kernel that is not installed anywhere and would only add
+     * a row nobody has to act on.
+     * </p>
+     */
+    private static final List<String> REPORTED_KERNEL_FLAVOURS = List.of("NVIDIA");
+
+    /**
+     * Determines whether the notice concerns a kernel that is actually in use.
+     *
+     * <p>
+     * A notice about anything other than the kernel is always kept. A kernel notice is kept when
+     * its title names no flavour, which is the generic kernel, or when the flavour it names is
+     * exactly one of {@link #REPORTED_KERNEL_FLAVOURS}. Ubuntu writes the flavour in parentheses
+     * after {@code Linux kernel}, as in {@code Linux kernel (NVIDIA) vulnerabilities}.
+     * </p>
+     *
+     * <p>
+     * The flavour has to match in full. {@code NVIDIA Tegra} is a kernel for an embedded system and
+     * {@code Low Latency NVIDIA} is the low latency kernel built for NVIDIA hardware; neither is
+     * the {@code NVIDIA} kernel, and matching on a part of the name would report both.
+     * </p>
+     *
+     * <p>
+     * The rule names the flavours to keep rather than the ones to drop. Naming the ones to drop had
+     * let every flavour Canonical added since the list was written pass through: in the five months
+     * to September 2026 that was seventeen notices about the Oracle, FIPS, HWE, Xilinx, GCP and Low
+     * Latency kernels.
+     * </p>
      *
      * @param entry the USN entry to evaluate
-     * @return true if the entry is generic, false otherwise
+     * @return true when the notice belongs in the report
      */
-    private boolean isGenericKernelReport(USNEntryJson entry) {
-        String title = entry.title != null ? entry.title : "";
-        return !(title.contains("GKE") || title.contains("AWS") || title.contains("Azure")
-                || title.contains("NVIDIA") || title.contains("Real-time")
-                || title.contains("OEM") || title.contains("Raspberry Pi"));
+    boolean reportsNotice(USNEntryJson entry) {
+        return coversAKernelInUse(entry);
+    }
+
+
+    private boolean coversAKernelInUse(USNEntryJson entry) {
+        if (!isKernelNotice(entry)) {
+            return true;
+        }
+        String flavour = kernelFlavourOf(entry.title);
+        return flavour.isEmpty() || REPORTED_KERNEL_FLAVOURS.contains(flavour);
     }
 
 
     /**
-     * Attempts to retrieve the Ubuntu-assigned priority level for the given CVE ID.
-     * <p>
-     * This method queries the Ubuntu CVE Tracker to determine the severity of the specified CVE.
-     * If the request fails (due to network issues, malformed responses, or unavailable data),
-     * the method logs a warning and returns {@code null} instead of throwing an exception.
+     * Reads the kernel flavour that a title names.
      *
-     * @param cveId the CVE identifier (e.g., "CVE-2024-12345")
-     * @return a {@link PriorityLevel} representing the severity assigned by Ubuntu,
-     *         or {@code null} if the priority could not be determined
+     * @param title the title of a notice, such as {@code Linux kernel (NVIDIA) vulnerabilities}
+     * @return the flavour, such as {@code NVIDIA}, or an empty string for the generic kernel
      */
-    private PriorityLevel fetchPrioritySafely(String cveId) {
-        try {
-            String rawPriority = UbuntuPriorityFetcher.fetchUbuntuPriority(cveId);
-            logger.info(String.format("rawPriority: %s, %s", rawPriority, cveId));
-            
-            if ("Unknown".equalsIgnoreCase(rawPriority)) {
-                logger.warn("Ubuntu priority is 'Unknown' for CVE {} (may not exist in Ubuntu tracker)", cveId);
-                return null;
+    static String kernelFlavourOf(String title) {
+        if (title == null) {
+            return "";
+        }
+        Matcher matcher = Pattern.compile("\\(([^)]*)\\)").matcher(title);
+        return matcher.find() ? matcher.group(1).trim() : "";
+    }
+
+
+    /**
+     * Determines the priority that Ubuntu assigns to the given CVE.
+     *
+     * <p>
+     * A priority already held by the cache is used without issuing a request. Otherwise the Ubuntu
+     * Security API is asked, and a ranked answer is added to the cache.
+     * </p>
+     *
+     * <p>
+     * A failed request and an answer that Ubuntu has not ranked are reported as two different
+     * outcomes. Reporting both as one value made the reader of the report unable to tell a notice
+     * that nobody has rated yet from a notice whose rating this program failed to obtain.
+     * </p>
+     *
+     * @param cveId the CVE identifier, for example {@code CVE-2024-12345}
+     * @return the outcome of the lookup, and the rank when there is one
+     */
+    private PriorityLookup lookupPriority(String cveId) {
+
+        String storedPriority = this.priorityCache.get(cveId);
+        if (storedPriority != null) {
+            PriorityLevel storedLevel = PriorityLevel.fromString(storedPriority);
+            if (storedLevel != null) {
+                logger.info(String.format("storedPriority: %s, %s", storedPriority, cveId));
+                return new PriorityLookup(PriorityLookupOutcome.RANKED, storedLevel);
             }
-            
+        }
+
+        try {
+            String rawPriority = this.cvePriorityLookup.fetchPriority(cveId);
+            logger.info(String.format("rawPriority: %s, %s", rawPriority, cveId));
+
             PriorityLevel level = PriorityLevel.fromString(rawPriority);
             if (level == null) {
-                logger.error("Unexpected priority value '{}' for CVE {}", rawPriority, cveId);
+                logger.warn("Ubuntu has not ranked CVE {}; it answered '{}'", cveId, rawPriority);
+                return new PriorityLookup(PriorityLookupOutcome.UNRATED, null);
             }
-            return level;
-            
+
+            this.priorityCache.put(cveId, rawPriority);
+            return new PriorityLookup(PriorityLookupOutcome.RANKED, level);
+
         } catch (IOException e) {
-            logger.error("Network/IO error fetching priority for CVE {}: {} - This typically indicates connection issues or server problems", 
-                cveId, e.getMessage());
-            return null;
+            logger.error("Could not retrieve the priority of CVE {}: {}", cveId, e.getMessage());
+            return new PriorityLookup(PriorityLookupOutcome.FAILED, null);
+
         } catch (Exception e) {
-            logger.error("Unexpected error fetching priority for CVE {}: {} ({})", 
-                cveId, e.getMessage(), e.getClass().getSimpleName());
-            return null;
+            logger.error("Could not retrieve the priority of CVE {}: {} ({})",
+                    cveId, e.getMessage(), e.getClass().getSimpleName());
+            return new PriorityLookup(PriorityLookupOutcome.FAILED, null);
         }
     }
 
@@ -542,7 +1023,7 @@ public class USNJsonExporter {
      */
     private void printAsTsv(List<USNEntryJson> entries) {
         // Print header row
-        System.out.println("id\ttitle\tpublished_date\tsummary\tseverity\treboot\tlivepatch");
+        System.out.println("id\ttitle\tpublished_date\tsummary\tseverity\treboot\tlivepatch\tsevere_cves");
 
         // Filter out any remaining entries with null or empty ID
         List<USNEntryJson> validEntries = entries.stream()
@@ -565,7 +1046,10 @@ public class USNJsonExporter {
             String livepatch = nullToEmpty(entry.livepatch);
             String needsReboot = nullToEmpty(entry.needs_reboot);
 
-            System.out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s%n", id, title, date, summary, severity, needsReboot, livepatch);
+            String severeCves = String.join(" ", entry.severeCves);
+
+            System.out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n", id, title, date, summary,
+                    severity, needsReboot, livepatch, severeCves);
         }
     }
 
