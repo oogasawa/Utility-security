@@ -373,8 +373,11 @@ cronから週に1回呼ぶことを想定している。
 
 ``` bash
 $ crontab -l
-30 10 * * 1 /home/devteam/works/Utility-security/bin/update-patch-history.sh
+30 10 * * 5 /home/devteam/works/Utility-security/bin/update-patch-history.sh
 ```
+
+金曜の午前に実行する。月曜にセキュリティの報告をするので、その前に記録簿が揃っている必要がある。
+午前にするのは、ubuntu.com が CVE 1件あたり日中は21〜27秒、夜間は125〜190秒で応答するためである。
 
 1回の実行は次の4つの状態を順に通る。
 どの状態で失敗しても記録簿は元のままである。
