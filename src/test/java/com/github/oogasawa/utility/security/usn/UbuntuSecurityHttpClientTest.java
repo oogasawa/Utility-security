@@ -37,11 +37,21 @@ public class UbuntuSecurityHttpClientTest {
     }
 
     @Test
-    @DisplayName("The waits of the whole schedule are 3s through 48s")
-    void waitMillisBefore_wholeSchedule_runsFromThreeToFortyEightSeconds() {
-        assertEquals(3000L, UbuntuSecurityHttpClient.waitMillisBefore(1));
-        assertEquals(48000L, UbuntuSecurityHttpClient.waitMillisBefore(10));
+    @DisplayName("The waits of the whole schedule are 10s through 100s")
+    void waitMillisBefore_wholeSchedule_runsFromTenToOneHundredSeconds() {
+        assertEquals(10000L, UbuntuSecurityHttpClient.waitMillisBefore(1));
+        assertEquals(100000L, UbuntuSecurityHttpClient.waitMillisBefore(10));
         assertEquals(10, UbuntuSecurityHttpClient.MAX_RETRIES);
+    }
+
+    @Test
+    @DisplayName("Exhausting every attempt takes between nine and ten minutes of waiting")
+    void waitMillisBefore_everyAttempt_addsUpToNineOrTenMinutes() {
+        long total = 0;
+        for (int attempt = 1; attempt <= UbuntuSecurityHttpClient.MAX_RETRIES; attempt++) {
+            total += UbuntuSecurityHttpClient.waitMillisBefore(attempt);
+        }
+        assertEquals(550000L, total);
     }
 
     @Test

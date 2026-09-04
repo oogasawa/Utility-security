@@ -47,13 +47,20 @@ import java.nio.charset.StandardCharsets;
  * </p>
  *
  * <pre>
- * attempt  1   2   3    4    5    6    7    8    9   10
- * wait/s   3   8  13   18   23   28   33   38   43   48
+ * attempt   1   2   3   4   5   6   7   8   9  10
+ * wait/s   10  20  30  40  50  60  70  80  90 100
  * </pre>
  *
  * <p>
  * A retry also multiplies the load exactly when the server has started refusing, and the growing
  * wait is what keeps the retries from making the refusal worse.
+ * </p>
+ *
+ * <p>
+ * The waits are long on purpose. A report that takes a night to finish costs nothing, because
+ * nobody waits for it; a CVE reported without its priority costs someone the work of looking it up
+ * by hand, and that work returns every time the report is produced. The choice is therefore
+ * between machine time and human time, and the waits are set so that the machine spends its own.
  * </p>
  */
 public class UbuntuSecurityHttpClient {
@@ -61,10 +68,10 @@ public class UbuntuSecurityHttpClient {
     private static final Logger logger = LoggerFactory.getLogger(UbuntuSecurityHttpClient.class);
 
     /** Minimum wait before every request. */
-    public static final long REQUEST_INTERVAL_MS = 3000L;
+    public static final long REQUEST_INTERVAL_MS = 10000L;
 
     /** Additional wait added for each retry, on top of {@link #REQUEST_INTERVAL_MS}. */
-    public static final long RETRY_INCREMENT_MS = 5000L;
+    public static final long RETRY_INCREMENT_MS = 10000L;
 
     /** Number of attempts made before a request is reported as failed. */
     public static final int MAX_RETRIES = 10;
