@@ -10,8 +10,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +34,21 @@ import java.util.Map;
 public class UsnApiFetcherTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    @TempDir
+    Path tempDir;
+
+    /**
+     * A fetcher whose store of notices is a file of this test alone. Without this the tests would
+     * read and write the store of the person running them, and each test would see what the test
+     * before it had left there.
+     *
+     * @param source the stub that returns the pages
+     * @return the fetcher
+     */
+    private UsnApiFetcher fetcher(UsnApiFetcher.NoticePageSource source) {
+        return new UsnApiFetcher(source, new NoticeCache(this.tempDir.resolve("notices.jsonl")));
+    }
 
     /**
      * Returns fixed pages by offset and records which offsets were requested.
@@ -85,7 +102,7 @@ public class UsnApiFetcherTest {
                 notice("USN-0002-1", "USN", "2026-08-26"),
                 notice("USN-0001-1", "USN", "2026-08-20")));
 
-        List<USNEntryJson> entries = new UsnApiFetcher(source)
+        List<USNEntryJson> entries = fetcher(source)
                 .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
 
         assertEquals(1, entries.size());
@@ -99,7 +116,7 @@ public class UsnApiFetcherTest {
                 notice("USN-0003-1", "USN", "2026-09-05"),
                 notice("USN-0002-1", "USN", "2026-08-26")));
 
-        List<USNEntryJson> entries = new UsnApiFetcher(source)
+        List<USNEntryJson> entries = fetcher(source)
                 .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
 
         assertEquals(1, entries.size());
@@ -113,7 +130,7 @@ public class UsnApiFetcherTest {
                 notice("LSN-0121-1", "LSN", "2026-08-26"),
                 notice("USN-0002-1", "USN", "2026-08-26")));
 
-        List<USNEntryJson> entries = new UsnApiFetcher(source)
+        List<USNEntryJson> entries = fetcher(source)
                 .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
 
         assertEquals(1, entries.size());
@@ -132,7 +149,7 @@ public class UsnApiFetcherTest {
                 .put(0, pageOf(firstPage))
                 .put(20, pageOf(notice("USN-0200-1", "USN", "2026-08-25")));
 
-        List<USNEntryJson> entries = new UsnApiFetcher(source)
+        List<USNEntryJson> entries = fetcher(source)
                 .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
 
         assertEquals(21, entries.size());
@@ -145,10 +162,75 @@ public class UsnApiFetcherTest {
     void fetchNotices_emptyPage_endsRetrieval() throws Exception {
         StubNoticePageSource source = new StubNoticePageSource().put(0, "{\"notices\": []}");
 
-        List<USNEntryJson> entries = new UsnApiFetcher(source)
+        List<USNEntryJson> entries = fetcher(source)
                 .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
 
         assertEquals(0, entries.size());
+    }
+
+    @Test
+    @DisplayName("A second run over the same period requests no page beyond the newest")
+    void fetchNotices_everyNoticeAlreadyStored_stopsAfterTheFirstPage() throws Exception {
+        String[] firstPage = new String[20];
+        for (int i = 0; i < firstPage.length; i++) {
+            firstPage[i] = notice(String.format("USN-01%02d-1", i), "USN", "2026-08-26");
+        }
+        StubNoticePageSource source = new StubNoticePageSource()
+                .put(0, pageOf(firstPage))
+                .put(20, pageOf(notice("USN-0200-1", "USN", "2026-08-20")));
+        NoticeCache cache = new NoticeCache(this.tempDir.resolve("notices.jsonl"));
+
+        new UsnApiFetcher(source, cache)
+                .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
+        source.requestedOffsets.clear();
+        List<USNEntryJson> entries = new UsnApiFetcher(source, cache)
+                .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
+
+        assertEquals(20, entries.size());
+        assertIterableEquals(List.of(Integer.valueOf(0)), source.requestedOffsets);
+    }
+
+    @Test
+    @DisplayName("A notice published since the last run is retrieved and added")
+    void fetchNotices_noticePublishedSince_isRetrieved() throws Exception {
+        StubNoticePageSource source = new StubNoticePageSource()
+                .put(0, pageOf(notice("USN-0001-1", "USN", "2026-08-25")));
+        NoticeCache cache = new NoticeCache(this.tempDir.resolve("notices.jsonl"));
+        new UsnApiFetcher(source, cache)
+                .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
+
+        source.put(0, pageOf(notice("USN-0002-1", "USN", "2026-08-27"),
+                notice("USN-0001-1", "USN", "2026-08-25")));
+        List<USNEntryJson> entries = new UsnApiFetcher(source, cache)
+                .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
+
+        assertIterableEquals(List.of("USN-0002-1", "USN-0001-1"),
+                entries.stream().map(e -> e.id).toList());
+    }
+
+    @Test
+    @DisplayName("Pages older than the stored ones are requested when the period reaches further "
+            + "back than what is stored")
+    void fetchNotices_periodReachesBeyondTheStore_requestsTheOlderPages() throws Exception {
+        String[] firstPage = new String[20];
+        for (int i = 0; i < firstPage.length; i++) {
+            firstPage[i] = notice(String.format("USN-01%02d-1", i), "USN", "2026-08-26");
+        }
+        StubNoticePageSource source = new StubNoticePageSource()
+                .put(0, pageOf(firstPage))
+                .put(20, pageOf(notice("USN-0200-1", "USN", "2026-08-20")));
+        NoticeCache cache = new NoticeCache(this.tempDir.resolve("notices.jsonl"));
+        new UsnApiFetcher(source, cache)
+                .fetchNotices(LocalDate.parse("2026-08-24"), LocalDate.parse("2026-08-31"), "noble");
+        source.requestedOffsets.clear();
+
+        // The store reaches back to 2026-08-20 only, so a period starting earlier must be read
+        // from the server however much of it is already stored.
+        new UsnApiFetcher(source, cache)
+                .fetchNotices(LocalDate.parse("2026-08-01"), LocalDate.parse("2026-08-31"), "noble");
+
+        assertIterableEquals(List.of(Integer.valueOf(0), Integer.valueOf(20)),
+                source.requestedOffsets);
     }
 
     @Test
@@ -157,7 +239,7 @@ public class UsnApiFetcherTest {
         StubNoticePageSource source = new StubNoticePageSource();
 
         assertThrows(IllegalArgumentException.class,
-                () -> new UsnApiFetcher(source).fetchNotices(
+                () -> fetcher(source).fetchNotices(
                         LocalDate.parse("2026-08-31"), LocalDate.parse("2026-08-24"), "noble"));
     }
 

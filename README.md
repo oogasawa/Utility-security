@@ -214,6 +214,25 @@ severityは最悪の値がいくつかを示すが、それがどのCVEかを示
 実際に1回の実行で16件のUbuntu Security Noticeがこの状態になり、
 1074件のCVEが未取得のまま残った。
 
+#### Ubuntu Security Noticeの一覧の保存
+
+一度読んだUbuntu Security Noticeは`$HOME/.cache/Utility-security/notices-<リリース名>.jsonl`に
+1行1件のJSONとして保存し、次回以降は要求を出さずに読む。
+
+`/security/notices.json`は期間で絞れないので、古い日付を指定すると
+それより新しい分を全部めくることになる。
+2025年8月まで遡る実行では、一覧の取得だけで146回の要求を出し、24分かかった。
+Ubuntu Security Noticeの内容は公開後に変わらない(訂正は別のUSN番号で公開される)ので、
+CVEのpriorityと同じく保存できる。
+
+保存があっても毎回、新しい方のページから読む。
+1ページ分が全て保存済みで、かつ保存済みの範囲が指定した期間の開始日まで届いていれば、
+そこで読むのをやめる。前回の実行以降に公開されたものはこの方法で拾える。
+保存済みの範囲が開始日に届いていなければ、従来どおり開始日まで遡る。
+
+1ページ届くごとに追記するので、途中で止めてもそれまでに読んだ分は残る。
+ファイルを消せば次回は全ページを読み直す。
+
 #### CVEのpriorityの保存
 
 一度取得したCVEのpriorityは次のファイルに保存し、次回以降は要求を出さずに読む。
@@ -506,4 +525,5 @@ v1.6.0
 - 依存する CLI ライブラリを `com.github.oogasawa:Utility-cli` 3.1.0 から `com.scivicslab:pluggable-cli` 1.0.0 へ変更した。前者はどこにも存在せず依存を解決できなかった
 - `severity` が `LookupFailed` の行を後の実行で書き直すようにした。この値は Ubuntu Security Notice についての事実ではなく、ubuntu.com が応答しなかったという実行時の事情だからである。書き直すのはプログラムが埋める8列だけで、人が埋める9列には触れない
 - 報告書の作成から記録簿への追記までを cron から週に1回実行する `bin/update-patch-history.sh` を追加した。置き換える前の記録簿は12世代を控えとして残す
-- ユニットテストを114件に増やし、いずれも外部サービスに接続しないようにした。ubuntu.com へ実際に届くかの確認は `UbuntuSecurityApiLiveCheck` として `main()` を持つプログラムに分離した
+- 一度読んだ Ubuntu Security Notice を `$HOME/.cache/Utility-security/notices-<リリース名>.jsonl` に保存し、次回以降は新しい方のページだけを読むようにした。2025年8月まで遡る実行では一覧の取得だけで146回の要求・24分かかっていた
+- ユニットテストを129件に増やし、いずれも外部サービスに接続しないようにした。ubuntu.com へ実際に届くかの確認は `UbuntuSecurityApiLiveCheck` として `main()` を持つプログラムに分離した

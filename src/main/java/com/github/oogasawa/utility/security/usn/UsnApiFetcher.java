@@ -70,6 +70,9 @@ public class UsnApiFetcher {
 
     private final NoticePageSource pageSource;
 
+    /** Where the notices already read are kept, or null to use the one of the release. */
+    private final NoticeCache noticeCache;
+
     /**
      * Creates a fetcher that requests pages from the live Ubuntu Security API.
      */
@@ -83,10 +86,22 @@ public class UsnApiFetcher {
      * @param pageSource the source of the notice pages
      */
     public UsnApiFetcher(NoticePageSource pageSource) {
+        this(pageSource, null);
+    }
+
+    /**
+     * Creates a fetcher that obtains pages from the given source and keeps what it read in the
+     * given store. Tests use this to work in a directory of their own.
+     *
+     * @param pageSource the source of the notice pages
+     * @param noticeCache where to keep the notices read, or null to use the one of the release
+     */
+    public UsnApiFetcher(NoticePageSource pageSource, NoticeCache noticeCache) {
         if (pageSource == null) {
             throw new IllegalArgumentException("Page source must not be null");
         }
         this.pageSource = pageSource;
+        this.noticeCache = noticeCache;
     }
 
     /**
@@ -156,8 +171,18 @@ public class UsnApiFetcher {
             throw new IllegalArgumentException("Release codename must not be null or blank");
         }
 
-        List<JsonNode> collected = new ArrayList<JsonNode>();
+        NoticeCache cache = this.noticeCache != null ? this.noticeCache
+                : new NoticeCache(releaseCodename);
+
+        // The stored notices reach back to this date, and every notice published after it is
+        // stored, because the store is only ever extended by reading pages from the newest
+        // backwards. When that date is at or before the start of the period, the pages older than
+        // the newest unstored one hold nothing this run has not already got.
+        LocalDate storedBackTo = cache.earliestPublished();
+        boolean storedReachesStart = storedBackTo != null && !storedBackTo.isAfter(start);
+
         int offset = 0;
+        int read = 0;
         boolean reachedStart = false;
 
         while (!reachedStart) {
@@ -170,6 +195,7 @@ public class UsnApiFetcher {
                 break;
             }
 
+            boolean everyNoticeWasStored = true;
             for (JsonNode notice : notices) {
                 LocalDate published = publishedDateOf(notice);
                 if (published == null) {
@@ -177,24 +203,31 @@ public class UsnApiFetcher {
                             notice.path("id").asText(""));
                     continue;
                 }
+                if (!cache.holds(notice.path("id").asText(""))) {
+                    everyNoticeWasStored = false;
+                }
+                cache.put(notice);
+                read++;
                 if (published.isBefore(start)) {
                     reachedStart = true;
-                    continue;
                 }
-                if (published.isAfter(end)) {
-                    continue;
-                }
-                collected.add(notice);
             }
 
             if (notices.size() < PAGE_SIZE) {
                 break;
             }
+            if (everyNoticeWasStored && storedReachesStart) {
+                logger.info("Every notice of this page was already stored and the stored notices "
+                        + "reach back to {}, so the older pages are not requested", storedBackTo);
+                break;
+            }
             offset += PAGE_SIZE;
         }
 
-        logger.info("Fetched {} notices for release {} between {} and {}",
-                collected.size(), releaseCodename, start, end);
+        cache.save();
+        List<JsonNode> collected = cache.between(start, end);
+        logger.info("Fetched {} notices for release {} between {} and {}, of which {} were read "
+                + "from the server this run", collected.size(), releaseCodename, start, end, read);
         return collected;
     }
 
