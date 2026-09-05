@@ -160,6 +160,40 @@ public class PatchHistoryWorkbookTest {
     }
 
     @Test
+    @DisplayName("A notice already recorded under another suffix is not written again")
+    void addReport_noticeRecordedUnderAnotherSuffix_isNotWrittenAgain() throws IOException {
+        // The record holds USN-8700-3, and a later run names the same group USN-8700-1 because an
+        // issue published earlier came into the list.
+        Path source = writeSourceWorkbook("2026", "USN-8700-3");
+        Path output = this.tempDir.resolve("output.xlsx");
+
+        new PatchHistoryWorkbook().addReport(source, writeReport(), output, "2026");
+
+        try (InputStream in = Files.newInputStream(output);
+                Workbook workbook = new XSSFWorkbook(in)) {
+            assertIterableEquals(List.of("", "USN-8700-3", "USN-8701-1"),
+                    firstColumnOf(workbook.getSheet("2026")));
+        }
+    }
+
+    @Test
+    @DisplayName("A row recorded under another suffix is given the severity a later run retrieved")
+    void addReport_rowAwaitingARankUnderAnotherSuffix_isGivenTheSeverity() throws IOException {
+        Path source = writeWorkbookWithARowAwaitingARank("USN-8700-3", "対応済み");
+        Path output = this.tempDir.resolve("output.xlsx");
+
+        new PatchHistoryWorkbook().addReport(source, writeReport(), output, "2026");
+
+        try (InputStream in = Files.newInputStream(output);
+                Workbook workbook = new XSSFWorkbook(in)) {
+            Sheet sheet = workbook.getSheet("2026");
+            assertIterableEquals(List.of("", "USN-8700-1", "USN-8701-1"), firstColumnOf(sheet));
+            assertEquals("Medium", sheet.getRow(1).getCell(4).getStringCellValue());
+            assertEquals("対応済み", sheet.getRow(1).getCell(16).getStringCellValue());
+        }
+    }
+
+    @Test
     @DisplayName("Running twice adds nothing the second time")
     void addReport_runTwice_addsNothingTheSecondTime() throws IOException {
         Path source = writeSourceWorkbook("2025", "USN-7520-1");

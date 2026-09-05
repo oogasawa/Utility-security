@@ -217,8 +217,15 @@ public class PatchHistoryWorkbook {
      * Writes a copy of the source workbook with the rows of a report added to the named sheet.
      *
      * <p>
-     * A notice whose identifier already appears anywhere in the workbook is not written again, so
-     * running this twice adds nothing the second time.
+     * A notice already anywhere in the workbook is not written again, so running this twice adds
+     * nothing the second time. The suffix of the identifier is ignored in that comparison, because
+     * the report names a group of reissues after its earliest issue and an issue published earlier
+     * than any seen before renames the group.
+     * </p>
+     *
+     * <p>
+     * A row already there is left as it is, with one exception: a row whose severity says the
+     * priority could not be retrieved is written over, in the columns this program fills in.
      * </p>
      *
      * @param sourceWorkbook the workbook to read, which is not modified
@@ -260,7 +267,7 @@ public class PatchHistoryWorkbook {
             int skipped = 0;
 
             for (List<String> reportRow : reportRows) {
-                String noticeId = reportRow.get(0);
+                String noticeId = USNJsonExporter.baseNoticeId(reportRow.get(0));
                 Row awaiting = rowsAwaitingARank.get(noticeId);
 
                 if (awaiting != null && !SEVERITY_LOOKUP_FAILED.equals(reportRow.get(
@@ -326,6 +333,13 @@ public class PatchHistoryWorkbook {
      * @return the identifiers found
      */
     static Set<String> collectNoticeIds(Workbook workbook) {
+        // The suffix is dropped, so that a notice already in the record is recognised however its
+        // representative issue changed. Canonical issues the same fix again for each kernel
+        // flavour, giving each issue the same number with a different suffix, and the report names
+        // the group after its earliest issue. An issue published earlier than any seen so far
+        // therefore renames the group, and matching the whole identifier would put the same notice
+        // in the record a second time under the new name.
+
         Set<String> ids = new HashSet<String>();
 
         for (Sheet sheet : workbook) {
@@ -336,7 +350,7 @@ public class PatchHistoryWorkbook {
                 }
                 String value = readAsText(cell);
                 if (value.startsWith("USN-") || value.startsWith("LSN-")) {
-                    ids.add(value);
+                    ids.add(USNJsonExporter.baseNoticeId(value));
                 }
             }
         }
@@ -460,7 +474,7 @@ public class PatchHistoryWorkbook {
                 continue;
             }
             if (SEVERITY_LOOKUP_FAILED.equals(readAsText(severity))) {
-                rows.put(readAsText(id), row);
+                rows.put(USNJsonExporter.baseNoticeId(readAsText(id)), row);
             }
         }
         return rows;

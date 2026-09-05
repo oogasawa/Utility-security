@@ -377,6 +377,12 @@ java -jar target/Utility-security-1.6.0.jar ubuntu:append-xlsx \
 
 記録簿のどこかに既に載っているUSN番号・LSN番号は書かない。二度実行しても増えない。
 
+**判定には枝番を落とした番号を使う。** 報告書は枝番の付いた同じ番号の記事を1行にまとめ、
+その組を最も公開日が古い記事の番号で呼ぶ。
+後から更に古い枝番が一覧に入ると組の呼び名が変わるので、
+番号をそのまま突き合わせると同じ記事が2行になる。
+`USN-7835-3` として載っている行は、報告書が `USN-7835-1` と呼んでも同じものとして扱う。
+
 ただし`severity`が`LookupFailed`の行は書き直す。
 この値はUbuntu Security Noticeについての事実ではなく、
 ubuntu.comが応答しなかったという実行時の事情を記録したものだからである。
@@ -525,5 +531,6 @@ v1.6.0
 - 依存する CLI ライブラリを `com.github.oogasawa:Utility-cli` 3.1.0 から `com.scivicslab:pluggable-cli` 1.0.0 へ変更した。前者はどこにも存在せず依存を解決できなかった
 - `severity` が `LookupFailed` の行を後の実行で書き直すようにした。この値は Ubuntu Security Notice についての事実ではなく、ubuntu.com が応答しなかったという実行時の事情だからである。書き直すのはプログラムが埋める8列だけで、人が埋める9列には触れない
 - 報告書の作成から記録簿への追記までを cron から週に1回実行する `bin/update-patch-history.sh` を追加した。置き換える前の記録簿は12世代を控えとして残す
+- `ubuntu:append-xlsx` が既に載っているかを判定するとき、枝番を落とした番号で突き合わせるようにした。以前は番号をそのまま比べており、後から古い枝番が一覧に入って組の呼び名が変わると、同じ Ubuntu Security Notice が2行になっていた
 - 一度読んだ Ubuntu Security Notice を `$HOME/.cache/Utility-security/notices-<リリース名>.jsonl` に保存し、次回以降は新しい方のページだけを読むようにした。2025年8月まで遡る実行では一覧の取得だけで146回の要求・24分かかっていた
 - ユニットテストを129件に増やし、いずれも外部サービスに接続しないようにした。ubuntu.com へ実際に届くかの確認は `UbuntuSecurityApiLiveCheck` として `main()` を持つプログラムに分離した
