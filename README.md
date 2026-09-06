@@ -41,7 +41,7 @@ fat-jarファイル(依存ライブラリがすべて入った単一のjarファ
 引数なしで実行すると使い方が表示される。
 
 ``` bash
-$ java -jar target/Utility-security-1.6.0.jar
+$ java -jar target/Utility-security-1.6.0-shaded.jar
 
 ## Usage
 
@@ -70,7 +70,7 @@ ubuntu:report   Create a report of Ubuntu Security Notices in TSV or JSON format
 #### 期間を指定して実行する
 
 ``` bash
-java -jar target/Utility-security-1.6.0.jar ubuntu:report \
+java -jar target/Utility-security-1.6.0-shaded.jar ubuntu:report \
   --start 2026-08-24 --end 2026-08-31 | tee ubuntu-security.2026W35.tsv
 ```
 
@@ -87,7 +87,7 @@ java -jar target/Utility-security-1.6.0.jar ubuntu:report \
 実行例
 
 ``` bash
-$ java -jar target/Utility-security-1.6.0.jar ubuntu:report --start 2026-04-01 --end 2026-09-01
+$ java -jar target/Utility-security-1.6.0-shaded.jar ubuntu:report --start 2026-04-01 --end 2026-09-01
 INFO c.g.o.u.s.u.UsnApiFetcher  Requesting notices 1 to 20 for release noble
 INFO c.g.o.u.s.u.UsnApiFetcher  Fetched 418 notices for release noble between 2026-04-01 and 2026-09-01
 INFO c.g.o.u.s.u.USNJsonExporter Merged 364 notices into 337 by their USN number
@@ -291,7 +291,7 @@ Ubuntu Security APIは新しい順に返すので、出力前に並べ替える�
 記事1件につき1回の要求が出るため、こちらも記事の件数に応じて時間がかかる。
 
 ``` bash
-java -jar target/Utility-security-1.6.0.jar ubuntu:report -i ubuntu-security.2505A.txt | tee 2505A.tsv
+java -jar target/Utility-security-1.6.0-shaded.jar ubuntu:report -i ubuntu-security.2505A.txt | tee 2505A.tsv
 ```
 
 #### ヘルプの表示
@@ -299,7 +299,7 @@ java -jar target/Utility-security-1.6.0.jar ubuntu:report -i ubuntu-security.250
 `-h`を付けるとエラー行が1行出た後にヘルプが表示される。
 
 ``` bash
-$ java -jar target/Utility-security-1.6.0.jar ubuntu:report -h
+$ java -jar target/Utility-security-1.6.0-shaded.jar ubuntu:report -h
 Error: Failed to parse the command. Reason: Unrecognized option: -h
 See the help below for correct usage:
 Usage:
@@ -316,7 +316,7 @@ Kernel Live Patch Security Noticeを1件1行で出力する。
 無停止でカーネルを修正できるかどうかを判断するための表である。
 
 ``` bash
-java -jar target/Utility-security-1.6.0.jar ubuntu:livepatch-report \
+java -jar target/Utility-security-1.6.0-shaded.jar ubuntu:livepatch-report \
   --start 2026-04-01 --end 2026-09-01 --release noble | tee livepatch.2026.tsv
 ```
 
@@ -355,7 +355,7 @@ Canonicalはこの文言を削除しており、2025年5月以降`yes`が1件も
 記録簿`【C-19】セキュリティパッチ対策履歴.xlsx`のシートへ追記する。
 
 ``` bash
-java -jar target/Utility-security-1.6.0.jar ubuntu:append-xlsx \
+java -jar target/Utility-security-1.6.0-shaded.jar ubuntu:append-xlsx \
   --infile report_2026.tsv \
   --xlsx  "【C-19】セキュリティパッチ対策履歴.xlsx" \
   --outfile "【C-19】セキュリティパッチ対策履歴_2026追記.xlsx" \
@@ -456,7 +456,7 @@ Kernel Live Patch Security Noticeは数週間に1件なので、30日間で0件�
 外部サービスへの要求をビルドのたびに出さないためである。
 
 ``` bash
-$ java -cp target/Utility-security-1.6.0.jar \
+$ java -cp target/Utility-security-1.6.0-shaded.jar \
     com.github.oogasawa.utility.security.usn.UbuntuSecurityApiLiveCheck
 notices endpoint: USN-8643-5, published 2026-08-27T21:29:15.524720, type USN, 4 CVEs
 cve endpoint: CVE-2025-4207 has priority Medium
@@ -479,7 +479,7 @@ PASS: both endpoints of the Ubuntu Security API answered.
 2. 取得したい期間（ISO 形式の日付）と出力ファイルを指定して実行する。
 
    ```bash
-   java -jar target/Utility-security-1.6.0.jar ubuntu:fetch-digest \
+   java -jar target/Utility-security-1.6.0-shaded.jar ubuntu:fetch-digest \
      --start 2025-05-01 --end 2025-05-07 \
      --outfile ~/logs-security/ubuntu-security.2025W18.txt
    ```
