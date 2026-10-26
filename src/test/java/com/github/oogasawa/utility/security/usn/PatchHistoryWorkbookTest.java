@@ -244,6 +244,11 @@ public class PatchHistoryWorkbookTest {
      */
     private Path writeWorkbookWithARowAwaitingARank(String noticeId, String note)
             throws IOException {
+        return writeWorkbookWithARowAwaitingARank(noticeId, note, "LookupFailed");
+    }
+
+    private Path writeWorkbookWithARowAwaitingARank(String noticeId, String note,
+            String placeholder) throws IOException {
         Path file = this.tempDir.resolve("awaiting.xlsx");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("2026");
@@ -253,7 +258,7 @@ public class PatchHistoryWorkbookTest {
             row.createCell(1).setCellValue("Vim vulnerability");
             row.createCell(2).setCellValue("2026-08-30");
             row.createCell(3).setCellValue("Vim could be made to crash.");
-            row.createCell(4).setCellValue("LookupFailed");
+            row.createCell(4).setCellValue(placeholder);
             row.createCell(5).setCellValue("no");
             row.createCell(6).setCellValue("NA");
             row.createCell(16).setCellValue(note);
@@ -312,6 +317,95 @@ public class PatchHistoryWorkbookTest {
             Sheet sheet = workbook.getSheet("2026");
             assertIterableEquals(List.of("", "USN-8700-1", "USN-8701-1"), firstColumnOf(sheet));
             assertEquals("LookupFailed", sheet.getRow(1).getCell(4).getStringCellValue());
+        }
+    }
+
+    @Test
+    @DisplayName("A row recorded as Pending is given the severity a later run retrieved")
+    void addReport_pendingRow_isGivenTheSeverityAndKeepsWhatAPersonWrote() throws IOException {
+        Path source = writeWorkbookWithARowAwaitingARank("USN-8700-1", "対応済み", "Pending");
+        Path output = this.tempDir.resolve("output.xlsx");
+
+        new PatchHistoryWorkbook().addReport(source, writeReport(), output, "2026");
+
+        try (InputStream in = Files.newInputStream(output);
+                Workbook workbook = new XSSFWorkbook(in)) {
+            Sheet sheet = workbook.getSheet("2026");
+            assertIterableEquals(List.of("", "USN-8700-1", "USN-8701-1"), firstColumnOf(sheet));
+            assertEquals("Medium", sheet.getRow(1).getCell(4).getStringCellValue());
+            assertEquals("対応済み", sheet.getRow(1).getCell(16).getStringCellValue());
+        }
+    }
+
+    @Test
+    @DisplayName("A report of Pending severities adds its notices and writes over nothing")
+    void addReport_pendingReport_addsNewRowsAndLeavesPlaceholdersAlone() throws IOException {
+        Path source = writeWorkbookWithARowAwaitingARank("USN-8700-1", "対応済み", "LookupFailed");
+        Path report = this.tempDir.resolve("pending.tsv");
+        Files.writeString(report,
+                REPORT.replace("\tMedium\t", "\tPending\t").replace("\tHigh\t", "\tPending\t"),
+                StandardCharsets.UTF_8);
+        Path output = this.tempDir.resolve("output.xlsx");
+
+        new PatchHistoryWorkbook().addReport(source, report, output, "2026");
+
+        try (InputStream in = Files.newInputStream(output);
+                Workbook workbook = new XSSFWorkbook(in)) {
+            Sheet sheet = workbook.getSheet("2026");
+            assertIterableEquals(List.of("", "USN-8700-1", "USN-8701-1"), firstColumnOf(sheet));
+            assertEquals("LookupFailed", sheet.getRow(1).getCell(4).getStringCellValue());
+            assertEquals("Pending", sheet.getRow(2).getCell(4).getStringCellValue());
+        }
+    }
+
+    @Test
+    @DisplayName("The rating of one notice is written in place, and only into its own cells")
+    void updateUsnRating_pendingRow_isWrittenInPlaceKeepingWhatAPersonWrote() throws IOException {
+        Path record = writeWorkbookWithARowAwaitingARank("USN-8700-1", "対応済み", "Pending");
+
+        boolean written = new PatchHistoryWorkbook().updateUsnRating(record, "2026",
+                "USN-8700-2", "High", List.of("CVE-2026-1", "CVE-2026-2"));
+
+        assertTrue(written);
+        try (InputStream in = Files.newInputStream(record);
+                Workbook workbook = new XSSFWorkbook(in)) {
+            Row row = workbook.getSheet("2026").getRow(1);
+            assertEquals("High", row.getCell(4).getStringCellValue());
+            assertEquals("CVE-2026-1 CVE-2026-2", row.getCell(7).getStringCellValue());
+            assertEquals("Vim vulnerability", row.getCell(1).getStringCellValue());
+            assertEquals("対応済み", row.getCell(16).getStringCellValue());
+        }
+        assertFalse(Files.exists(record.resolveSibling("awaiting.xlsx.updating")));
+    }
+
+    @Test
+    @DisplayName("A row that already carries a severity is not written by a rating")
+    void updateUsnRating_settledRow_isLeftAlone() throws IOException {
+        Path record = writeWorkbookWithARowAwaitingARank("USN-8700-1", "対応済み", "Medium");
+
+        boolean written = new PatchHistoryWorkbook().updateUsnRating(record, "2026",
+                "USN-8700-1", "High", List.of());
+
+        assertFalse(written);
+        try (InputStream in = Files.newInputStream(record);
+                Workbook workbook = new XSSFWorkbook(in)) {
+            assertEquals("Medium",
+                    workbook.getSheet("2026").getRow(1).getCell(4).getStringCellValue());
+        }
+    }
+
+    @Test
+    @DisplayName("A row recorded as at least a rank is given the severity a later run retrieved")
+    void addReport_atLeastRow_isGivenTheSeverity() throws IOException {
+        Path source = writeWorkbookWithARowAwaitingARank("USN-8700-1", "対応済み", "High+");
+        Path output = this.tempDir.resolve("output.xlsx");
+
+        new PatchHistoryWorkbook().addReport(source, writeReport(), output, "2026");
+
+        try (InputStream in = Files.newInputStream(output);
+                Workbook workbook = new XSSFWorkbook(in)) {
+            assertEquals("Medium",
+                    workbook.getSheet("2026").getRow(1).getCell(4).getStringCellValue());
         }
     }
 

@@ -29,6 +29,19 @@ public class USNJsonExporter {
     /** Severity reported when the notice refers to no CVE at all. */
     public static final String SEVERITY_NO_CVE = "NoCve";
 
+    /** Severity reported when the CVEs of the notice have not been looked up yet. */
+    public static final String SEVERITY_PENDING = "Pending";
+
+    /**
+     * Written after a rank when the rank is only a lower bound, as in {@code High+}.
+     *
+     * <p>
+     * A priority could not be retrieved for some CVE of the notice, and that CVE may be worse than
+     * the ones that were retrieved. The rank is therefore the least the severity can be.
+     * </p>
+     */
+    public static final String SEVERITY_AT_LEAST_SUFFIX = "+";
+
     /** Severity reported when the priority of a CVE could not be retrieved. */
     public static final String SEVERITY_LOOKUP_FAILED = "LookupFailed";
 
@@ -297,6 +310,28 @@ public class USNJsonExporter {
      * @param format the desired output format ("json" or "tsv")
      */
     public void report(LocalDate start, LocalDate end, String releaseCodename, String format) {
+        report(start, end, releaseCodename, format, true);
+    }
+
+
+    /**
+     * Generates a report from the Ubuntu Security API, optionally without looking up any CVE.
+     *
+     * <p>
+     * Without the lookup the report is complete except for the severity and the severe CVEs, which
+     * are the only columns that depend on a CVE page of ubuntu.com. Those two columns are given
+     * {@link #SEVERITY_PENDING} and left empty, so that the notices can be recorded before the
+     * slow part begins.
+     * </p>
+     *
+     * @param start the first publication date to include, inclusive
+     * @param end the last publication date to include, inclusive
+     * @param releaseCodename the Ubuntu release codename, for example {@code noble} for 24.04 LTS
+     * @param format the desired output format ("json" or "tsv")
+     * @param rateCves false to skip every CVE lookup
+     */
+    public void report(LocalDate start, LocalDate end, String releaseCodename, String format,
+            boolean rateCves) {
         loadPriorityCache();
         try {
             List<USNEntryJson> entries =
@@ -313,7 +348,12 @@ public class USNJsonExporter {
             logger.info("Final entries after keeping only the kernels in use: {}", filtered.size());
 
             for (USNEntryJson entry : filtered) {
-                assignMaxSeverity(entry);
+                if (rateCves) {
+                    assignMaxSeverity(entry);
+                } else {
+                    entry.severity = SEVERITY_PENDING;
+                    entry.severeCves = List.of();
+                }
                 determineLivepatchAvailability(entry, entry.update_instructions);
                 determineRebootRequirement(entry, entry.update_instructions);
             }
@@ -326,6 +366,191 @@ public class USNJsonExporter {
         } finally {
             this.priorityCache.save();
         }
+    }
+
+
+    /**
+     * Rates the notices of a period and hands each rating over whenever it changes.
+     *
+     * <p>
+     * The notices take turns, one request each per turn, as {@link #rateInTurns(List, RatingSink)}
+     * describes. A notice with several hundred CVEs that are not yet stored takes hours when
+     * ubuntu.com is slow, and it must not keep the other notices from being given a rank.
+     * </p>
+     *
+     * @param start the first publication date to include, inclusive
+     * @param end the last publication date to include, inclusive
+     * @param releaseCodename the Ubuntu release codename, for example {@code noble} for 24.04 LTS
+     * @param sink the receiver of each rating
+     * @throws IOException if the notices cannot be retrieved or a rating cannot be kept
+     */
+    public void rateNotices(LocalDate start, LocalDate end, String releaseCodename,
+            RatingSink sink) throws IOException {
+        loadPriorityCache();
+        try {
+            List<USNEntryJson> entries = collapseReissues(
+                    new UsnApiFetcher().fetchNotices(start, end, releaseCodename).stream()
+                            .filter(entry -> entry.id != null && !entry.id.trim().isEmpty())
+                            .filter(this::appliesToUbuntu2404)
+                            .filter(this::coversAKernelInUse)
+                            .collect(Collectors.toList()));
+
+            entries.sort(Comparator.comparingInt(entry -> countUnstoredCves(entry.cves)));
+
+            List<NoticeCves> notices = new ArrayList<>();
+            for (USNEntryJson entry : entries) {
+                notices.add(new NoticeCves(entry.id, entry.cves));
+            }
+            rateInTurns(notices, sink);
+        } finally {
+            this.priorityCache.save();
+        }
+    }
+
+
+    /**
+     * The CVEs of one notice waiting to be rated.
+     *
+     * @param noticeId the identifier of the notice, for example {@code USN-8933-1}
+     * @param cveIds the CVEs the notice refers to
+     */
+    public record NoticeCves(String noticeId, List<String> cveIds) {}
+
+
+    /**
+     * Rates the notices by taking turns among them, one request per notice per turn, and hands a
+     * rating over whenever it changes.
+     *
+     * <h2>Why the notices take turns</h2>
+     *
+     * <p>
+     * A kernel notice refers to several hundred CVEs, and when ubuntu.com is slow a single CVE
+     * takes minutes. Rating the notices one after another keeps every notice behind such a notice
+     * Pending until all of its CVEs have been requested, and a run that has not ended by the
+     * Monday meeting leaves those notices without any rank. Taking turns gives every notice a rank
+     * from its first CVE onwards, and each request after that can only raise the rank or remove
+     * the {@code +} that marks it as a lower bound. The notices that need the fewest requests
+     * come first in each turn.
+     * </p>
+     *
+     * <h2>What one turn does</h2>
+     *
+     * <p>
+     * Before the first turn every CVE whose priority is stored is read without a request, and
+     * each notice whose rating that settles is handed over. In a turn each notice that still has
+     * a CVE waiting gets one request for its next one. A CVE is requested once per run even when
+     * several notices refer to it: its answer is shared by all of them, and each of those notices
+     * whose rating it changes is handed over at once. A notice of which no CVE has been obtained
+     * is not handed over while CVEs are still waiting, so that the record keeps saying Pending
+     * rather than LookupFailed for a notice whose turn has not come yet.
+     * </p>
+     *
+     * @param notices the notices to rate, in the order of the turns
+     * @param sink the receiver of each rating
+     * @throws IOException if a rating cannot be kept
+     */
+    public void rateInTurns(List<NoticeCves> notices, RatingSink sink) throws IOException {
+
+        Map<String, PriorityLookup> obtained = new HashMap<>();
+        Map<String, List<Integer>> noticesByCve = new HashMap<>();
+        List<Deque<String>> waiting = new ArrayList<>();
+
+        for (int i = 0; i < notices.size(); i++) {
+            Deque<String> queue = new ArrayDeque<>();
+            for (String cve : new LinkedHashSet<>(notices.get(i).cveIds())) {
+                noticesByCve.computeIfAbsent(cve, key -> new ArrayList<>()).add(i);
+                if (PriorityLevel.fromString(this.priorityCache.get(cve)) != null) {
+                    obtained.put(cve, lookupPriority(cve));
+                } else {
+                    queue.add(cve);
+                }
+            }
+            waiting.add(queue);
+        }
+
+        Map<Integer, CveRating> handedOver = new HashMap<>();
+        Set<Integer> finished = new HashSet<>();
+        for (int i = 0; i < notices.size(); i++) {
+            handOverIfChanged(notices, i, waiting, obtained, handedOver, finished, sink);
+        }
+
+        boolean requested = true;
+        while (requested) {
+            requested = false;
+            for (int i = 0; i < notices.size(); i++) {
+                Deque<String> queue = waiting.get(i);
+                // A CVE obtained in the turn of another notice needs no request of its own.
+                while (!queue.isEmpty() && obtained.containsKey(queue.peek())) {
+                    queue.poll();
+                }
+                if (queue.isEmpty()) {
+                    handOverIfChanged(notices, i, waiting, obtained, handedOver, finished, sink);
+                    continue;
+                }
+                String cve = queue.poll();
+                obtained.put(cve, lookupPriority(cve));
+                requested = true;
+                for (int sharer : noticesByCve.get(cve)) {
+                    waiting.get(sharer).remove(cve);
+                    handOverIfChanged(notices, sharer, waiting, obtained, handedOver, finished,
+                            sink);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Hands the rating of one notice over when it differs from the one handed over last.
+     *
+     * @param notices the notices being rated
+     * @param index the position of the notice among them
+     * @param waiting the CVEs of each notice not obtained yet
+     * @param obtained the lookups made so far, by CVE
+     * @param handedOver the rating handed over last for each notice
+     * @param finished the notices whose last CVE has been obtained and whose rating is final
+     * @param sink the receiver of each rating
+     * @throws IOException if the rating cannot be kept
+     */
+    private void handOverIfChanged(List<NoticeCves> notices, int index,
+            List<Deque<String>> waiting, Map<String, PriorityLookup> obtained,
+            Map<Integer, CveRating> handedOver, Set<Integer> finished, RatingSink sink)
+            throws IOException {
+
+        if (finished.contains(index)) {
+            return;
+        }
+        NoticeCves notice = notices.get(index);
+        boolean complete = waiting.get(index).isEmpty();
+        if (complete) {
+            finished.add(index);
+        }
+        CveRating rating = rateFromLookups(notice.cveIds(), obtained, notice.noticeId(), complete);
+        if (!complete && SEVERITY_LOOKUP_FAILED.equals(rating.severity())) {
+            return;
+        }
+        if (rating.equals(handedOver.get(index))) {
+            return;
+        }
+        handedOver.put(index, rating);
+        sink.accept(notice.noticeId(), rating.severity(), rating.severeCveIds());
+    }
+
+
+    /**
+     * Counts the CVEs whose priority is not stored, which are the ones that need a request.
+     *
+     * @param cveIds the CVEs of a notice
+     * @return how many of them have no stored rank
+     */
+    int countUnstoredCves(List<String> cveIds) {
+        int unstored = 0;
+        for (String cve : cveIds) {
+            if (PriorityLevel.fromString(this.priorityCache.get(cve)) == null) {
+                unstored++;
+            }
+        }
+        return unstored;
     }
 
 
@@ -554,6 +779,32 @@ public class USNJsonExporter {
      *         {@link #SEVERITY_UNRATED}
      */
     CveRating rateCves(List<String> cveIds, String noticeId) {
+        Map<String, PriorityLookup> lookups = new HashMap<>();
+        for (String cve : cveIds) {
+            lookups.put(cve, lookupPriority(cve));
+        }
+        return rateFromLookups(cveIds, lookups, noticeId, true);
+    }
+
+
+    /**
+     * Determines the severity of a notice from the lookups made so far.
+     *
+     * <p>
+     * A CVE that has no lookup yet counts as one whose priority could not be retrieved, because
+     * in both cases nothing is known about it. A notice rated while some of its CVEs are still
+     * waiting is therefore given the highest rank among the ones obtained, with
+     * {@link #SEVERITY_AT_LEAST_SUFFIX}, unless one of them is Critical.
+     * </p>
+     *
+     * @param cveIds the CVEs the notice refers to
+     * @param lookups the lookups made so far, by CVE
+     * @param noticeId the notice, used in the log
+     * @param logged true to log how the severity was reached, which is wanted once per notice
+     * @return the rating, as {@link #rateCves(List, String)} describes it
+     */
+    CveRating rateFromLookups(List<String> cveIds, Map<String, PriorityLookup> lookups,
+            String noticeId, boolean logged) {
 
         if (cveIds.isEmpty()) {
             return new CveRating(SEVERITY_NO_CVE, List.of());
@@ -565,7 +816,8 @@ public class USNJsonExporter {
         List<String> unratedCveIds = new ArrayList<>();
 
         for (String cve : cveIds) {
-            PriorityLookup lookup = lookupPriority(cve);
+            PriorityLookup lookup = lookups.getOrDefault(cve,
+                    new PriorityLookup(PriorityLookupOutcome.FAILED, null));
 
             switch (lookup.outcome()) {
                 case FAILED:
@@ -583,26 +835,44 @@ public class USNJsonExporter {
             }
         }
 
+        // A Critical CVE among those retrieved settles the severity: no CVE not yet retrieved can
+        // raise it, so the notice is Critical whatever the failed lookups would have answered.
+        // Below Critical a CVE not retrieved may still be worse than the ones that were, so the
+        // severity is only known to be at least the highest rank retrieved.
+        if (!failedCveIds.isEmpty() && !levels.contains(PriorityLevel.CRITICAL)) {
+            if (levels.isEmpty()) {
+                if (logged) logger.warn("Severity of {} is {} because the priority of {} of its {} CVEs could "
+                        + "not be retrieved: {}", noticeId, SEVERITY_LOOKUP_FAILED,
+                        failedCveIds.size(), cveIds.size(), failedCveIds);
+                return new CveRating(SEVERITY_LOOKUP_FAILED, severeCveIds);
+            }
+            PriorityLevel highest = levels.stream()
+                    .max(Comparator.comparingInt(PriorityLevel::level)).orElseThrow();
+            if (logged) logger.warn("Severity of {} is at least {} because the priority of {} of its {} CVEs "
+                    + "could not be retrieved: {}", noticeId, highest.nameCapitalized(),
+                    failedCveIds.size(), cveIds.size(), failedCveIds);
+            return new CveRating(highest.nameCapitalized() + SEVERITY_AT_LEAST_SUFFIX,
+                    severeCveIds);
+        }
         if (!failedCveIds.isEmpty()) {
-            logger.warn("Severity of {} is {} because the priority of {} of its {} CVEs could not "
-                    + "be retrieved: {}", noticeId, SEVERITY_LOOKUP_FAILED, failedCveIds.size(),
-                    cveIds.size(), failedCveIds);
-            return new CveRating(SEVERITY_LOOKUP_FAILED, severeCveIds);
+            if (logged) logger.warn("The priority of {} of the {} CVEs of {} could not be retrieved, but one "
+                    + "retrieved CVE is Critical, so the severity is Critical: {}",
+                    failedCveIds.size(), cveIds.size(), noticeId, failedCveIds);
         }
         if (levels.isEmpty()) {
-            logger.warn("Severity of {} is {} because Ubuntu has ranked none of its {} CVEs: {}",
+            if (logged) logger.warn("Severity of {} is {} because Ubuntu has ranked none of its {} CVEs: {}",
                     noticeId, SEVERITY_UNRATED, cveIds.size(), unratedCveIds);
             return new CveRating(SEVERITY_UNRATED, severeCveIds);
         }
         if (!unratedCveIds.isEmpty()) {
-            logger.info("Ubuntu has not ranked {} of the {} CVEs of {}: {}. The severity is taken "
+            if (logged) logger.info("Ubuntu has not ranked {} of the {} CVEs of {}: {}. The severity is taken "
                     + "from the {} it has ranked.", unratedCveIds.size(), cveIds.size(), noticeId,
                     unratedCveIds, levels.size());
         }
 
         PriorityLevel max =
                 levels.stream().max(Comparator.comparingInt(PriorityLevel::level)).orElseThrow();
-        logger.info("Assigned severity '{}' to {} based on {} CVEs, {} of them High or above",
+        if (logged) logger.info("Assigned severity '{}' to {} based on {} CVEs, {} of them High or above",
                 max.nameCapitalized(), noticeId, levels.size(), severeCveIds.size());
         return new CveRating(max.nameCapitalized(), severeCveIds);
     }

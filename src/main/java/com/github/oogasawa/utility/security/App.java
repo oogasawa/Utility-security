@@ -7,9 +7,18 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import com.scivicslab.pluggablecli.CommandRepository;
+import com.github.oogasawa.utility.security.deps.JavaCveReporter;
+import com.github.oogasawa.utility.security.deps.MavenDependencyLister;
+import com.github.oogasawa.utility.security.deps.OsvClient;
+import com.github.oogasawa.utility.security.fortinet.FortinetPsirtClient;
+import com.github.oogasawa.utility.security.fortinet.FortinetReporter;
+import com.github.oogasawa.utility.security.fortinet.HttpTextFetcher;
+import com.github.oogasawa.utility.security.fortinet.NvdFortiOsClient;
 import com.github.oogasawa.utility.security.gmail.GmailIMAPFetcher;
 import com.github.oogasawa.utility.security.log.LogRenamer;
+import com.github.oogasawa.utility.security.usn.CvePriorityCache;
 import com.github.oogasawa.utility.security.usn.LivePatchReporter;
+import com.github.oogasawa.utility.security.usn.UsnApiFetcher;
 import com.github.oogasawa.utility.security.usn.PatchHistoryWorkbook;
 import com.github.oogasawa.utility.security.usn.USNJsonExporter;
 import jakarta.mail.MessagingException;
@@ -80,10 +89,148 @@ public class App {
         ubuntuSecurityReportCommand();
         livePatchReportCommand();
         patchHistoryAppendCommand();
+        patchHistoryRateCommand();
         gmailDigestFetchCommand();
+        javaCveReportCommand();
+        fortinetReportCommand();
+        cveAppendCommand();
         
     }
     
+    /**
+     * Registers the {@code java:cve-report} command that reports known vulnerabilities in the
+     * Maven dependencies of Java projects.
+     */
+    public void javaCveReportCommand() {
+        Options opts = new Options();
+
+        opts.addOption(Option.builder("d")
+                .longOpt("projectDir")
+                .hasArg(true)
+                .argName("projectDir")
+                .desc("A Maven project directory (a directory with pom.xml).")
+                .required(false)
+                .build());
+
+        opts.addOption(Option.builder("w")
+                .longOpt("worksDir")
+                .hasArg(true)
+                .argName("worksDir")
+                .desc("A directory whose child directories with pom.xml are all checked.")
+                .required(false)
+                .build());
+
+        opts.addOption(Option.builder("f")
+                .longOpt("format")
+                .hasArg(true)
+                .argName("report|sheet")
+                .desc("report (default) or sheet, the columns of the sheet for CVEs other than Ubuntu's.")
+                .required(false)
+                .build());
+
+        this.cmds.addCommand("Java security commands", "java:cve-report", opts,
+                "Report known vulnerabilities (OSV.dev) in the Maven dependencies of Java projects, in TSV format.",
+                (CommandLine cl) -> {
+                    try {
+                        java.util.List<Path> projects = new java.util.ArrayList<>();
+                        if (cl.hasOption("projectDir")) {
+                            projects.add(Path.of(cl.getOptionValue("projectDir")));
+                        }
+                        if (cl.hasOption("worksDir")) {
+                            projects.addAll(JavaCveReporter.findProjects(Path.of(cl.getOptionValue("worksDir"))));
+                        }
+                        if (projects.isEmpty()) {
+                            System.err.println("Error: give --projectDir or --worksDir.");
+                            return;
+                        }
+                        new JavaCveReporter(new MavenDependencyLister(), new OsvClient())
+                                .report(projects, System.out,
+                                        "sheet".equalsIgnoreCase(cl.getOptionValue("format", "report")));
+                    } catch (IOException e) {
+                        System.err.println("Error: " + e.getMessage());
+                    }
+                });
+    }
+
+    /**
+     * Registers the {@code fortinet:report} command that reports FortiGuard PSIRT advisories
+     * which list FortiOS versions as affected.
+     */
+    public void fortinetReportCommand() {
+        Options opts = new Options();
+
+        opts.addOption(Option.builder("V")
+                .longOpt("versions")
+                .hasArg(true)
+                .argName("7.4.6,7.4.11")
+                .desc("Comma separated FortiOS versions in use.")
+                .required(true)
+                .build());
+
+        opts.addOption(Option.builder("S")
+                .longOpt("since")
+                .hasArg(true)
+                .argName("yyyy-MM-dd")
+                .desc("Only advisories released on or after this date. Defaults to the first of January of this year.")
+                .required(false)
+                .build());
+
+        this.cmds.addCommand("Fortinet security commands", "fortinet:report", opts,
+                "Report FortiGuard PSIRT advisories that list the given FortiOS versions, in TSV format.",
+                (CommandLine cl) -> {
+                    try {
+                        java.util.List<String> versions = java.util.Arrays
+                                .stream(cl.getOptionValue("versions").split(","))
+                                .map(String::trim).filter(v -> !v.isEmpty()).toList();
+                        String since = cl.getOptionValue("since", LocalDate.now().getYear() + "-01-01");
+                        new FortinetReporter(new FortinetPsirtClient(),
+                                new NvdFortiOsClient(new HttpTextFetcher(7000L)))
+                                .report(versions, since, System.out);
+                    } catch (IOException e) {
+                        System.err.println("Error: " + e.getMessage());
+                    }
+                });
+    }
+
+    /**
+     * Registers the {@code cve:append-xlsx} command that adds a report of CVEs other than
+     * Ubuntu's to the patch history workbook.
+     */
+    public void cveAppendCommand() {
+        Options opts = new Options();
+
+        opts.addOption(Option.builder("i").longOpt("infile").hasArg(true).argName("report.tsv")
+                .desc("The TSV produced by fortinet:report or java:cve-report --format sheet.")
+                .required(true).build());
+        opts.addOption(Option.builder("x").longOpt("xlsx").hasArg(true).argName("file")
+                .desc("The patch history workbook to read. It is never modified.")
+                .required(true).build());
+        opts.addOption(Option.builder("o").longOpt("outfile").hasArg(true).argName("file")
+                .desc("The workbook to write, holding the source workbook plus the new rows.")
+                .required(true).build());
+        opts.addOption(Option.builder("s").longOpt("sheet").hasArg(true).argName("name")
+                .desc("The sheet that receives the rows. It is created when absent.")
+                .required(true).build());
+
+        this.cmds.addCommand("Ubuntu security commands", "cve:append-xlsx", opts,
+                "Add a report of CVEs other than Ubuntu's to the patch history workbook, writing a new file.",
+                (CommandLine cl) -> {
+                    Path source = Path.of(cl.getOptionValue("xlsx"));
+                    Path output = Path.of(cl.getOptionValue("outfile"));
+                    if (source.equals(output)) {
+                        System.err.println("--outfile must differ from --xlsx.");
+                        return;
+                    }
+                    try {
+                        new PatchHistoryWorkbook().addCveReport(source,
+                                Path.of(cl.getOptionValue("infile")), output,
+                                cl.getOptionValue("sheet"));
+                    } catch (IOException e) {
+                        System.err.println("Failed to write the workbook: " + e.getMessage());
+                    }
+                });
+    }
+
     /**
      * Registers the {@code log:rename} command that normalizes log file names.
      */
@@ -186,6 +333,7 @@ public class App {
                 .required(false)
                 .build());
 
+        opts.addOption(noCveOption());
 
         this.cmds.addCommand("Ubuntu security commands", "ubuntu:report", opts,
                 "Create a report of Ubuntu Security Notices in TSV or JSON format.",
@@ -218,8 +366,25 @@ public class App {
                     }
 
                     String release = cl.getOptionValue("release", "noble");
-                    exporter.report(startDate, endDate, release, format);
+                    exporter.report(startDate, endDate, release, format,
+                            !cl.hasOption("no-cve"));
                 });
+    }
+
+
+    /**
+     * Builds the option that makes a report skip every CVE lookup.
+     *
+     * @return the option
+     */
+    private static Option noCveOption() {
+        return Option.builder()
+                .longOpt("no-cve")
+                .hasArg(false)
+                .desc("Do not look up any CVE. The severity is Pending and the severe CVEs are "
+                        + "empty, so that the notices can be recorded before the lookups begin.")
+                .required(false)
+                .build();
     }
 
 
@@ -270,6 +435,8 @@ public class App {
                 .required(false)
                 .build());
 
+        opts.addOption(noCveOption());
+
         this.cmds.addCommand("Ubuntu security commands", "ubuntu:livepatch-report", opts,
                 "Create a report of Kernel Live Patch Security Notices in TSV format.",
                 (CommandLine cl) -> {
@@ -283,7 +450,8 @@ public class App {
                         return;
                     }
                     String release = cl.getOptionValue("release", "noble");
-                    new LivePatchReporter().report(startDate, endDate, release);
+                    new LivePatchReporter().report(startDate, endDate, release,
+                            !cl.hasOption("no-cve"));
                 });
     }
 
@@ -360,6 +528,114 @@ public class App {
                         }
                     } catch (IOException e) {
                         System.err.println("Failed to write the workbook: " + e.getMessage());
+                    }
+                });
+    }
+
+    /**
+     * Registers the {@code ubuntu:rate-xlsx} command that looks up the CVEs of the notices
+     * waiting for a severity and writes each severity into the patch history workbook as soon as
+     * it is known.
+     */
+    public void patchHistoryRateCommand() {
+        Options opts = new Options();
+
+        opts.addOption(Option.builder("x")
+                .longOpt("xlsx")
+                .hasArg(true)
+                .argName("file")
+                .desc("The patch history workbook. It is changed in place, one notice at a time.")
+                .required(true)
+                .build());
+
+        opts.addOption(Option.builder("s")
+                .longOpt("sheet")
+                .hasArg(true)
+                .argName("name")
+                .desc("The sheet holding the notices.")
+                .required(true)
+                .build());
+
+        opts.addOption(Option.builder("S")
+                .longOpt("start")
+                .hasArg(true)
+                .argName("YYYY-MM-DD")
+                .desc("First publication date to include, inclusive. ISO format.")
+                .required(true)
+                .build());
+
+        opts.addOption(Option.builder("E")
+                .longOpt("end")
+                .hasArg(true)
+                .argName("YYYY-MM-DD")
+                .desc("Last publication date to include, inclusive. ISO format.")
+                .required(true)
+                .build());
+
+        opts.addOption(Option.builder("r")
+                .longOpt("release")
+                .hasArg(true)
+                .argName("codename")
+                .desc("Ubuntu release codename to report on. Defaults to noble (24.04 LTS).")
+                .required(false)
+                .build());
+
+        opts.addOption(Option.builder("k")
+                .longOpt("kind")
+                .hasArg(true)
+                .argName("usn|livepatch")
+                .desc("Which notices to rate. Defaults to usn.")
+                .required(false)
+                .build());
+
+        opts.addOption(Option.builder()
+                .longOpt("stored-only")
+                .hasArg(false)
+                .desc("Make no request. Rate each notice from the CVE priorities already stored, "
+                        + "so that what is known is written at once.")
+                .required(false)
+                .build());
+
+        this.cmds.addCommand("Ubuntu security commands", "ubuntu:rate-xlsx", opts,
+                "Write the severity of each waiting notice into the patch history workbook.",
+                (CommandLine cl) -> {
+                    LocalDate startDate = parseIsoDate(cl.getOptionValue("start"), "--start");
+                    LocalDate endDate = parseIsoDate(cl.getOptionValue("end"), "--end");
+                    if (startDate == null || endDate == null) {
+                        System.exit(1);
+                    }
+                    if (endDate.isBefore(startDate)) {
+                        System.err.println("--end date must be the same as or after --start date.");
+                        System.exit(1);
+                    }
+
+                    Path record = Path.of(cl.getOptionValue("xlsx"));
+                    String sheetName = cl.getOptionValue("sheet");
+                    String release = cl.getOptionValue("release", "noble");
+                    boolean livepatch = "livepatch".equalsIgnoreCase(cl.getOptionValue("kind", "usn"));
+
+                    PatchHistoryWorkbook workbook = new PatchHistoryWorkbook();
+                    boolean storedOnly = cl.hasOption("stored-only");
+                    USNJsonExporter.CvePriorityLookup noRequest = cve -> {
+                        throw new IOException("The priority of " + cve + " is not stored");
+                    };
+                    CvePriorityCache cache = new CvePriorityCache(CvePriorityCache.defaultCacheFile());
+                    try {
+                        if (livepatch) {
+                            (storedOnly
+                                    ? new LivePatchReporter(new UsnApiFetcher(), cache, noRequest)
+                                    : new LivePatchReporter()).rateNotices(startDate, endDate, release,
+                                    (id, severity, severeCves) -> workbook.updateLivePatchRating(
+                                            record, sheetName, id, severity, severeCves));
+                        } else {
+                            (storedOnly ? new USNJsonExporter(cache, noRequest)
+                                    : new USNJsonExporter()).rateNotices(startDate, endDate, release,
+                                    (id, severity, severeCves) -> workbook.updateUsnRating(
+                                            record, sheetName, id, severity, severeCves));
+                        }
+                    } catch (IOException e) {
+                        System.err.println("Failed to rate the notices: " + e.getMessage());
+                        System.exit(1);
                     }
                 });
     }

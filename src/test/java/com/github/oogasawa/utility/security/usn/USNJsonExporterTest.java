@@ -215,16 +215,47 @@ public class USNJsonExporterTest {
     }
 
     @Test
-    @DisplayName("A CVE whose priority cannot be retrieved is reported as LookupFailed")
-    void assignMaxSeverity_priorityCannotBeRetrieved_reportsLookupFailed(@TempDir Path tempDir) {
-        USNEntryJson entry = entryReferring("CVE-2026-0001", "CVE-2026-0002");
+    @DisplayName("When a priority cannot be retrieved, the severity is at least the highest rank retrieved")
+    void assignMaxSeverity_priorityCannotBeRetrieved_reportsAtLeastTheHighestRetrieved(
+            @TempDir Path tempDir) {
+        USNEntryJson entry = entryReferring("CVE-2026-0001", "CVE-2026-0002", "CVE-2026-0003");
         StubCvePriorityLookup lookup = new StubCvePriorityLookup()
                 .answering("CVE-2026-0001", "Medium")
+                .answering("CVE-2026-0003", "High")
+                .failingFor("CVE-2026-0002");
+
+        exporterWith(tempDir.resolve("c.tsv"), lookup).assignMaxSeverity(entry);
+
+        assertEquals("High+", entry.severity);
+        assertEquals(List.of("CVE-2026-0003"), entry.severeCves);
+    }
+
+    @Test
+    @DisplayName("When no priority can be retrieved, the severity is LookupFailed")
+    void assignMaxSeverity_noPriorityCanBeRetrieved_reportsLookupFailed(@TempDir Path tempDir) {
+        USNEntryJson entry = entryReferring("CVE-2026-0001", "CVE-2026-0002");
+        StubCvePriorityLookup lookup = new StubCvePriorityLookup()
+                .failingFor("CVE-2026-0001")
                 .failingFor("CVE-2026-0002");
 
         exporterWith(tempDir.resolve("c.tsv"), lookup).assignMaxSeverity(entry);
 
         assertEquals(USNJsonExporter.SEVERITY_LOOKUP_FAILED, entry.severity);
+    }
+
+
+    @Test
+    @DisplayName("A Critical CVE settles the severity even when another lookup failed")
+    void assignMaxSeverity_criticalCveAndAFailedLookup_reportsCritical(@TempDir Path tempDir) {
+        USNEntryJson entry = entryReferring("CVE-2026-0001", "CVE-2026-0002");
+        StubCvePriorityLookup lookup = new StubCvePriorityLookup()
+                .answering("CVE-2026-0001", "Critical")
+                .failingFor("CVE-2026-0002");
+
+        exporterWith(tempDir.resolve("c.tsv"), lookup).assignMaxSeverity(entry);
+
+        assertEquals("Critical", entry.severity);
+        assertEquals(List.of("CVE-2026-0001"), entry.severeCves);
     }
 
     @Test
@@ -267,7 +298,7 @@ public class USNJsonExporterTest {
 
         exporterWith(tempDir.resolve("c.tsv"), lookup).assignMaxSeverity(entry);
 
-        assertEquals(USNJsonExporter.SEVERITY_LOOKUP_FAILED, entry.severity);
+        assertEquals("High+", entry.severity);
         assertEquals(3, lookup.askedCveIds.size());
     }
 
@@ -290,8 +321,8 @@ public class USNJsonExporterTest {
     }
 
     @Test
-    @DisplayName("A failed lookup outweighs a rank that was obtained")
-    void assignMaxSeverity_oneFailsAndAnotherIsRanked_reportsLookupFailed(
+    @DisplayName("A failed lookup leaves the severity as at least the rank that was obtained")
+    void assignMaxSeverity_oneFailsAndAnotherIsRanked_reportsAtLeastThatRank(
             @TempDir Path tempDir) {
         USNEntryJson entry = entryReferring("CVE-2026-0001", "CVE-2026-0002");
         StubCvePriorityLookup lookup = new StubCvePriorityLookup()
@@ -300,7 +331,7 @@ public class USNJsonExporterTest {
 
         exporterWith(tempDir.resolve("c.tsv"), lookup).assignMaxSeverity(entry);
 
-        assertEquals(USNJsonExporter.SEVERITY_LOOKUP_FAILED, entry.severity);
+        assertEquals("High+", entry.severity);
     }
 
     @Test
@@ -560,5 +591,118 @@ public class USNJsonExporterTest {
 
         assertIterableEquals(List.of("USN-8701-1", "USN-8702-1"),
                 ordered.stream().map(entry -> entry.id).toList());
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Rating in turns: one request per notice per turn, each change handed over at once
+    // ---------------------------------------------------------------------------------------
+
+    /** Keeps every rating handed over, in the order it arrived. */
+    private static final class RecordingSink implements RatingSink {
+
+        final List<String> handedOver = new ArrayList<String>();
+
+        @Override
+        public void accept(String noticeId, String severity, List<String> severeCves) {
+            this.handedOver.add(noticeId + " " + severity + " " + severeCves);
+        }
+    }
+
+    @Test
+    @DisplayName("The notices take turns: the first CVE of each is requested before the second of any")
+    void rateInTurns_twoNotices_requestsOneCveOfEachPerTurn(@TempDir Path tempDir)
+            throws IOException {
+        StubCvePriorityLookup lookup = new StubCvePriorityLookup();
+
+        exporterWith(tempDir.resolve("c.tsv"), lookup).rateInTurns(List.of(
+                new USNJsonExporter.NoticeCves("USN-0001-1",
+                        List.of("CVE-2026-0011", "CVE-2026-0012", "CVE-2026-0013")),
+                new USNJsonExporter.NoticeCves("USN-0002-1",
+                        List.of("CVE-2026-0021", "CVE-2026-0022"))),
+                new RecordingSink());
+
+        assertEquals(List.of("CVE-2026-0011", "CVE-2026-0021", "CVE-2026-0012",
+                "CVE-2026-0022", "CVE-2026-0013"), lookup.askedCveIds);
+    }
+
+    @Test
+    @DisplayName("The highest rank obtained so far is handed over at once, marked as a lower bound")
+    void rateInTurns_cvesStillWaiting_handsOverTheHighestRankSoFar(@TempDir Path tempDir)
+            throws IOException {
+        StubCvePriorityLookup lookup = new StubCvePriorityLookup()
+                .answering("CVE-2026-0011", "Medium")
+                .answering("CVE-2026-0012", "High")
+                .answering("CVE-2026-0013", "Low");
+        RecordingSink sink = new RecordingSink();
+
+        exporterWith(tempDir.resolve("c.tsv"), lookup).rateInTurns(List.of(
+                new USNJsonExporter.NoticeCves("USN-0001-1",
+                        List.of("CVE-2026-0011", "CVE-2026-0012", "CVE-2026-0013"))),
+                sink);
+
+        assertEquals(List.of(
+                "USN-0001-1 Medium+ []",
+                "USN-0001-1 High+ [CVE-2026-0012]",
+                "USN-0001-1 High [CVE-2026-0012]"), sink.handedOver);
+    }
+
+    @Test
+    @DisplayName("A CVE shared by two notices is requested once and rates both")
+    void rateInTurns_sharedCve_isRequestedOnce(@TempDir Path tempDir) throws IOException {
+        StubCvePriorityLookup lookup = new StubCvePriorityLookup()
+                .answering("CVE-2026-0001", "Critical")
+                .answering("CVE-2026-0002", "Low");
+        RecordingSink sink = new RecordingSink();
+
+        exporterWith(tempDir.resolve("c.tsv"), lookup).rateInTurns(List.of(
+                new USNJsonExporter.NoticeCves("USN-0001-1", List.of("CVE-2026-0001")),
+                new USNJsonExporter.NoticeCves("USN-0002-1",
+                        List.of("CVE-2026-0001", "CVE-2026-0002"))),
+                sink);
+
+        assertEquals(List.of("CVE-2026-0001", "CVE-2026-0002"), lookup.askedCveIds);
+        assertEquals(List.of(
+                "USN-0001-1 Critical [CVE-2026-0001]",
+                "USN-0002-1 Critical [CVE-2026-0001]"), sink.handedOver);
+    }
+
+    @Test
+    @DisplayName("A notice of which nothing has been obtained yet is not handed over as LookupFailed")
+    void rateInTurns_nothingObtainedYet_handsNothingOver(@TempDir Path tempDir)
+            throws IOException {
+        StubCvePriorityLookup lookup = new StubCvePriorityLookup()
+                .failingFor("CVE-2026-0001")
+                .answering("CVE-2026-0002", "Medium");
+        RecordingSink sink = new RecordingSink();
+
+        exporterWith(tempDir.resolve("c.tsv"), lookup).rateInTurns(List.of(
+                new USNJsonExporter.NoticeCves("USN-0001-1",
+                        List.of("CVE-2026-0001", "CVE-2026-0002"))),
+                sink);
+
+        assertEquals(List.of("USN-0001-1 Medium+ []"), sink.handedOver);
+    }
+
+    @Test
+    @DisplayName("A notice whose CVEs are all stored is handed over before any request")
+    void rateInTurns_everyCveStored_handsOverBeforeAnyRequest(@TempDir Path tempDir)
+            throws IOException {
+        Path cacheFile = tempDir.resolve("c.tsv");
+        CvePriorityCache cache = new CvePriorityCache(cacheFile);
+        cache.put("CVE-2026-0001", "High");
+        StubCvePriorityLookup lookup = new StubCvePriorityLookup()
+                .answering("CVE-2026-0002", "Low");
+        List<String> askedWhenHandedOver = new ArrayList<String>();
+
+        new USNJsonExporter(cache, lookup).rateInTurns(List.of(
+                new USNJsonExporter.NoticeCves("USN-0002-1", List.of("CVE-2026-0002")),
+                new USNJsonExporter.NoticeCves("USN-0001-1", List.of("CVE-2026-0001"))),
+                (id, severity, severeCves) -> {
+                    if (id.equals("USN-0001-1")) {
+                        askedWhenHandedOver.addAll(lookup.askedCveIds);
+                    }
+                });
+
+        assertEquals(List.of(), askedWhenHandedOver);
     }
 }

@@ -94,6 +94,21 @@ public class LivePatchReporter {
     }
 
     /**
+     * Creates a reporter that reads notices from the given fetcher and obtains CVE priorities
+     * from the given source.
+     *
+     * @param noticeFetcher the source of the notices
+     * @param priorityCache the cache of CVE priorities
+     * @param priorityLookup the source of CVE priorities that the cache does not hold
+     */
+    public LivePatchReporter(UsnApiFetcher noticeFetcher, CvePriorityCache priorityCache,
+            USNJsonExporter.CvePriorityLookup priorityLookup) {
+        this.noticeFetcher = noticeFetcher;
+        this.priorityCache = priorityCache;
+        this.severityRater = new USNJsonExporter(priorityCache, priorityLookup);
+    }
+
+    /**
      * Prints the report of the period as a table of tab separated values.
      *
      * @param start the first publication date to include, inclusive
@@ -101,10 +116,27 @@ public class LivePatchReporter {
      * @param releaseCodename the Ubuntu release codename, for example {@code noble} for 24.04 LTS
      */
     public void report(LocalDate start, LocalDate end, String releaseCodename) {
+        report(start, end, releaseCodename, true);
+    }
+
+    /**
+     * Prints the report of the period, optionally without looking up any CVE.
+     *
+     * <p>
+     * Without the lookup the severity is {@link USNJsonExporter#SEVERITY_PENDING} and the severe
+     * CVEs are empty; every other column is complete.
+     * </p>
+     *
+     * @param start the first publication date to include, inclusive
+     * @param end the last publication date to include, inclusive
+     * @param releaseCodename the Ubuntu release codename, for example {@code noble} for 24.04 LTS
+     * @param rateCves false to skip every CVE lookup
+     */
+    public void report(LocalDate start, LocalDate end, String releaseCodename, boolean rateCves) {
         this.priorityCache.load();
         try {
             List<LivePatchEntry> entries = new ArrayList<LivePatchEntry>(
-                    collect(start, end, releaseCodename));
+                    collect(start, end, releaseCodename, rateCves));
             entries.sort(java.util.Comparator
                     .comparing(LivePatchEntry::publishedDate)
                     .thenComparing(LivePatchEntry::id));
@@ -127,6 +159,40 @@ public class LivePatchReporter {
     }
 
     /**
+     * Rates the Kernel Live Patch Security Notices of a period and hands each rating over as soon
+     * as it is known.
+     *
+     * @param start the first publication date to include, inclusive
+     * @param end the last publication date to include, inclusive
+     * @param releaseCodename the Ubuntu release codename, for example {@code noble} for 24.04 LTS
+     * @param sink the receiver of each rating
+     * @throws IOException if the notices cannot be retrieved or a rating cannot be kept
+     */
+    public void rateNotices(LocalDate start, LocalDate end, String releaseCodename,
+            RatingSink sink) throws IOException {
+        this.priorityCache.load();
+        try {
+            List<USNJsonExporter.NoticeCves> notices = new ArrayList<USNJsonExporter.NoticeCves>();
+            for (JsonNode notice : this.noticeFetcher.fetchRawNotices(start, end,
+                    releaseCodename)) {
+                if (!NOTICE_TYPE_LSN.equals(notice.path("type").asText(""))) {
+                    continue;
+                }
+                List<String> cveIds = new ArrayList<String>();
+                for (JsonNode cve : notice.path("cves_ids")) {
+                    cveIds.add(cve.asText(""));
+                }
+                notices.add(new USNJsonExporter.NoticeCves(notice.path("id").asText(""), cveIds));
+            }
+            notices.sort(java.util.Comparator.comparingInt(
+                    notice -> this.severityRater.countUnstoredCves(notice.cveIds())));
+            this.severityRater.rateInTurns(notices, sink);
+        } finally {
+            this.priorityCache.save();
+        }
+    }
+
+    /**
      * Builds one entry per Kernel Live Patch Security Notice of the period.
      *
      * @param start the first publication date to include, inclusive
@@ -137,6 +203,21 @@ public class LivePatchReporter {
      */
     List<LivePatchEntry> collect(LocalDate start, LocalDate end, String releaseCodename)
             throws IOException {
+        return collect(start, end, releaseCodename, true);
+    }
+
+    /**
+     * Builds one entry per Kernel Live Patch Security Notice of the period.
+     *
+     * @param start the first publication date to include, inclusive
+     * @param end the last publication date to include, inclusive
+     * @param releaseCodename the Ubuntu release codename
+     * @param rateCves false to skip every CVE lookup
+     * @return the entries, in the order the notices were retrieved
+     * @throws IOException if the notices cannot be obtained
+     */
+    List<LivePatchEntry> collect(LocalDate start, LocalDate end, String releaseCodename,
+            boolean rateCves) throws IOException {
 
         List<LivePatchEntry> entries = new ArrayList<LivePatchEntry>();
 
@@ -144,7 +225,7 @@ public class LivePatchReporter {
             if (!NOTICE_TYPE_LSN.equals(notice.path("type").asText(""))) {
                 continue;
             }
-            entries.add(toEntry(notice, releaseCodename));
+            entries.add(toEntry(notice, releaseCodename, rateCves));
         }
 
         logger.info("Found {} Kernel Live Patch Security Notices for release {} between {} and {}",
@@ -157,9 +238,10 @@ public class LivePatchReporter {
      *
      * @param notice the notice
      * @param releaseCodename the Ubuntu release whose packages are read
+     * @param rateCves false to skip every CVE lookup
      * @return the row
      */
-    private LivePatchEntry toEntry(JsonNode notice, String releaseCodename) {
+    private LivePatchEntry toEntry(JsonNode notice, String releaseCodename, boolean rateCves) {
 
         String id = notice.path("id").asText("");
         String publishedDate = notice.path("published").asText("");
@@ -184,7 +266,9 @@ public class LivePatchReporter {
             }
         }
 
-        USNJsonExporter.CveRating rating = this.severityRater.rateCves(cveIds, id);
+        USNJsonExporter.CveRating rating = rateCves
+                ? this.severityRater.rateCves(cveIds, id)
+                : new USNJsonExporter.CveRating(USNJsonExporter.SEVERITY_PENDING, List.of());
 
         return new LivePatchEntry(id, publishedDate,
                 collapseWhitespace(notice.path("summary").asText("")),

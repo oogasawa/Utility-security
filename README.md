@@ -61,6 +61,44 @@ ubuntu:livepatch-report Create a report of Kernel Live Patch Security Notices in
 ubuntu:report   Create a report of Ubuntu Security Notices in TSV or JSON format.
 ```
 
+### `java:cve-report`コマンド
+
+Javaプロジェクトが使うMavenの依存(推移依存を含む)に、既知の脆弱性があるかを調べる。
+依存の一覧は`mvn dependency:list`で得る。`pom.xml`に書いた版ではなく、Mavenが実際に解決した版である。
+脆弱性は[OSV.dev](https://osv.dev)に問い合わせる。APIキーは要らない。リクエストの間隔は3秒空ける。
+
+``` bash
+# 1つのプロジェクト
+java -jar target/Utility-security-1.6.0-shaded.jar java:cve-report -d ~/works/html-saurus
+
+# ~/works 直下で pom.xml を持つ全ディレクトリ
+java -jar target/Utility-security-1.6.0-shaded.jar java:cve-report -w ~/works > java-cve.tsv
+```
+
+出力はTSVで、列は`project` `dependency` `version` `vulnerability` `cve` `severity` `fixed` `summary`である。
+脆弱性が1件もなければヘッダ行だけが出る。`severity`はGitHub Advisoryの値(`LOW` `MODERATE` `HIGH` `CRITICAL`)で、
+付いていなければ`Unknown`になる。テスト範囲(`test` scope)の依存は対象外である。
+
+### `fortinet:report`コマンドと`cve:append-xlsx`コマンド
+
+FortiGateのFortiOSに影響するCVEを調べ、パッチ対策履歴のシート`usn以外のcve`に書く。
+
+``` bash
+java -jar target/Utility-security-1.6.0-shaded.jar fortinet:report -V 7.4.6,7.4.11 -S 2026-01-01 > fortinet.tsv
+java -jar target/Utility-security-1.6.0-shaded.jar cve:append-xlsx -i fortinet.tsv -x 元.xlsx -o 新.xlsx -s "usn以外のcve"
+```
+
+情報源は2つある。FortiGuard PSIRTのフィードは直近約50件しか載せないので、新しい通知はそちら(CSAF)から、
+古い通知はNVDから補う。NVDは版ごとに、Fortinetが登録した影響範囲に当たるCVEを返す。
+`target`欄に版ごとの`該当`/`非該当`/`要確認`が入る。版の範囲だけを見た判定で、機能の有効・無効は見ていない。
+
+`java:cve-report --format sheet`の出力も同じ列なので、`cve:append-xlsx`で同じシートに書ける。
+同じ`id` `category` `target`の行は2度書かず、人が書いた列(対策内容など)は変えない。
+
+`bin/update-patch-history.sh`は、Ubuntuの2つのシートの更新の後に、この2つのCVEを`usn以外のcve`へ追記する。
+この段が失敗してもUbuntu側の記録には影響しない。FortiOSの版は環境変数`FORTIOS_VERSIONS`、
+Javaを調べる親ディレクトリは`JAVA_CVE_WORKS_DIR`で変える。
+
 ### `ubuntu:report`コマンド
 
 対応が必要なUbuntu Security Noticeを選び出し、タブ区切り形式(TSV)またはJSONで出力する。
