@@ -245,8 +245,8 @@ public class USNJsonExporterTest {
 
 
     @Test
-    @DisplayName("A Critical CVE settles the severity even when another lookup failed")
-    void assignMaxSeverity_criticalCveAndAFailedLookup_reportsCritical(@TempDir Path tempDir) {
+    @DisplayName("A Critical CVE with another lookup failed stays open as Critical+")
+    void assignMaxSeverity_criticalCveAndAFailedLookup_reportsCriticalPlus(@TempDir Path tempDir) {
         USNEntryJson entry = entryReferring("CVE-2026-0001", "CVE-2026-0002");
         StubCvePriorityLookup lookup = new StubCvePriorityLookup()
                 .answering("CVE-2026-0001", "Critical")
@@ -254,7 +254,7 @@ public class USNJsonExporterTest {
 
         exporterWith(tempDir.resolve("c.tsv"), lookup).assignMaxSeverity(entry);
 
-        assertEquals("Critical", entry.severity);
+        assertEquals("Critical+", entry.severity);
         assertEquals(List.of("CVE-2026-0001"), entry.severeCves);
     }
 
@@ -663,7 +663,28 @@ public class USNJsonExporterTest {
         assertEquals(List.of("CVE-2026-0001", "CVE-2026-0002"), lookup.askedCveIds);
         assertEquals(List.of(
                 "USN-0001-1 Critical [CVE-2026-0001]",
+                "USN-0002-1 Critical+ [CVE-2026-0001]",
                 "USN-0002-1 Critical [CVE-2026-0001]"), sink.handedOver);
+    }
+
+    @Test
+    @DisplayName("A Critical notice stays open with + until every severe CVE is known")
+    void rateInTurns_criticalWithCvesWaiting_keepsThePlusUntilTheListIsWhole(
+            @TempDir Path tempDir) throws IOException {
+        StubCvePriorityLookup lookup = new StubCvePriorityLookup()
+                .answering("CVE-2026-0011", "Critical")
+                .answering("CVE-2026-0012", "Low")
+                .answering("CVE-2026-0013", "High");
+        RecordingSink sink = new RecordingSink();
+
+        exporterWith(tempDir.resolve("c.tsv"), lookup).rateInTurns(List.of(
+                new USNJsonExporter.NoticeCves("USN-0001-1",
+                        List.of("CVE-2026-0011", "CVE-2026-0012", "CVE-2026-0013"))),
+                sink);
+
+        assertEquals(List.of(
+                "USN-0001-1 Critical+ [CVE-2026-0011]",
+                "USN-0001-1 Critical [CVE-2026-0011, CVE-2026-0013]"), sink.handedOver);
     }
 
     @Test

@@ -11,15 +11,16 @@
 #
 #   1. Alone           the lock is held, so no other run is in progress.
 #   2. Noticed         the notices are in the record, with the severity marked Pending.
-#   3. Rated           the severity and the severe CVEs of those notices are in the record.
+#   3. Other CVEs      the sheet usn以外のcve holds the CVEs of FortiOS and of the Java projects.
+#   4. Rated           the severity and the severe CVEs of the Ubuntu notices are in the record.
 #
 # State 2 is reached by writing a candidate copy of the record beside it, checking the candidate,
-# copying the old record to the backup directory and moving the candidate into place. State 3 is
-# reached one notice at a time: the program writes each notice's severity into the record the
-# moment its CVEs are known, through a copy that replaces the record in one step. A run that
-# stops in the middle leaves the notices already rated rated and the others Pending, and the next
-# run rates the others. A notice whose CVEs could not all be looked up is marked LookupFailed
-# and is rated again the same way.
+# copying the old record to the backup directory and moving the candidate into place. State 4 is
+# reached one notice at a time: the program writes each notice's highest rank so far into the
+# record whenever it changes, through a copy that replaces the record in one step, with a + while
+# CVEs of the notice are still waiting. A run that stops in the middle leaves the notices with a
+# + or Pending, and the next run rates them again. A notice of which no CVE could be looked up is
+# marked LookupFailed and is rated again the same way.
 #
 set -u -o pipefail
 
@@ -197,36 +198,9 @@ record_reports "$PENDING_USN" "$PENDING_LSN"
 rm -f "$PENDING_USN" "$PENDING_LSN"
 log "state noticed"
 
-# State 3: rated. The CVEs are looked up, which is the part that can take hours. The notices take
-# turns, one CVE request each per turn, and the highest rank obtained so far for a notice is
-# written into the record whenever it changes, marked with + while CVEs of the notice are still
-# waiting. A run that has not ended by the Monday meeting therefore leaves every notice with a
-# rank from at least one of its CVEs. The record is copied once before the first of those writes.
-RATING_BACKUP="$BACKUP_DIR/$(basename "$RECORD" .xlsx)-$(date '+%Y%m%d%H%M%S').xlsx"
-cp -p "$RECORD" "$RATING_BACKUP" || die "the record could not be copied to $RATING_BACKUP"
-log "the record before rating is at $RATING_BACKUP"
-
-# The first pass makes no request: it writes what the stored CVE priorities already settle, so
-# that the record shows it at once. A notice with a CVE not stored is marked LookupFailed unless
-# a stored CVE is Critical, which settles it.
-run ubuntu:rate-xlsx --stored-only -k livepatch -x "$RECORD" -s "$YEAR-livepatch" -S "$START" \
-    -E "$END" -r "$RELEASE" \
-    || die "rating the Kernel Live Patch Security Notices from the stored priorities ended with an error"
-run ubuntu:rate-xlsx --stored-only -k usn -x "$RECORD" -s "$YEAR" -S "$START" -E "$END" \
-    -r "$RELEASE" \
-    || die "rating the Ubuntu Security Notices from the stored priorities ended with an error"
-log "state rated from the stored priorities"
-
-# The second pass looks up the CVEs that are not stored.
-run ubuntu:rate-xlsx -k livepatch -x "$RECORD" -s "$YEAR-livepatch" -S "$START" -E "$END" \
-    -r "$RELEASE" \
-    || die "rating the Kernel Live Patch Security Notices ended with an error"
-run ubuntu:rate-xlsx -k usn -x "$RECORD" -s "$YEAR" -S "$START" -E "$END" -r "$RELEASE" \
-    || die "rating the Ubuntu Security Notices ended with an error"
-unzip -qq -t "$RECORD" > /dev/null 2>&1 || die "the record is not a readable workbook"
-log "state rated"
-
-# State 4: other CVEs. The sheet "usn以外のcve" lists the CVEs of FortiOS and of the Maven
+# State 3: other CVEs. The sheet "usn以外のcve" lists the CVEs of FortiOS and of the Maven
+# It comes before the rating of the Ubuntu notices, which can take days when ubuntu.com is
+# slow, so that the sheet is brought up to date every week whatever the rating does.
 # dependencies of the Java projects, which no Ubuntu notice covers. This stage is not part of
 # the record's Ubuntu states: whatever goes wrong in it is logged and the record is left as the
 # earlier states made it. The sheet is written to a candidate beside the record and moved into
@@ -277,6 +251,36 @@ other_cves() {
 }
 
 other_cves || log "state other CVEs failed; see the messages above"
+
+# State 4: rated. The CVEs are looked up, which is the part that can take hours. The notices take
+# turns, one CVE request each per turn, and the highest rank obtained so far for a notice is
+# written into the record whenever it changes, marked with + while CVEs of the notice are still
+# waiting. A run that has not ended by the Monday meeting therefore leaves every notice with a
+# rank from at least one of its CVEs. The record is copied once before the first of those writes.
+RATING_BACKUP="$BACKUP_DIR/$(basename "$RECORD" .xlsx)-$(date '+%Y%m%d%H%M%S').xlsx"
+cp -p "$RECORD" "$RATING_BACKUP" || die "the record could not be copied to $RATING_BACKUP"
+log "the record before rating is at $RATING_BACKUP"
+
+# The first pass makes no request: it writes what the stored CVE priorities already settle, so
+# that the record shows it at once. A notice with a CVE not stored is marked LookupFailed unless
+# a stored CVE is Critical, which settles it.
+run ubuntu:rate-xlsx --stored-only -k livepatch -x "$RECORD" -s "$YEAR-livepatch" -S "$START" \
+    -E "$END" -r "$RELEASE" \
+    || die "rating the Kernel Live Patch Security Notices from the stored priorities ended with an error"
+run ubuntu:rate-xlsx --stored-only -k usn -x "$RECORD" -s "$YEAR" -S "$START" -E "$END" \
+    -r "$RELEASE" \
+    || die "rating the Ubuntu Security Notices from the stored priorities ended with an error"
+log "state rated from the stored priorities"
+
+# The second pass looks up the CVEs that are not stored.
+run ubuntu:rate-xlsx -k livepatch -x "$RECORD" -s "$YEAR-livepatch" -S "$START" -E "$END" \
+    -r "$RELEASE" \
+    || die "rating the Kernel Live Patch Security Notices ended with an error"
+run ubuntu:rate-xlsx -k usn -x "$RECORD" -s "$YEAR" -S "$START" -E "$END" -r "$RELEASE" \
+    || die "rating the Ubuntu Security Notices ended with an error"
+unzip -qq -t "$RECORD" > /dev/null 2>&1 || die "the record is not a readable workbook"
+log "state rated"
+
 
 # Only the newest of each kind are kept, so that the directory does not grow without bound.
 prune() {

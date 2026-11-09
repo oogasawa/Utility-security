@@ -442,7 +442,9 @@ public class USNJsonExporter {
      * several notices refer to it: its answer is shared by all of them, and each of those notices
      * whose rating it changes is handed over at once. A notice of which no CVE has been obtained
      * is not handed over while CVEs are still waiting, so that the record keeps saying Pending
-     * rather than LookupFailed for a notice whose turn has not come yet.
+     * rather than LookupFailed for a notice whose turn has not come yet. A notice with CVEs still
+     * waiting is handed over with {@code +} even when it is Critical, so that its row stays
+     * open and the last rating fills in every severe CVE.
      * </p>
      *
      * @param notices the notices to rate, in the order of the turns
@@ -526,8 +528,19 @@ public class USNJsonExporter {
             finished.add(index);
         }
         CveRating rating = rateFromLookups(notice.cveIds(), obtained, notice.noticeId(), complete);
-        if (!complete && SEVERITY_LOOKUP_FAILED.equals(rating.severity())) {
-            return;
+        if (!complete) {
+            // Nothing ranked yet: the record keeps saying Pending until something is known.
+            if (SEVERITY_LOOKUP_FAILED.equals(rating.severity())
+                    || SEVERITY_UNRATED.equals(rating.severity())) {
+                return;
+            }
+            // While CVEs are waiting the rating is a lower bound and the severe CVEs are not
+            // all known, so even Critical carries the +. The record writes over a row only
+            // while its severity carries a +, and the last write gives the whole list.
+            if (!rating.severity().endsWith(SEVERITY_AT_LEAST_SUFFIX)) {
+                rating = new CveRating(rating.severity() + SEVERITY_AT_LEAST_SUFFIX,
+                        rating.severeCveIds());
+            }
         }
         if (rating.equals(handedOver.get(index))) {
             return;
@@ -835,11 +848,11 @@ public class USNJsonExporter {
             }
         }
 
-        // A Critical CVE among those retrieved settles the severity: no CVE not yet retrieved can
-        // raise it, so the notice is Critical whatever the failed lookups would have answered.
-        // Below Critical a CVE not retrieved may still be worse than the ones that were, so the
-        // severity is only known to be at least the highest rank retrieved.
-        if (!failedCveIds.isEmpty() && !levels.contains(PriorityLevel.CRITICAL)) {
+        // A CVE not retrieved may be worse than the ones that were, and even when one of them is
+        // Critical it may be another severe CVE the record has to list. Either way the severity
+        // is only known to be at least the highest rank retrieved, and the row stays open for a
+        // later run to complete.
+        if (!failedCveIds.isEmpty()) {
             if (levels.isEmpty()) {
                 if (logged) logger.warn("Severity of {} is {} because the priority of {} of its {} CVEs could "
                         + "not be retrieved: {}", noticeId, SEVERITY_LOOKUP_FAILED,
@@ -853,11 +866,6 @@ public class USNJsonExporter {
                     failedCveIds.size(), cveIds.size(), failedCveIds);
             return new CveRating(highest.nameCapitalized() + SEVERITY_AT_LEAST_SUFFIX,
                     severeCveIds);
-        }
-        if (!failedCveIds.isEmpty()) {
-            if (logged) logger.warn("The priority of {} of the {} CVEs of {} could not be retrieved, but one "
-                    + "retrieved CVE is Critical, so the severity is Critical: {}",
-                    failedCveIds.size(), cveIds.size(), noticeId, failedCveIds);
         }
         if (levels.isEmpty()) {
             if (logged) logger.warn("Severity of {} is {} because Ubuntu has ranked none of its {} CVEs: {}",
